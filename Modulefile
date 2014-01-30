@@ -8,6 +8,4 @@ description 'Module for configuring Atomia'
 project_page 'https://github.com/atomia/puppet-atomia'
 
 ## Add dependencies, if any:
-dependency 'puppetlabs/apt', '1.4.0'
-dependency 'camptocamp/openssl', ''
-
+# Dependencies are managed in Puppetfile
