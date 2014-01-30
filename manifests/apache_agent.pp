@@ -3,9 +3,25 @@
 #
 # Manifest to install/configure Atomia Apache agent
 #
+# [$password]
+# Define a password for accessing the agent
+# (required) 
+#
+# [$username]
+# Defines the username for accessing the agent
+# (optional) Defaults to apacheagent
+#
 # [ssl_enabled]
 # Defines if ssl should be used or not
 # (optional) Defaults to false
+#
+# [$atomia_clustered]
+# Defines if this is a clustered instance
+# (optional) Defaults to true
+#
+# [$should_have_pa_apache]
+# Defines if the apache agent shall be debloyed or not
+# (optional) Defaults to true
 #
 #
 # === Examples

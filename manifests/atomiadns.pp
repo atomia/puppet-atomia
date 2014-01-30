@@ -31,23 +31,25 @@ class atomia::atomiadns (
 
 	if !defined(Class['atomia::apache_password_protect']) {
 		class { 'atomia::apache_password_protect':
-			application_protect => "atomiadns"
+			username => $agent_user,
+			password => $agent_password
 		}
 	}
 
-	if $dns_ns_group {
-		if is_array($atomia_dns_config)
-		{
-			each($atomia_dns_config) | $val|
-			{
-				exec { "/usr/bin/sudo -u postgres psql zonedata -c \"INSERT INTO nameserver_group (name) VALUES ('${val[ns_group]}')\"":
-					require => [ Package["atomiadns-masterserver"], Package["atomiadns-client"], Package["sudo"] ],
-					unless => "/usr/bin/sudo -u postgres psql zonedata -tA -c \"SELECT name FROM nameserver_group WHERE name = '${val[ns_group]}'\" | grep '^${val[ns_group]}\$'",
-				}
-			}
-		}
-		else
-		{
+  #TODO: Rewrite this section
+	#if $dns_ns_group {
+	#	if is_array($atomia_dns_config)
+	#	{
+	#		each($atomia_dns_config) | $val|
+	#		{
+	#			exec { "/usr/bin/sudo -u postgres psql zonedata -c \"INSERT INTO nameserver_group (name) VALUES ('${val[ns_group]}')\"":
+	#				require => [ Package["atomiadns-masterserver"], Package["atomiadns-client"], Package["sudo"] ],
+	#				unless => "/usr/bin/sudo -u postgres psql zonedata -tA -c \"SELECT name FROM nameserver_group WHERE name = '${val[ns_group]}'\" | grep '^${val[ns_group]}\$'",
+	#			}
+	#		}
+	#	}
+	#	else
+	#	{
 			exec 
 			{ 
 add_nameserver_group:
@@ -56,7 +58,7 @@ add_nameserver_group:
 					command => "/usr/bin/sudo -u postgres psql zonedata -c \"INSERT INTO nameserver_group (name) VALUES ('$ns_group')\"",
 			}
 		}
-	}
+	#}
 
 	if $ssl_enabled {
 		file { "/etc/atomiadns-mastercert.pem":
@@ -118,28 +120,29 @@ add_nameserver_group:
 				source	=> "puppet:///modules/atomia/atomiadns/add_zones.sh",
 				require => [ Package["atomiadns-masterserver"], Package["atomiadns-client"] ],
 		}
+    
+    #TODO: rewrite this section
+		#if is_array($atomia_dns_config)
+		#{
+		#	each($atomia_dns_config) |$c|
+		#	{
 
-		if is_array($atomia_dns_config)
-		{
-			each($atomia_dns_config) |$c|
-			{
-
-			file { "/usr/share/doc/atomiadns-masterserver/zones_to_add_${c[ns_group]}.txt":
-				owner   => root,
-				group   => root,
-				mode    => 500,
-				content	=> $c[zones],
-				require => [ Package["atomiadns-masterserver"], Package["atomiadns-client"] ],
-				notify  => Exec['remove_lock_file'],
-			}
-			exec { "/bin/sh /usr/share/doc/atomiadns-masterserver/add_zones.sh ${c[ns_group]} ${c[nameserver1]} ${c[nameservers]} ${c[registry]}" :
-					require => [ File["/usr/share/doc/atomiadns-masterserver/zones_to_add_${c[ns_group]}.txt"]],
-						unless => "/usr/bin/test -f /usr/share/doc/atomiadns-masterserver/sync_zones_done_${c[ns_group]}.txt",
-				}
-			}
-		}
-		else
-		{
+ 		#	file { "/usr/share/doc/atomiadns-masterserver/zones_to_add_${c[ns_group]}.txt":
+		#		owner   => root,
+		#		group   => root,
+		#		mode    => 500,
+		#		content	=> $c[zones],
+		#		require => [ Package["atomiadns-masterserver"], Package["atomiadns-client"] ],
+		#		notify  => Exec['remove_lock_file'],
+		#	}
+		#	exec { "/bin/sh /usr/share/doc/atomiadns-masterserver/add_zones.sh ${c[ns_group]} ${c[nameserver1]} ${c[nameservers]} ${c[registry]}" :
+		#			require => [ File["/usr/share/doc/atomiadns-masterserver/zones_to_add_${c[ns_group]}.txt"]],
+		#			unless => "/usr/bin/test -f /usr/share/doc/atomiadns-masterserver/sync_zones_done_${c[ns_group]}.txt",
+		#		}
+		#	}
+		#}
+		#else
+		#{
 
 			file { "/usr/share/doc/atomiadns-masterserver/zones_to_add.txt":
 				owner   => root,
@@ -154,7 +157,7 @@ add_nameserver_group:
 					command => "/bin/sh /usr/share/doc/atomiadns-masterserver/add_zones.sh $ns_group $nameserver1 $nameservers $registry",
 					unless => "/usr/bin/test -f /usr/share/doc/atomiadns-masterserver/sync_zones_done.txt",
 			}
-		}
-	}
+		#}
+	#}
 }
 

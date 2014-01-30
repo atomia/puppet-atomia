@@ -70,7 +70,8 @@ class atomia::domainreg (
         if !defined(Class['atomia::apache_password_protect']) {
                 class {
                         'atomia::apache_password_protect':
-                                application_protect => "domainreg"
+                                username => $service_username,
+                                password => $service_password
                 }
         }
 

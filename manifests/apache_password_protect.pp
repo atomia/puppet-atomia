@@ -1,17 +1,27 @@
-class atomia::apache_password_protect ($application_protect) {
+#
+# == Class: atomia::apache_password_protect
+#
+# Manifest to password protect apache
+#
+# [$username]
+# Define a username for protection
+# (required) 
+#
+# [$password]
+# Defines a password for protection
+# (required) 
+#
+# === Examples
+#
+# class {'atomia::apache_password_protect':
+#   username      => 'myUsername',
+#   password      => 'myPassword',
+#}
 
-        if $application_protect == "atomiadns" {
-                $htconf_dns = generate("/usr/bin/htpasswd", "-bn", $atomia_dns_agent_user, $atomia_dns_agent_password)
-        }
-        if $application_protect == "domainreg" {
-                $htconf_domain = generate("/usr/bin/htpasswd", "-bn", $domainreg_service_username, $domainreg_service_password)
-        }
-        if $application_protect == "webinstaller" {
-                $htconf_webinst = generate("/usr/bin/htpasswd", "-bn", $webinstaller_username, $webinstaller_password)
-        }
 
-        $htconf = "${htconf_dns}${htconf_domain}${htconf_webinst}"
+class atomia::apache_password_protect ($username,$password) {
 
+        $htconf = generate("/usr/bin/htpasswd", "-bn", $username, $password)
         file { "/etc/apache2":
                 ensure => directory,
                 owner   => root,

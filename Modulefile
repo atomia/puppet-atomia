@@ -9,5 +9,5 @@ project_page 'https://github.com/atomia/puppet-atomia'
 
 ## Add dependencies, if any:
 dependency 'puppetlabs/apt', '1.4.0'
-dependency 'camptocamp/openssl', '0.1.0'
+dependency 'camptocamp/openssl', ''
 

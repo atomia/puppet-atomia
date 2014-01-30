@@ -1,6 +1,6 @@
 class atomia::webinstaller (
 	$agent_username 		= "webinstaller",
-	$agent_password,
+	$agent_password      = "",
 	) {
 	if $atomia_linux_software_auto_update {
 		package { atomiawebinstaller-api: ensure => latest }
@@ -25,7 +25,8 @@ class atomia::webinstaller (
 
         class {
                 'atomia::apache_password_protect':
-                application_protect => "webinstaller"
+                username => $agent_username,
+                password => $agent_password
         }
 	service { 'apache': 
 		name => apache2,
