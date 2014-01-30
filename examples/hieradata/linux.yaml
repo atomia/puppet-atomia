@@ -1,0 +1,12 @@
+atomia::adjoin::base_dn:                "cn=Users,dc=atomia,dc=local"
+atomia::adjoin::ldap_uris:              "ldap://9.9.9.9 ldap://9.9.9.10"
+atomia::adjoin::bind_user:              "PosixGuest"
+atomia::adjoin::bind_password:          "PosixGuestPassword"
+atomia::adjoin::use_nslcd_conf:         1
+
+atomia::atomiadns::atomia_dns_url:             "http://10.10.10.10/atomiadns"
+atomia::atomiadns::agent_password:             "[PASSWORD]"
+atomia::atomiadns::dns_ns_group:                "default"
+atomia::atomiadns::zones_to_add:                "1"
+
+atomia::mailnfsmount::use_nfs3:                 1
