@@ -1,0 +1,50 @@
+#!/bin/sh
+
+# Sync configs, using /etc/atomiadns.conf.master if option exist in both
+if [ -f "/etc/atomiadns.conf.master" ]; then
+	if [ -f "/etc/atomiadns.conf" ]; then
+		tempconfig=`tempfile || exit 1`
+
+		# options in /etc/atomiadns.conf, if in both then /etc/atomiadns.conf.master overrides
+		while read k rest; do
+			if [ -n "$k" ] && [ -n "$(echo "$k" | grep -v ^"#")" ]; then
+				from_generated="$(grep "^$k[[:space:]]" /etc/atomiadns.conf.master)"
+				if [ -n "$from_generated" ]; then
+					echo "$from_generated" >> "$tempconfig"
+				else
+					echo "$k $rest" >> "$tempconfig"
+				fi
+			else
+				if [ -n "$k" ]; then
+					echo "$k $rest" >> "$tempconfig"
+				else 
+					echo >> "$tempconfig"
+				fi
+			fi
+		done < "/etc/atomiadns.conf"
+
+		# options only in /etc/atomiadns.conf.master
+		while read k rest; do
+			if [ -n "$k" ] && [ -n "$(echo "$k" | grep -v ^"#")" ]; then
+				if [ -z "$(grep "^$k[[:space:]]" /etc/atomiadns.conf)" ]; then
+					echo "$k $rest" >> "$tempconfig"
+				fi
+			else
+				if [ -n "$k" ]; then
+					echo "$k $rest" >> "$tempconfig"
+				else 
+					echo >> "$tempconfig"
+				fi
+			fi
+		done < "/etc/atomiadns.conf.master"
+
+		# move into place if different
+		diff "/etc/atomiadns.conf" "$tempconfig" > /dev/null
+		if [ $? != 0 ]; then
+			chmod 444 "$tempconfig"
+			mv "$tempconfig" "/etc/atomiadns.conf"
+		fi
+	fi
+fi
+
+

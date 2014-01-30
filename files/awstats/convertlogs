@@ -1,0 +1,2 @@
+* * * * * root lockfile -r0 /var/run/convertlogs.lock && (/storage/content/logs/iis_logs/convert_logs.sh; rm /var/run/convertlogs.lock)
+

@@ -1,0 +1,6 @@
+fixtures:
+  repositories:
+    openssl: "https://github.com/camptocamp/puppet-openssl"
+  symlinks:
+    atomia: "#{source_dir}"
+

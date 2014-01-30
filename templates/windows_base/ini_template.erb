@@ -1,0 +1,129 @@
+[General]
+Location = c:\Program Files (x86)\Atomia
+LogFolder = c:\AtomiaLogs
+BackupFolder = c:\Backups
+ApplicationEnvironment = Production
+User = apppooluser
+Password = <%= @app_password %>
+Domain = <%= @ad_domain %>
+SqlServer = <%= @database_server %>
+FailoverSqlServer = <%= @mirror_database_server %>
+PublicHost = <%= @appdomain %>
+
+[ActionTrail]
+Host = <%= @actiontrail %>.<%= @appdomain %>
+
+[Identity]
+Host = sts.<%= @appdomain %>
+GuiHost = <%= @login %>.<%= @appdomain %>
+
+[Provisioning]
+Host = <%= @automationserver %>.<%= @appdomain %>
+CertName = <%= @automationserver %>.<%= @appdomain %>
+EncCertThumb = <%= @automationserver_encryption_cert_thumb %>
+
+[UserApi]
+Host = userapi.<%= @appdomain %>
+CertName = userapi.<%= @appdomain %>
+
+[AccountApi]
+Host = accountapi.<%= @appdomain %>
+CertName = accountapi.<%= @appdomain %>
+
+[OrderApi]
+Host = orderapi.<%= @appdomain %>
+CertName = orderapi.<%= @appdomain %>
+
+[BillingApi]
+Host = billingapi.<%= @appdomain %>
+CertName = billingapi.<%= @appdomain %>
+EncrCertThumbprint = <%= @billing_encryption_cert_thumb %>
+PluginConfig = <%= @billing_plugin_config %>
+PdfPrintLocation = c:\Program Files (x86)\Atomia\Atomia Billing Api\pdf\
+DefaultPrintTemplate = InvoiceTemplate
+FullGraphicsTemplate = InvoiceTemplate
+NoBackgroundTemplate = InvoiceTemplate
+SendInvoiceEmailSubjectFormat = <%= @send_invoice_email_subject_format %>
+
+[Order]
+Host = <%= @order %>.<%= @appdomain %>
+
+[Billing]
+Host = <%= @billing %>.<%= @appdomain %>
+CertName = <%= @billing %>.<%= @appdomain %>
+
+[Admin]
+Host = <%= @admin %>.<%= @appdomain %>
+UploadBgMaxFilePath = c:\Program Files (x86)\Atomia\AdminPanel\App_Data
+CertName = <%= @admin %>.<%= @appdomain %>
+
+[HCP]
+Host = <%= @hcp %>.<%= @appdomain %>
+cookieEncryptionCertificateFindValue = *.<%= @appdomain %>
+CertName = <%= @hcp %>.<%= @appdomain %>
+
+[BillingApi]
+PdfPrintUrlRoot = https://<%= @admin %>.<%= @appdomain %>/pdf/
+DomainServiceClient = <%= @domainreg_service_url %>
+DomainServiceUser = <%= @domainreg_service_username %>
+DomainServicePassword = <%= @domainreg_service_password %>
+
+[GUI]
+SharedAtomiaGuiCert = guicert.<%= @appdomain %> 
+
+[ActionTrail]
+CertName = actiontrail.<%= @appdomain %>
+IP = <%= @actiontrail_ip %>
+
+[Identity]
+RootCertName = <%= @appdomain %> Root
+RootCertThumb = <%= @root_cert_thumb %>
+SigningCertName = stssigning.<%= @appdomain %>
+SigningCertThumb = <%= @signing_cert_thumb %>
+CertName = sts.<%= @appdomain %>
+
+[GUI]
+SharedAtomiaGuiCookieDomain = <%= @appdomain %>
+SharedAtomiaGuiCookiePath = /
+
+[Email]
+SenderAddress = <%= @mail_sender_address %>
+Host = <%= @mail_server_host %>
+Port = <%= @mail_server_port %>
+Username = <%= @mail_server_username %>
+Password = <%= @mail_server_password %>
+SSL = <%= @mail_server_use_ssl %>
+BccEmailAddressesList = <%= @mail_bcc_list %>
+ReplyToAddress = <%= @mail_reply_to %>
+
+[ProvDesc]
+Domain = <%= @appdomain %>
+Domain+ = <%= @appdomain.gsub('.','\.') %>
+DnsNS = <%= @appdomain %>
+DnsNS+ = <%= @appdomain.gsub('.','\.') %>
+Storage = <%= @storage_server_hostname %>
+Storage+ = <%= @storage_server_hostname.gsub('.','\.') %>
+
+[MailDispatcher]
+Interval = <%= @mail_dispatcher_interval %>
+
+[PayEx]
+AccountNumber = 
+EncryptionKey = 
+Test = test-
+
+[PayPal]
+Host = 
+PEndpointUrl = 
+ApiUsername = 
+ApiPassword = 
+ApiSignature = 
+
+[Sms]
+Url = 
+Username = 
+Password = 
+OriginatorType = 
+Originator = 
+
+

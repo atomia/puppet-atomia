@@ -1,0 +1,8 @@
+RewriteEngine on
+RewriteRule /default_error_guqeyqwe/ - [L]
+
+Alias /default_error_guqeyqwe/ /storage/content/PD/HTTPD/HTTPD/public_html/errors/
+ErrorDocument 500 /default_error_guqeyqwe/500.html
+ErrorDocument 501 /default_error_guqeyqwe/501.html
+ErrorDocument 404 /default_error_guqeyqwe/404.html
+

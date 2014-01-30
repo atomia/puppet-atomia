@@ -1,0 +1,18 @@
+{
+  "name": "Atomia-atomia",
+  "version": "0.1.0",
+  "summary": "Puppet module for deploying Atomia",
+  "author": "atomia",
+  "description": "Module for configuring Atomia",
+  "dependencies": [
+    {
+      "name": "puppetlabs/apt",
+      "version_requirement": "1.4.0"
+    }
+  ],
+  "types": [],
+  "checksums": {},
+  "source": "git://git.atomia.com/atomia/puppet-atomia",
+  "project_page": "https://github.com/atomia/puppet-atomia",
+  "license": "Apache License, Version 2.0"
+}

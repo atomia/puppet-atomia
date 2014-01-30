@@ -1,0 +1,78 @@
+require 'spec_helper'
+
+describe 'atomia::apache_agent' do
+
+	# minimum set of default parameters
+	let :params do
+		{
+			:password		=> 'abc123',
+		}
+	end
+	
+	let :facts do 
+		{
+			:osfamily		=> 'Debian'
+		}
+	end
+	
+    context 'make sure required packages are installed' do
+    
+		it { should contain_package('atomia-pa-apache').with_ensure('present') }    
+		it { should contain_package('atomiastatisticscopy').with_ensure('present') }    
+		it { should contain_package('apache2').with_ensure('present') }    
+		it { should contain_package('libapache2-mod-fcgid-atomia').with_ensure('present') }    
+		it { should contain_package('apache2-suexec-custom-cgroups-atomia').with_ensure('present') }    
+		it { should contain_package('php5-cgi').with_ensure('present') }    
+		it { should contain_package('libexpat1').with_ensure('present') }    
+		it { should contain_package('cgroup-bin').with_ensure('present') }    
+		
+    end
+    
+    it { should contain_file('/usr/local/apache-agent/settings.cfg').with(
+    			'owner'   => 'root',
+				'group'   => 'root',
+				'mode'    => '440',
+				)
+	}
+
+    it { should contain_file('/etc/statisticscopy.conf').with(
+    			'owner'   => 'root',
+				'group'   => 'root',
+				'mode'    => '440',
+				)
+	}
+	
+	describe 'with ssl enabled' do
+		let(:params) {{ :ssl_enabled => true, :password => 'abc123' }}
+		
+		it { should contain_file('/usr/local/apache-agent/wildcard.key').with(
+        	        'owner'   => 'root',
+                	'group'   => 'root',
+	                'mode'    => '440',
+	               	).with_content(/[a-z]/)
+	    }
+	    
+
+	    
+	    it { should contain_file('/usr/local/apache-agent/wildcard.crt').with(
+        	        'owner'   => 'root',
+                	'group'   => 'root',
+	                'mode'    => '440',
+	               	).with_content(/[a-z]/)
+	    }
+	end
+	
+	it { should contain_file('/var/log/httpd') }
+	it { should contain_file('/var/www/cgi-wrappers') }
+	
+	it { should contain_file('/storage/configuration/maps').with(
+			'owner'   => 'root',
+			'group'   => 'www-data',
+			'mode'    => '2750',
+			'ensure'  => 'directory'
+			)
+		}
+	
+	
+end
+
