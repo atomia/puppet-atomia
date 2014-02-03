@@ -50,7 +50,7 @@ class atomia::apache_password_protect ($username, $password) {
     owner   => root,
     group   => root,
     mode    => 440,
-    source  => "puppet:///modules/apache_password_protect/passwordprotect",
+    source  => "puppet:///modules/atomia/apache_password_protect/passwordprotect",
     require => File["/etc/apache2/conf.d"],
   }
 }
