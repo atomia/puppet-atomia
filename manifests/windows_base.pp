@@ -1,10 +1,4 @@
-# modules/atomia/windows_base/init.pp
-# Windows base module
-# Author: Stefan Mortensen <stefan.mortensen@atomia.com> - Atomia AB 2013
-#
-# Dependencies:
-#   Dism module by Puppet Labs https://forge.puppetlabs.com/puppetlabs/dism v0.1.0+
-#   Powershell module by joshcooper https://forge.puppetlabs.com/joshcooper/powershell v0.0.5+
+
 class atomia::windows_base (
   $app_password,
   $ad_domain,
