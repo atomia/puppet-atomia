@@ -1,5 +1,5 @@
 name    'puppet-atomia'
-version '0.1.5'
+version '0.1.6'
 source 'git://git.atomia.com/atomia/puppet-atomia'
 author 'atomia'
 license 'Apache License, Version 2.0'
