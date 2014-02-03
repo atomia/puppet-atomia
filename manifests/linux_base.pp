@@ -1,4 +1,4 @@
-class atomia_linux_base {
+class atomia::linux_base {
 
         package { sudo: ensure => present }
 }
