@@ -29,7 +29,13 @@ Deploying the atomia module is done using librarian-puppet https://github.com/ro
 	gem install librarian-puppet
 	cd /etc/puppet
 	echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\"" > Puppetfile
-	librarian-puppet install && cd modules/atomia && librarian-puppet install --path /etc/puppet/modules/ && cd ../../
+	librarian-puppet install 
+	rm Puppetfile && ln -s modules/atomia/Puppetfile Puppetfile && librarian-puppet install
+	
+If you want to update your modules to the latest supported version simply do
+
+	cd /etc/puppet
+	librarian-puppet update
 
 Generate new certificates for your environment, replace arguments to generate_certificates.rb to fit your environment
 
