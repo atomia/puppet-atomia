@@ -6,3 +6,6 @@ mod "joshcooper/powershell", "0.0.5"
 
 mod "openssl",
   :git => "git://github.com/camptocamp/puppet-openssl.git"
+  
+mod "atomia",
+  :git => "git://github.com/atomia/puppet-atomia.git"
