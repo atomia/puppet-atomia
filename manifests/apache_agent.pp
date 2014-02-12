@@ -27,7 +27,9 @@
 # === Examples
 #
 # class {'atomia::apache_agent':
-#   password      => 'myPassword',
+#   password                      => 'myPassword',
+#   content_share_nfs_location    => 'storage.atomia.com:/storage/content'
+#   config_share_nfs_location     => 'storage.atomia.com:/storage/configuration'
 #}
 
 class atomia::apache_agent (
@@ -40,7 +42,15 @@ class atomia::apache_agent (
   # Username for the agent
   $username              = "apacheagent",
   # Omit the provisioning agent
-  $should_have_pa_apache = 1,) {
+  $should_have_pa_apache = 1,
+  # Content share nfs location
+  $content_share_nfs_location,
+  # Config share nfs location
+  $config_share_nfs_location,
+  $use_nfs3 = 1
+  
+  ) {
+    
   if $should_have_pa_apache == 1 {
     package { atomia-pa-apache: ensure => present }
   }
@@ -110,7 +120,22 @@ class atomia::apache_agent (
   } else {
     $ssl_generate_var = "nossl"
   }
+  
+  
+  atomia::nfsmount { 'mount_content':
+    use_nfs3 => $use_nfs3,
+    mount_point => '/storage/content',
+    nfs_location => $content_share_nfs_location
+  }
+  
+  atomia::nfsmount { 'mount_config':
+    use_nfs3 => $use_nfs3,
+    mount_point => '/storage/configuration',
+    nfs_location => $config_share_nfs_location
+  }
+   
 
+    
   if $atomia_clustered != 0 {
     exec { "/bin/sed 's/%h/%{X-Forwarded-For}i/' -i /etc/apache2/conf.d/atomia-pa-apache.conf.ubuntu":
       unless  => "/bin/grep 'X-Forwarded-For' /etc/apache2/conf.d/atomia-pa-apache.conf.ubuntu",
@@ -231,7 +256,7 @@ class atomia::apache_agent (
     owner   => root,
     group   => root,
     mode    => 444,
-    source  => "puppet:///modules/apache_agent/001-custom-errors",
+    source  => "puppet:///modules/atomia/apache_agent/001-custom-errors",
     require => Package["apache2"],
     notify  => Service["apache2"],
   }
@@ -240,7 +265,7 @@ class atomia::apache_agent (
     owner   => root,
     group   => root,
     mode    => 444,
-    source  => "puppet:///modules/apache_agent/suexec-conf",
+    source  => "puppet:///modules/atomia/apache_agent/suexec-conf",
     require => [Package["apache2"], Package["apache2-suexec-custom-cgroups-atomia"]],
     notify  => Service["apache2"],
   }
@@ -249,7 +274,7 @@ class atomia::apache_agent (
     owner   => root,
     group   => root,
     mode    => 444,
-    source  => "puppet:///modules/apache_agent/cgconfig.conf",
+    source  => "puppet:///modules/atomia/apache_agent/cgconfig.conf",
     require => [Package["cgroup-bin"]],
   }
 

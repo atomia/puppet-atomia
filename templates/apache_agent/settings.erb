@@ -15,6 +15,6 @@ APACHECTL_PATH              = /usr/sbin/apache2ctl
 SERVICE_AUTH                = True
 SERVICE_AUTH_USER           = <%= @username %>
 SERVICE_AUTH_PW             = <%= @password %>
-SERVE_HTTPS                 = <%= @ssl_generate_var %>
+SERVE_HTTPS                 = False
 CERTIFICATE_FILE            = /usr/local/apache-agent/wildcard.crt
 PRIVATE_KEY_FILE            = /usr/local/apache-agent/wildcard.key

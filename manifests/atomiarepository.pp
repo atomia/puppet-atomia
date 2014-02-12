@@ -1,11 +1,12 @@
 class atomia::atomiarepository {
+  
   # Workaround for Debian Jessie
   if $operatingsystem == "Debian" {
     # Currently only supports Wheezy
     $repo = "debian-wheezy wheezy main"
   }
   else {
-    $repo = "ubuntu-$distcodename $distcodename main"
+    $repo = "ubuntu-$lsbdistcodename $lsbdistcodename main"
   }
 
   file { "/etc/apt/sources.list.d/atomia.list":
@@ -36,10 +37,11 @@ class atomia::atomiarepository {
     source  => "puppet:///modules/atomia/repository/80atomiaupdate",
   }
 
-        exec { "apt-update":
-                command => "/usr/bin/apt-get update",
+  exec { "apt-update":
+    command => "/usr/bin/apt-get update",
     require => File["/etc/apt/apt.conf.d/80atomiaupdate", "/etc/apt/ATOMIA-GPG-KEY.pub", "/etc/apt/sources.list.d/atomia.list"]
-        }
+  }
 
-        Exec["apt-update"] -> Package <| |>
+  Exec["apt-update"] -> Package <| |>
+
 }

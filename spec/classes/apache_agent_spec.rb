@@ -6,6 +6,8 @@ describe 'atomia::apache_agent' do
 	let :params do
 		{
 			:password		=> 'abc123',
+			:content_share_nfs_location	=> "127.0.0.1:/export/content",
+			:config_share_nfs_location	=> "127.0.0.1:/export/configuration"
 		}
 	end
 	
@@ -43,7 +45,7 @@ describe 'atomia::apache_agent' do
 	}
 	
 	describe 'with ssl enabled' do
-		let(:params) {{ :ssl_enabled => true, :password => 'abc123' }}
+		let(:params) {{ :ssl_enabled => true, :password => 'abc123', :content_share_nfs_location	=> "127.0.0.1:/export/content", :config_share_nfs_location	=> "127.0.0.1:/export/configuration" }}
 		
 		it { should contain_file('/usr/local/apache-agent/wildcard.key').with(
         	        'owner'   => 'root',
@@ -72,6 +74,29 @@ describe 'atomia::apache_agent' do
 			'ensure'  => 'directory'
 			)
 		}
+	
+	it { should contain_file('/etc/cgconfig.conf').with(
+			'owner'   => 'root',
+			'group'   => 'root',
+			'mode'    => '444',
+			)
+		}	
+
+	it { should contain_file('/etc/apache2/conf.d/001-custom-errors').with(
+			'owner'   => 'root',
+			'group'   => 'root',
+			'mode'    => '444',
+			)
+		}			
+
+	it { should contain_file('/etc/apache2/suexec/www-data').with(
+			'owner'   => 'root',
+			'group'   => 'root',
+			'mode'    => '444',
+			)
+		}			
+		
+		
 	
 	
 end

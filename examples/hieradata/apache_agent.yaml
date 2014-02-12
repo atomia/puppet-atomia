@@ -1,0 +1,8 @@
+# apache_agent.yaml
+# Defines all classess and variables needed to deploy 
+# the apache_agent role
+---
+classes:
+  - apache_agent
+  
+atomia::apache_agent::password:		'password123'
