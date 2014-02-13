@@ -1,0 +1,20 @@
+base <%= @base_dn %>
+uri <%= @ldap_uris %>
+ldap_version 3
+binddn cn=<%= @bind_user %>,<%= @base_dn %>
+bindpw <%= @bind_password %>
+scope group sub
+scope hosts sub
+ssl no
+
+filter passwd (&(objectClass=user)(!(objectClass=computer))(uidNumber=*)(unixHomeDirectory=*))
+map    passwd homeDirectory    unixHomeDirectory
+filter shadow (&(objectClass=user)(!(objectClass=computer))(uidNumber=*)(unixHomeDirectory=*))
+map    shadow shadowLastChange pwdLastSet
+filter group  (objectClass=group)
+#map    group  uniqueMember     member
+
+uid nslcd
+#gid ldap
+tls_cacertdir /etc/openldap/cacerts
+

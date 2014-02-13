@@ -3,9 +3,17 @@
 #
 # Manifest to install/configure Atomia Apache agent
 #
-# [$password]
+# [password]
 # Define a password for accessing the agent
 # (required) 
+#
+# [content_share_nfs_location]
+# Define where the content nfs share is located
+# (required)
+#
+# [config_share_nfs_location]
+# Define where the config nfs share is located
+# (required)
 #
 # [$username]
 # Defines the username for accessing the agent
@@ -15,11 +23,11 @@
 # Defines if ssl should be used or not
 # (optional) Defaults to false
 #
-# [$atomia_clustered]
+# [atomia_clustered]
 # Defines if this is a clustered instance
 # (optional) Defaults to true
 #
-# [$should_have_pa_apache]
+# [should_have_pa_apache]
 # Defines if the apache agent shall be debloyed or not
 # (optional) Defaults to true
 #

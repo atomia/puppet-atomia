@@ -60,9 +60,9 @@
 # Linux:
 #```
 # class {'atomia::adjoin':
-#   base_dn         => "cn=Users,dc=atomia,dc=local"
-#   ldap_uris       => "ldap://9.9.9.9 ldap://9.9.9.10"
-#   bind_user       => "PosixGuest"
+#   base_dn         => "cn=Users,dc=atomia,dc=local",
+#   ldap_uris       => "ldap://9.9.9.9 ldap://9.9.9.10",
+#   bind_user       => "PosixGuest",
 #   bind_password   => "PosixGuestPassword"
 #}
 #```
@@ -104,10 +104,6 @@ class atomia::adjoin (
       source => "puppet:///modules/atomia/adjoin/common-account",
     }
 
-    $ldap_conf_content = generate("/etc/puppet/modules/atomia/files/adjoin/ldap.conf.sh", $base_dn, $ldap_uris, $bind_user, 
-    $bind_password)
-    $nslcd_conf_content = generate("/etc/puppet/modules/atomia/files/adjoin/nslcd.conf.sh", $base_dn, $ldap_uris, $bind_user, 
-    $bind_password)
 
     if $no_nscd != 1 {
       package { nscd: ensure => present }
@@ -121,9 +117,18 @@ class atomia::adjoin (
         require => Package["nscd"],
         notify  => Service["nscd"],
       }
+      
+      file { "/etc/nslcd.conf":
+        ensure  => file,
+        owner   => root,
+        group   => root,
+        mode    => 600,
+        content => template("atomia/adjoin/nslcd.conf.erb"),
+        notify  => Service["nscd"],
+      }
 
       service { nscd:
-        enable    => false,
+        enable    => true,
         ensure    => running,
         subscribe => File["/etc/nscd.conf"],
       }
@@ -142,10 +147,15 @@ class atomia::adjoin (
         owner   => root,
         group   => root,
         mode    => 644,
-        content => $ldap_conf_content,
+        content => template("atomia/adjoin/ldap.conf.erb"),
         notify  => Service["nscd"],
       }
     } else {
+      
+       service { nscd:
+        enable    => false,
+        ensure    => stopped,
+      }
       file { "/etc/nsswitch.conf":
         ensure => file,
         owner  => root,
@@ -159,20 +169,9 @@ class atomia::adjoin (
         owner   => root,
         group   => root,
         mode    => 644,
-        content => $ldap_conf_content,
+        content => template("atomia/adjoin/ldap.conf.erb"),
       }
 
-    }
-
-    if $no_nscd != 1 {
-      file { "/etc/nslcd.conf":
-        ensure  => file,
-        owner   => root,
-        group   => root,
-        mode    => 600,
-        content => $nslcd_conf_content,
-        notify  => Service["nscd"],
-      }
     }
 
     file { "/etc/pam.d/common-auth":

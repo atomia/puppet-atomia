@@ -1,0 +1,25 @@
+base <%= @base_dn %>
+uri <%= ldap_uris %>
+ldap_version 3
+binddn cn=<%= @bind_user %>,<%= @base_dn %>
+bindpw <%= @bind_password %>
+scope sub
+bind_policy soft
+ssl no
+
+nss_base_passwd <%= @base_dn %>
+nss_base_shadow <%= @base_dn %>
+nss_base_group <%= @base_dn %>
+
+nss_map_objectclass posixAccount user
+nss_map_objectclass shadowAccount user
+
+nss_map_attribute homeDirectory unixHomeDirectory
+
+nss_map_objectclass posixGroup Group
+nss_map_attribute cn sAMAccountName
+
+pam_filter objectclass=user
+pam_password ad
+
+
