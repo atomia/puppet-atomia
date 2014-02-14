@@ -1,25 +1,33 @@
 class atomia::awstats (
-	$agent_user = "awstats",
-	$agent_password,
-	$ssl_enabled = 0
-
+		$agent_user = "awstats",
+		$agent_password,
+		$ssl_enabled = 0,
+		$content_share_nfs_location,
+		$configuration_share_nfs_location,
+		$ssl_cert_key = "",
+    $ssl_cert_file = ""
 	) {
-	if $atomia_linux_software_auto_update {
-		package { atomia-pa-awstats: ensure => latest }
-		package { atomiaprocesslogs: ensure => latest }
-	} else {
-		package { atomia-pa-awstats: ensure => present }
-		package { atomiaprocesslogs: ensure => present }
-	}
+
+  package { atomia-pa-awstats: ensure => present }
+	package { atomiaprocesslogs: ensure => present }
+
 	package { awstats: ensure => installed }
 	if !defined(Package['apache2-mpm-worker']) and !defined(Package['apache2-mpm-prefork']) and !defined(Package['apache2']) {
 		package { apache2-mpm-worker: ensure => installed }
 	}
 
-	if $atomia_web_content_nfs_location {
-		include nfsmount
-	}
+  atomia::nfsmount { 'mount_content':
+    use_nfs3 => 1,
+    mount_point => '/storage/content',
+    nfs_location => $content_share_nfs_location
+  }
 
+  atomia::nfsmount { 'mount_configuration':
+    use_nfs3 => 1,
+    mount_point => '/storage/configuration',
+    nfs_location => $configuration_share_nfs_location
+  }
+    
 	if $ssl_enabled == 1 {
 			$ssl_generate_var = "ssl"
 
@@ -27,7 +35,7 @@ class atomia::awstats (
 					owner   => root,
 					group   => root,
 					mode    => 440,
-				   content => $ssl_cert_key,
+				  content => $ssl_cert_key,
 					require => Package["atomia-pa-awstats"]
 			}
 
@@ -42,12 +50,12 @@ class atomia::awstats (
 			$ssl_generate_var = "nossl"
 	}
 
-	$settings_content = generate("/etc/puppet/modules/atomia/files/awstats/settings.cfg.sh", $agent_user, $agent_password, $ssl_generate_var)
+
 	file { "/usr/local/awstats-agent/settings.cfg":
 			owner   => root,
 			group   => root,
 			mode    => 440,
-			content => $settings_content,
+			content => template("atomia/awstats/settings.cfg.erb"),
 			require => Package["atomia-pa-awstats"]
 	}
 
@@ -55,6 +63,8 @@ class atomia::awstats (
 			name => awstats-agent,
 			enable => true,
 			ensure => running,
+			hasstatus => false,
+			pattern => "/etc/init.d/awstats-agent start",
 			subscribe => [ Package["atomia-pa-awstats"], File["/usr/local/awstats-agent/settings.cfg"] ],
 	}
 

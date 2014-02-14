@@ -1,0 +1,9 @@
+# awstats.yaml
+# Defines classes and variables needed to deploy awstats
+---
+classes:
+  - atomia::awstats
+
+atomia::awstats::agent_password: "test123"
+atomia::awstats::content_share_nfs_location: "127.0.0.1:/export/content"
+atomia::awstats::configuration_share_nfs_location: "127.0.0.1:/export/configuration"

@@ -1,0 +1,11 @@
+[settings]
+AWSTATS_CONFIG_DIR          = /etc/awstats/
+REPORTS_DEDICATED_SITE_PATH = /storage/content/awstats-sites
+SERVICE_PORT                = 8888
+SERVICE_AUTH                = True
+SERVICE_AUTH_USER           = <%= @agent_user %>
+SERVICE_AUTH_PW             = <%= @agent_password %>
+SERVE_HTTPS                 = <% if (@ssl_enabled == 1) %>True<% else %>False<% end %>
+CERTIFICATE_FILE            = /usr/local/awstats-agent/wildcard.crt
+PRIVATE_KEY_FILE            = /usr/local/awstats-agent/wildcard.key
+
