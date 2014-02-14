@@ -23,13 +23,12 @@ class atomia::cronagent (
 		ensure => present,
 	}
 
-	
-	$settings_content = generate("/etc/puppet/modules/cronagent/files/settings.cfg.sh", $global_auth_token, $min_part, $max_part, $mail_host, $mail_port, $mail_ssl, $mail_from, "$mail_user", "$mail_pass")
+
 	file { "/etc/default/cronagent":
 		owner   => root,
 		group   => root,
 		mode    => 440,
-		content => $settings_content,
+		content => template("atomia/cronagent/settings.cfg.erb"),
 		require => Package["atomia-cronagent"],		
 	}
 	

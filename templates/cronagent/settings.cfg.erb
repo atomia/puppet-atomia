@@ -1,0 +1,15 @@
+MONGO_HOST=localhost
+MONGO_PORT=27017
+MONGO_DBNAME=cronagent
+CRON_LISTEN_PORT=10101
+CRON_GLOBAL_AUTH_TOKEN=<%= @global_auth_token %>
+MIN_PART=$2 <%= @min_part %>
+MAX_PART=$3 <%= @max_part %>
+INTERVAL=60
+MAIL_HOST=$4 <%= @mail_host %>
+MAIL_PORT=$5 <%= @mail_port %>
+MAIL_USER=$8 <%= @mail_user %>
+MAIL_PASS=$9 <%= @mail_pass %>
+MAIL_SSL=$6 <%= @mail_ssl %>
+MAIL_FROM=$7 <%= @mail_from %>
+
