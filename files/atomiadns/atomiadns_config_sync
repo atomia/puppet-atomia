@@ -46,5 +46,3 @@ if [ -f "/etc/atomiadns.conf.master" ]; then
 		fi
 	fi
 fi
-
-

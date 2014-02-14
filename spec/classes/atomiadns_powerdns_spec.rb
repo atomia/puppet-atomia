@@ -24,17 +24,18 @@ describe 'atomia::atomiadns_powerdns' do
 		it { should contain_package('atomiadns-powerdns-database').with_ensure('present') }    
 		it { should contain_package('atomiadns-powerdnssync').with_ensure('present') }    
 		it { should contain_package('pdns-static').with_ensure('present') }    
-		it { should contain_package('bind-utils').with_ensure('present') }   
+		it { should contain_package('dnsutils').with_ensure('present') }   
 		 
     end
     
     describe 'debian specific packages' do 
     	let(:facts) {{ :osfamily => 'Debian', :operatingsystem => 'Debian' }}
-    	it { should contain_package('dnsutils').with_ensure('present') }   
+    	it { should contain_package('bind-utils').with_ensure('present') }   
     end
     
     it { should contain_file('/etc/atomiadns.conf.powerdnssync').with_content(/abc123/) }
     it { should contain_file('/etc/atomiadns.conf.powerdnssync').with_content(/;soap_cacert = \/etc\/atomiadns-mastercert\.pem/) }
+    it { should contain_file('/usr/bin/atomiadns_config_sync') }
     
     describe 'ssl is enabled' do 
 		let :params do

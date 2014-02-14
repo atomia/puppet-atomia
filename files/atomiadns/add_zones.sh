@@ -6,8 +6,8 @@ if [ -z "$4" ]; then
 fi
 
 basedir="/usr/share/doc/atomiadns-masterserver"
-if [ -f "$basedir/zones_to_add_$1.txt" ]; then
-	zones_to_add=`cat "$basedir/zones_to_add_$1.txt"`
+if [ -f "$basedir/zones_to_add.txt" ]; then
+	zones_to_add=`cat "$basedir/zones_to_add.txt"`
 
 	echo "$zones_to_add" | tr -d " " | tr ";" "\n" | grep -v '^[a-zA-Z0-9.-]$' | while read domain; do
 		sudo -u postgres psql zonedata -tA -c "SELECT name FROM zone WHERE name = '$domain'" 2> /dev/null | grep "^$domain"'$' > /dev/null
@@ -18,7 +18,7 @@ if [ -f "$basedir/zones_to_add_$1.txt" ]; then
 				echo "error adding, zone, ignoring - it will re-add later anyway"
 				exit 0
 			else
-				touch /usr/share/doc/atomiadns-masterserver/sync_zones_done_$1.txt
+				touch /usr/share/doc/atomiadns-masterserver/sync_zones_done.txt
 			fi
 		fi
 	done

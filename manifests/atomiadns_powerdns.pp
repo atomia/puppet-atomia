@@ -9,7 +9,7 @@
 #
 # [agent_user]
 # Defines the username for accessing atomiadns
-# (required)
+# (optional) Default: atomiadns
 #
 # [atomia_dns_url]
 # Url of atomiadns endpoint
@@ -17,7 +17,7 @@
 #
 # [atomia_dns_ns_group]
 # Nameserver group to subscribe to
-# (required)
+# (optional) Default: default
 #
 # [ssl_enabled]
 # Defines if ssl is enabled
@@ -27,18 +27,16 @@
 # === Examples
 #
 # class {'atomia::atomiadns_powerdns':
-#        agent_user     => 'atomiadns',
 #        agent_password   => 'abc123',
 #        atomia_dns_url   => 'http://127.0.0.1/atomiadns',
-#        atomia_dns_ns_group => 'default'
 #}
 class atomia::atomiadns_powerdns (
   # If ssl should be enabled or not
   $ssl_enabled = 0,
-  $agent_user,
+  $agent_user = "atomiadns",
   $agent_password,
   $atomia_dns_url,
-  $atomia_dns_ns_group) {
+  $atomia_dns_ns_group = "default") {
   package { atomiadns-powerdns-database: ensure => present }
 
   package { atomiadns-powerdnssync: ensure => present }
@@ -48,7 +46,7 @@ class atomia::atomiadns_powerdns (
     require => [Service["atomiadns-powerdnssync"]]
   }
 
-  if $operatingsystem == "Debian" {
+  if $operatingsystem == "Ubuntu" {
     package { dnsutils: ensure => present }
   } else {
     package { bind-utils: ensure => present }
@@ -95,7 +93,7 @@ class atomia::atomiadns_powerdns (
       owner   => root,
       group   => root,
       mode    => 500,
-      source  => "puppet:///modules/atomiadns_powerdns/atomiadns_config_sync",
+      source  => "puppet:///modules/atomia/atomiadns_powerdns/atomiadns_config_sync",
       require => [Package["atomiadns-powerdns-database"], Package["atomiadns-powerdnssync"]],
     }
 

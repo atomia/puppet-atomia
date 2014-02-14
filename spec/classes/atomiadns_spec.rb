@@ -23,5 +23,11 @@ describe 'atomia::atomiadns' do
 				).with_content(/atomiadns/)
 	}
 
+    it { should contain_file('/etc/atomiadns.conf.master').with(
+    			'owner'   => 'root',
+				'group'   => 'root',
+				'mode'    => '444',
+				).with_content(/atomiadns/)
+	}
 end
 
