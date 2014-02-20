@@ -6,8 +6,6 @@ Install Puppet with Hiera
 	dpkg -i puppetlabs-release-precise.deb
 	apt-get update
 	apt-get install puppetmaster
-	puppet resource package hiera ensure=installed
-	puppet resource package hiera-puppet ensure=installed
 	mkdir /etc/puppet/hieradata
 
 Create a new hiera.yaml file in /etc/puppet/hiera.yaml with the following content
