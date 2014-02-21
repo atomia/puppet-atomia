@@ -1,6 +1,8 @@
 fixtures:
   repositories:
     openssl: "https://github.com/camptocamp/puppet-openssl"
+    apt: "https://github.com/puppetlabs/puppetlabs-apt.git"
+    stdlib: "https://github.com/puppetlabs/puppetlabs-stdlib.git"
   symlinks:
     atomia: "#{source_dir}"
 

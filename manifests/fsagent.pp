@@ -1,6 +1,6 @@
 class atomia::fsagent(
-	$fs_agent_user,
-	$fs_agent_password,
+	$username = "fsagent",
+	$password,
 	) {
 
 	package { python-software-properties: ensure => present }
@@ -38,25 +38,22 @@ class atomia::fsagent(
        }
 
 
-        $settings_content = generate("/etc/puppet/modules/fsagent/files/settings.cfg.sh", $fs_agent_user, $fs_agent_password)
         file { "/etc/default/fsagent":
                 owner   => root,
                 group   => root,
                 mode    => 440,
-                content => $settings_content,
+                content =>  template("atomia/fsagent/settings.cfg.erb"),
                 require => [ Package["atomia-fsagent"], File["/storage/content/backup"] ],
         }
 
 		if $fs_agent_ssl {
-			$settings_ssl_content = generate("/etc/puppet/modules/fsagent/files/settings-ssl.cfg.sh", $fs_agent_user, $fs_agent_password)
-			$init_file = generate("/etc/puppet/modules/fsagent/files/atomia-fsagent-ssl.sh")
 			
 			file { "/etc/default/fsagent-ssl":
                 owner   => root,
                 group   => root,
                 mode    => 440,
 				ensure  => present,
-                content => $settings_ssl_content,
+                content => template("atomia/fsagent/settings-ssl.cfg.erb"),
                 require => [ Package["atomia-fsagent"] ],
 			}
 			
@@ -65,7 +62,7 @@ class atomia::fsagent(
                 group   => root,
                 mode    => 755,
 				ensure  => present,
-                content => $init_file,
+                content => template("atomia/fsagent/atomia-fsagent-ssl.erb"),
                 require => [ Package["atomia-fsagent"] , File["/etc/default/fsagent-ssl"] ],
 			}
 			

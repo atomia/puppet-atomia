@@ -9,3 +9,4 @@ project_page 'https://github.com/atomia/puppet-atomia'
 
 ## Add dependencies, if any:
 # Dependencies are managed in Puppetfile
+
