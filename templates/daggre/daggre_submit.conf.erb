@@ -1,0 +1,13 @@
+# Specify host or hosts that run the daggre datastore/aggregator
+daggre_auth_token=<%= @global_auth_token %>
+daggre_hosts=<%= @ip_addr %>:999
+
+# Disk usage reporter specifics
+agents_diskusage_customerdir=/storage/content/*/%account/%domain
+
+# Web log traffic reporter specifics
+alias_map_path=/storage/configuration/maps/vhost.map
+user_map_path=/storage/configuration/maps/users.map
+folder_user_parse_regexp = [/_\\\\\\\\]content[/\\\\\\\\]\d\d[/\\\\\\\\](\d+)/
+iis_config = /storage/configuration_iis/applicationHost.config
+

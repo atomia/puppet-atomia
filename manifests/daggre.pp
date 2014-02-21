@@ -1,6 +1,6 @@
 class atomia::daggre (
 	$global_auth_token,
-	$ip_addr, 
+	$ip_addr = $ipaddress, 
 	) {
 	
 	include atomia::mongodb
@@ -33,21 +33,19 @@ class atomia::daggre (
 		}
 	}
 	
-	$settings_content = generate("/etc/puppet/modules/atomia/files/daggre/settings.cfg.sh", $global_auth_token)
 	file { "/etc/default/daggre":
 		owner   => root,
 		group   => root,
 		mode    => 440,
-		content => $settings_content,
+		content =>  template("atomia/daggre/settings.cfg.erb"),
 		require => Package["daggre"],		
 	}
 	
-	$daggre_submit_content = generate("/etc/puppet/modules/atomia/files/daggre/daggre_submit.conf.sh", $global_auth_token, $ip_addr)
 	file { "/etc/daggre_submit.conf":
 		owner   => root,
 		group   => root,
 		mode    => 440,
-		content => $daggre_submit_content,
+		content => template("atomia/daggre/daggre_submit.conf.erb"),
 		require => Package["atomia-daggre-reporters-disk", "atomia-daggre-reporters-weblog"],		
 	}	
 	

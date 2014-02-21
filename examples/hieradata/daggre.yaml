@@ -1,0 +1,8 @@
+# daggre.yaml
+# Defines classes and variables needed to
+# deploy daggre 
+---
+classes:
+  - atomia::daggre
+
+atomia::daggre::global_auth_token: "token123"
