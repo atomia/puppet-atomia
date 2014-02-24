@@ -36,16 +36,16 @@ default_ca             = CA_default
 
 [ CA_default ]
 
-dir                    = "/etc/puppet/modules/atomia/files/certificates"
+dir                    = ""
 certs                  = certificates
 crl_dir                = ""
-database               = $dir/index.txt
+database               = index.txt
 new_certs_dir          = certificates
-certificate            = $dir/ca.crt
-serial                 = $dir/serial
-crl                    = $dir/crl.pem
-private_key            = $dir/private/ca.key
-RANDFILE               = $dir/.rand
+certificate            = ca.crt
+serial                 = serial
+crl                    = crl.pem
+private_key            = private/ca.key
+RANDFILE               = .rand
 x509_extensions        = usr_cert
 default_days           = 3650
 default_crl_days       = 10000
