@@ -1,0 +1,12 @@
+<resourceDescription xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+  <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.ActiveDirectory.ActiveDirectory'])">
+    <resourceList>
+      <resource name="ActiveDirectory" xdt:Transform="Insert">
+        <property name="DomainName"><%= @ad_domain  %></property>
+        <property name="ShortDomainName"><%= @ad_shortname  %></property>
+        <property name="Username"><%= @windows_admin_user %></property>
+        <property name="Password"><%= @windows_admin_password %></property>
+      </resource>
+    </resourceList>
+  </bindings>
+</resourceDescription>

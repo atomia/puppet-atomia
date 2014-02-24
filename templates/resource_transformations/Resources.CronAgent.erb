@@ -1,0 +1,11 @@
+<resourceDescription xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+  <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.CronAgent.CronAgent'])">
+    <resourceList>
+      <resource name="CronAgent" xdt:Transform="Insert">
+        <property name="CronBaseUrl"><%= @cronagent_base_url %></property>
+        <property name="AuthToken"><%= @cronagent_global_auth_token %></property>
+      </resource>
+    </resourceList>
+  </bindings>
+</resourceDescription>
+

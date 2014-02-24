@@ -1,0 +1,19 @@
+<% $i = 1 %>
+<resourceDescription xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+  <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.MySql.MySql'])" xdt:Transform="Replace">
+      <moduleList>
+      <module name="Atomia.Provisioning.Modules.MySql.MySql" MaxItems="500" resourceAsignmentPolicy="RoundRobinStickyPerAccountWithMaximum" />
+    </moduleList>
+    <resourceList>
+<% while $i <= @number_of_mysql_servers.to_i do %>
+      <resource name="mysql<%= $i %>">
+        <property name="DatabaseServer"><%= @mysql_ip_address[$i -1] %></property>
+        <property name="PublicIpAddress"><%= @mysql_ip_address[$i - 1] %></property>
+        <property name="User"><%= @mysql_username %></property>
+        <property name="Password"><%= @mysql_password %></property>
+      </resource>
+<% $i = $i + 1 %>
+<% end %>
+    </resourceList>
+  </bindings>
+</resourceDescription>

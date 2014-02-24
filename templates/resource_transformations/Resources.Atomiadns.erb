@@ -1,0 +1,14 @@
+<resourceDescription xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+  <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.Dns.Dns'])">
+    <resourceList>
+      <resource name="AtomiaDNS" xdt:Transform="Insert">
+        <property name="URL"><%= @atomia_dns_url  %></property>
+        <property name="Username"><%= @atomia_dns_agent_user.strip %></property>
+        <property name="Password"><%= @atomia_dns_agent_password.strip %></property>
+        <property name="Nameservers"><%= @nameservers.gsub("[","").gsub("]","").gsub(",",".,").gsub("\"","").strip %>.</property>
+        <property name="NameserverGroup"><%= @atomia_dns_ns_group.strip %></property>
+      </resource>
+    </resourceList>
+  </bindings>
+</resourceDescription>
+

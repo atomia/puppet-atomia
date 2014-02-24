@@ -1,0 +1,10 @@
+<resourceDescription xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+  <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.Daggre.Daggre'])">
+    <resourceList>
+      <resource name="Daggre" xdt:Transform="Insert">
+        <property name="DaggreHosts"><%= @daggre_ip_addr %>:999</property>
+        <property name="DaggreAuthToken"><%= @daggre_global_auth_token %></property>
+      </resource>
+    </resourceList>
+  </bindings>
+</resourceDescription>

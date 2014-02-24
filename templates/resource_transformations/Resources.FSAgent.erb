@@ -1,0 +1,11 @@
+<resourceDescription xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+  <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.FileSystem.FileSystem'])">
+    <resourceList>
+      <resource name="FSAgent" xdt:Transform="Insert">
+        <property name="Username"><%= @fs_agent_user %></property>
+        <property name="Password"><%= @fs_agent_password %></property>
+        <property name="URL">http://<%= @fs_agent_ip %>:10201/</property>
+      </resource>
+    </resourceList>
+  </bindings>
+</resourceDescription>

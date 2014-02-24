@@ -1,0 +1,13 @@
+<resourceDescription xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+  <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.DomainRegistration.DomainRegistration'])">
+    <resourceList>
+      <resource name="DomainReg" xdt:Transform="Insert">
+        <property name="URL"><%= @domainreg_service_url %> </property>
+        <property name="Username"><%= @domainreg_service_username %></property>
+        <property name="Password"><%= @domainreg_service_password %></property>
+        <property name="AcceptEmptyAuthcode">true</property>
+        <property name="UpdateContacts">1</property>
+      </resource>
+    </resourceList>
+  </bindings>
+</resourceDescription>
