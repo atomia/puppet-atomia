@@ -4,7 +4,6 @@ mod "puppetlabs/apt", "1.4.2"
 mod "puppetlabs/dism", "0.1.0"
 mod "joshcooper/powershell", "0.0.6"
 mod "ghoneycutt/nfs", "1.6.3"
-mod "puppetlabs/apt", "1.4.1"
 mod "puppetlabs/stdlib", "4.1.0"
 
 mod "openssl",
