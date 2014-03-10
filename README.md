@@ -5,7 +5,7 @@ Install Puppet with Hiera
 	wget https://apt.puppetlabs.com/puppetlabs-release-precise.deb
 	dpkg -i puppetlabs-release-precise.deb
 	apt-get update
-	apt-get install puppetmaster
+	apt-get install puppetmaster git
 	mkdir /etc/puppet/hieradata
 
 Create a new hiera.yaml file in /etc/puppet/hiera.yaml with the following content
@@ -33,7 +33,6 @@ Deploying the atomia module is done using librarian-puppet https://github.com/ro
 	cd /etc/puppet
 	echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\"" > Puppetfile
 	librarian-puppet install 
-	rm Puppetfile && ln -s modules/atomia/Puppetfile Puppetfile && librarian-puppet install
 	
 If you want to update your modules to the latest supported version simply do
 
