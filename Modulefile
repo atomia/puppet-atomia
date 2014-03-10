@@ -1,4 +1,4 @@
-name    'puppet-atomia'
+name    'atomia'
 version '0.1.8'
 source 'git://git.atomia.com/atomia/puppet-atomia'
 author 'atomia'
