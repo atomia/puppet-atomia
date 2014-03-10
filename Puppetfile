@@ -10,8 +10,6 @@ mod "puppetlabs/stdlib", "4.1.0"
 mod "openssl",
   :git => "git://github.com/camptocamp/puppet-openssl.git"
   
-mod "atomia",
-  :git => "git://github.com/atomia/puppet-atomia.git"
   
 mod "nfs",
   :git => "git://github.com/stefanmortensen/puppet-nfs.git"
