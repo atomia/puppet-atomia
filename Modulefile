@@ -1,6 +1,6 @@
 name    'puppet-atomia'
 version '0.1.9'
-source 'git://git.atomia.com/atomia/puppet-atomia'
+source 'https://github.com/atomia/puppet-atomia'
 author 'atomia'
 license 'Apache License, Version 2.0'
 summary 'Puppet module for deploying Atomia'
