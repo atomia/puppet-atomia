@@ -1,6 +1,6 @@
 forge "http://forge.puppetlabs.com"
 
-mod "puppetlabs/apt", "1.4.0"
+mod "puppetlabs/apt", "1.4.2"
 mod "puppetlabs/dism", "0.1.0"
 mod "joshcooper/powershell", "0.0.5"
 mod "ghoneycutt/nfs", "1.6.3"
