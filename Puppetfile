@@ -5,7 +5,7 @@ mod "joshcooper/powershell", ">= 0.0.5"
 mod "puppetlabs/apt", ">= 1.4.1"
   
 mod "dism",
-  :git => "git://github.com/puppetlabs/puppetlabs-dism.git"
+  :git => "git://github.com/jimmybergman/puppetlabs-dism.git"
   
 mod "openssl",
   :git => "git://github.com/camptocamp/puppet-openssl.git"
