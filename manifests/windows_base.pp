@@ -140,7 +140,7 @@ class atomia::windows_base (
   }
 
   file { 'c:/install/certificates':
-    source  => 'puppet:///atomiacerts/certificates/certificates',
+    source  => 'puppet:///atomiacerts/certificates',
     recurse => true
   }
 
