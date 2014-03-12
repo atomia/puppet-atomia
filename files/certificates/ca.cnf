@@ -1,7 +1,7 @@
-#
+
 # OpenSSL configuration based on sample configuration shipped
 # with OpenVPN.
-#
+
 
 #############################################################
 # modify according to your needs
@@ -11,7 +11,7 @@ KEY_COUNTRY            = SE
 KEY_PROVINCE           = VA
 KEY_CITY               = VASTERAS
 KEY_ORG                = ATOMIA.COM
-KEY_ORGUNIT            = Atomia root certificate 
+KEY_ORGUNIT            = Atomia root certificate
 KEY_EMAIL              = info@atomia.com
 HOME                   = /root
 KEY_DIR                = $ENV::HOME/certs
@@ -36,15 +36,15 @@ default_ca             = CA_default
 
 [ CA_default ]
 
-dir                    = ""
-certs                  = certificates
+dir                    = "/etc/puppet/atomiacerts"
+certs                  = "/etc/puppet/atomiacerts/certificates"
 crl_dir                = ""
 database               = index.txt
-new_certs_dir          = certificates
-certificate            = ca.crt
+new_certs_dir          = "/etc/puppet/atomiacerts/certificates"
+certificate            = "/etc/puppet/atomiacerts/ca.crt"
 serial                 = serial
 crl                    = crl.pem
-private_key            = private/ca.key
+private_key            = "/etc/puppet/atomiacerts/private/ca.key"
 RANDFILE               = .rand
 x509_extensions        = usr_cert
 default_days           = 3650
