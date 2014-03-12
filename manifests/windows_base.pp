@@ -146,7 +146,7 @@ class atomia::windows_base (
 
   file { 'C:\inetpub\wwwroot\empty.crl':
     ensure => 'file',
-    source => "puppet:///atomiacerts/certificates/empty.crl"
+    source => "puppet:///atomiacerts/empty.crl"
   }
 
   # Deploy resource transformations if needed
