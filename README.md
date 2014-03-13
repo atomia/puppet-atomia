@@ -98,3 +98,10 @@ In order to ease editing of these files there is helper scripts available to run
 
 You should now edit the variables in these files to fit your environment
 
+In order to assign a role to a specific node we use facter, there are several ways to add custom facts to facter but the recommended way is to for each node do the following.
+
+	mkdir -p /etc/facter/facts.d
+	echo "atomia_role=daggre" >> /etc/facter/facts.d/atomiarole.txt
+
+Replace "atomia_role" with the role you want this node to have. In order for this to work there needs to be a matching yaml file in /etc/puppet/hieradata. Example files for each role can be found at https://github.com/atomia/puppet-atomia/tree/master/examples/hieradata
+
