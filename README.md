@@ -94,7 +94,7 @@ Start with copying these three files to /etc/puppet/hieradata on the Puppet Mast
 
 In order to ease editing of these files there is helper scripts available to run to perform some initial tasks
 
-	/etc/puppet/modules/atomia/files/certificates/set_cert_fingerprint.sh
+	/etc/puppet/modules/atomia/files/certificates/set_cert_fingerprints.sh
 
 You should now edit the variables in these files to fit your environment
 
