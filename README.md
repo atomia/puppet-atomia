@@ -28,9 +28,10 @@ Make sure your /etc/puppet/manifests/site.pp file contains the following
 	}
 
 Add the following to /etc/puppet/fileserver.conf
+
 	[atomiacerts]
-  	  path /etc/puppet/atomiacerts
-  	  allow *
+ 	   path /etc/puppet/atomiacerts
+  	   allow *
 
 Deploying the atomia module is done using librarian-puppet https://github.com/rodjek/librarian-puppet
 
