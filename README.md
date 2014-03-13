@@ -21,11 +21,16 @@ Create a new hiera.yaml file in /etc/puppet/hiera.yaml with the following conten
 	:yaml:
 	  :datadir: /etc/puppet/hieradata
 
-Also make sure your /etc/puppet/manifests/site.pp file contains the following
+Make sure your /etc/puppet/manifests/site.pp file contains the following
 
 	node default {
 	        hiera_include('classes')
 	}
+
+Add the following to /etc/puppet/fileserver.conf
+	[atomiacerts]
+  	  path /etc/puppet/atomiacerts
+  	  allow *
 
 Deploying the atomia module is done using librarian-puppet https://github.com/rodjek/librarian-puppet
 
