@@ -5,7 +5,7 @@ Install Puppet with Hiera
 	wget https://apt.puppetlabs.com/puppetlabs-release-precise.deb
 	dpkg -i puppetlabs-release-precise.deb
 	apt-get update
-	apt-get install puppetmaster git
+	apt-get install puppetmaster git apache2-utils
 	mkdir /etc/puppet/hieradata
 
 Create a new hiera.yaml file in /etc/puppet/hiera.yaml with the following content
