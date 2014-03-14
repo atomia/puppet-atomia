@@ -9,15 +9,18 @@ class atomia::pureftpd (
 	$is_master				= 0,
 	$pureftpd_slave_password,
 	$ssl_enabled	 			= 0,
+	$skip_mount        = 0,
 	){
 	package { pure-ftpd-mysql: ensure => installed }
 
 	$mysql_command = "/usr/bin/mysql --defaults-file=/etc/mysql/debian.cnf -Ns"
 
-  atomia::nfsmount { 'mount_content':
-    use_nfs3 => 1,
-    mount_point => '/storage/content',
-    nfs_location => $content_share_nfs_location
+  if $skip_mount == 0 {
+	  atomia::nfsmount { 'mount_content':
+	    use_nfs3 => 1,
+	    mount_point => '/storage/content',
+	    nfs_location => $content_share_nfs_location
+	  }
   }
   	
 	if $is_master == "1" {
