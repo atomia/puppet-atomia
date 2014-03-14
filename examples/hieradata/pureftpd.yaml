@@ -1,0 +1,15 @@
+# pureftpd.yaml
+# Defines all classess and variables needed to deploy
+# the pureftpd role
+---
+classes:
+  - atomia::pureftpd
+
+atomia::pureftpd::agent_password: "password123",
+atomia::pureftpd::master_ip: "127.0.0.1",
+atomia::pureftpd::provisioning_host: "127.0.0.1",
+atomia::pureftpd::pureftpd_password: "password123",
+atomia::pureftpd::ftp_cluster_ip: "127.0.0.1",
+atomia::pureftpd::is_master: 1,
+atomia::pureftpd::pureftpd_slave_password: "password123",
+atomia::pureftpd::content_share_nfs_location: "127.0.0.1:/export/content"

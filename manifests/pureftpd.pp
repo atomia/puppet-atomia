@@ -5,6 +5,7 @@ class atomia::pureftpd (
 	$provisioning_host,
 	$pureftpd_password,
 	$ftp_cluster_ip,
+	$content_share_nfs_location,
 	$is_master				= 0,
 	$pureftpd_slave_password,
 	$ssl_enabled	 			= 0,
@@ -12,7 +13,13 @@ class atomia::pureftpd (
 	package { pure-ftpd-mysql: ensure => installed }
 
 	$mysql_command = "/usr/bin/mysql --defaults-file=/etc/mysql/debian.cnf -Ns"
-	
+
+  atomia::nfsmount { 'mount_content':
+    use_nfs3 => 1,
+    mount_point => '/storage/content',
+    nfs_location => $content_share_nfs_location
+  }
+  	
 	if $is_master == "1" {
 
 		class { 'mysql::server':
