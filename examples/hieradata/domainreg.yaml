@@ -1,0 +1,7 @@
+# domainreg.yaml
+# Defines classes and variables needed to deploy domainreg
+---
+classes:
+  - atomia::domainreg
+
+atomia::domainreg::service_password: "password123"
