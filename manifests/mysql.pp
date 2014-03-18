@@ -1,28 +1,3 @@
-#$mysql_command = "mysql --defaults-file=/etc/mysql/debian.cnf -Ns"
-#define mysql_database($name, $schema_table, $initial_schema) {
-#	exec { "create-db $name":
-#		command => "$mysql_command -e 'CREATE DATABASE $name'",
-#		unless => "/usr/bin/test -d $mysql_datadir/$name",
-#	}
-#
-#	exec { "import-schema $name":
-#		command => "$mysql_command $name < $initial_schema",
-#		unless => "$mysql_command -e \"SELECT * FROM $schema_table\" $name",
-#	}
-#}
-
-#define mysql_user($name, $host, $db_grant, $password, $grant_option) {
-#	case $grant_option {
-#		true: { $grant_statement = " WITH GRANT OPTION" }
-#		default: { $grant_statement = "" }
-#	}
-#
-#	exec { $name:
-#		command => "$mysql_command -e \"GRANT ALL ON $db_grant.* TO '$name'@'$host' IDENTIFIED BY '$password'$grant_statement\"",
-#		unless => "$mysql_command -e \"SELECT user, host FROM user WHERE user = '$name' AND host = '$host'\" mysql | grep $name",
-#	}
-#}
-
 class atomia::mysql (
 	$mysql_username,
 	$mysql_password,
@@ -33,8 +8,6 @@ class atomia::mysql (
 
 	#package { mysql-server: ensure => installed }
 
-	package { apache2: ensure => present }
-	package { libapache2-mod-php5: ensure => present }
 
 	class { '::mysql::server':
   		override_options => { 'mysqld' => { 'bind_address' => $ipaddress } }
@@ -53,11 +26,6 @@ class atomia::mysql (
   		user       => "$mysql_username@$provisioning_host",
 	}
        
-	 service { apache2:
-                name => apache2,
-                enable => true,
-                ensure => running,
-        }
 
 	exec { "delete-test-db":
 		command => "$mysql_command -e \"DROP DATABASE test;\" ",
