@@ -1,0 +1,10 @@
+MYSQLServer     <%= $master_ip %>
+MYSQLSocket      /var/run/mysqld/mysqld.sock
+MYSQLUser       <%= $agent_user %>
+MYSQLPassword   <%= $pureftpd_password %>
+MYSQLDatabase   pureftpd
+MYSQLCrypt      md5
+MYSQLGetPW      SELECT Password FROM users WHERE User="\L" AND status="1"
+MYSQLGetUID     SELECT Uid FROM users WHERE User="\L" AND status="1"
+MYSQLGetGID     SELECT Gid FROM users WHERE User="\L" AND status="1"
+MYSQLGetDir     SELECT Dir FROM users WHERE User="\L" AND status="1"
