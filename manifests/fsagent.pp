@@ -2,6 +2,7 @@ class atomia::fsagent(
 	$username = "fsagent",
 	$password,
 	$content_share_nfs_location,
+	$skip_mount        = 0,
 	) {
 
 	package { python-software-properties: ensure => present }
@@ -30,12 +31,13 @@ class atomia::fsagent(
 	} else {
 		package { atomia-fsagent: ensure => present }
 	}
-	
-	atomia::nfsmount { 'mount_content':
-    use_nfs3 => 1,
-    mount_point => '/storage/content',
-    nfs_location => $content_share_nfs_location
-  }
+	if($skip_mount == 0){
+		atomia::nfsmount { 'mount_content':
+			use_nfs3 => 1,
+			mount_point => '/storage/content',
+			nfs_location => $content_share_nfs_location
+		}
+	}
 
         file { "/storage/content/backup":
             	ensure => "directory",
