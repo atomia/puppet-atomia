@@ -5,7 +5,8 @@ class atomia::awstats (
 		$content_share_nfs_location,
 		$configuration_share_nfs_location,
 		$ssl_cert_key = "",
-    $ssl_cert_file = ""
+		$ssl_cert_file = "",
+		$skip_mount        = 0,
 	) {
 
   package { atomia-pa-awstats: ensure => present }
@@ -15,19 +16,19 @@ class atomia::awstats (
 	if !defined(Package['apache2-mpm-worker']) and !defined(Package['apache2-mpm-prefork']) and !defined(Package['apache2']) {
 		package { apache2-mpm-worker: ensure => installed }
 	}
+	if($skip_mount == 0){
+		atomia::nfsmount { 'mount_content':
+			use_nfs3 => 1,
+			mount_point => '/storage/content',
+			nfs_location => $content_share_nfs_location
+		}
 
-  atomia::nfsmount { 'mount_content':
-    use_nfs3 => 1,
-    mount_point => '/storage/content',
-    nfs_location => $content_share_nfs_location
-  }
-
-  atomia::nfsmount { 'mount_configuration':
-    use_nfs3 => 1,
-    mount_point => '/storage/configuration',
-    nfs_location => $configuration_share_nfs_location
-  }
-    
+		atomia::nfsmount { 'mount_configuration':
+			use_nfs3 => 1,
+			mount_point => '/storage/configuration',
+			nfs_location => $configuration_share_nfs_location
+		}
+    }
 	if $ssl_enabled == 1 {
 			$ssl_generate_var = "ssl"
 
