@@ -10,6 +10,7 @@ class atomia::pureftpd (
 	$pureftpd_slave_password,
 	$ssl_enabled	 			= 0,
 	$skip_mount        = 0,
+	$skip_mysql        = 0,
 	){
 	package { pure-ftpd-mysql: ensure => installed }
 
@@ -24,9 +25,10 @@ class atomia::pureftpd (
   }
   	
 	if $is_master == "1" {
-
-		class { 'mysql::server':
-			override_options  => { mysqld => {'server_id' => '1', 'log_bin' => '/var/log/mysql/mysql-bin.log', 'binlog_do_db' => 'pureftpd', 'bind_address' => $master_ip } }
+		if $skip_mysql == 0{
+			class { 'mysql::server':
+				override_options  => { mysqld => {'server_id' => '1', 'log_bin' => '/var/log/mysql/mysql-bin.log', 'binlog_do_db' => 'pureftpd', 'bind_address' => $master_ip } }
+			}
 		}
 
 		exec { 'grant-replicate-privileges':
@@ -65,9 +67,11 @@ class atomia::pureftpd (
 	}
 	else {
 		# Slave config
-                class { 'mysql::server':
-                        override_options => { mysqld => { 'server_id' => '2', 'log_bin' => '/var/log/mysql/mysql-bin.log', 'binlog_do_db' => 'pureftpd'} }
-                }
+				if $skip_mysql == 0{
+					class { 'mysql::server':
+							override_options => { mysqld => { 'server_id' => '2', 'log_bin' => '/var/log/mysql/mysql-bin.log', 'binlog_do_db' => 'pureftpd'} }
+					}
+				}
 
                 exec { 'change-master':
                         command => "$mysql_command -e \"CHANGE MASTER TO MASTER_HOST='$master_ip',MASTER_USER='slave_user', MASTER_PASSWORD='$pureftpd_slave_password', MASTER_LOG_FILE='mysql-bin.000001', MASTER_LOG_POS=107;START SLAVE;\"",
@@ -82,12 +86,11 @@ class atomia::pureftpd (
 		require => Class[Mysql::Server::Service]
         }
 
-	$mysql_conf = generate("/etc/puppet/modules/pureftpd/files/generate_mysql.sh", $master_ip, 'pureftpd', 'pureftpd', $pureftpd_password)
 	file { "/etc/pure-ftpd/db/mysql.conf":
 		owner   => root,
 		group   => root,
 		mode    => 400,
-		content => $mysql_conf,
+		content => template("atomia/pure-ftpd/mysqlsettings.cfg.erb"),
 		require => Package["pure-ftpd-mysql"],
 		notify	=> Service["pure-ftpd-mysql"],
 	}
