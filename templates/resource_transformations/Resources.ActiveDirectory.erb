@@ -2,10 +2,10 @@
   <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.ActiveDirectory.ActiveDirectory'])">
     <resourceList>
       <resource name="ActiveDirectory" xdt:Transform="Insert">
-        <property name="DomainName"><%= @ad_domain  %></property>
-        <property name="ShortDomainName"><%= @ad_shortname  %></property>
-        <property name="Username"><%= @windows_admin_user %></property>
-        <property name="Password"><%= @windows_admin_password %></property>
+        <property name="DomainName"><%= IO.popen([@lookup_var,"adjoin","domain_name",@hierapath,@modulepath]).read %></property>
+        <property name="ShortDomainName"><%= IO.popen([@lookup_var,"adjoin","short_domain_name",@hierapath,@modulepath]).read %></property>
+        <property name="Username"><%= IO.popen([@lookup_var,"adjoin","admin_user",@hierapath,@modulepath]).read %></property>
+        <property name="Password"><%= IO.popen([@lookup_var,"adjoin","admin_password",@hierapath,@modulepath]).read %></property>
       </resource>
     </resourceList>
   </bindings>

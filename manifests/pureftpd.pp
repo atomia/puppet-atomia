@@ -11,6 +11,7 @@ class atomia::pureftpd (
 	$ssl_enabled	 			= 0,
 	$skip_mount        = 0,
 	$skip_mysql        = 0,
+    $content_mount_point = "/storage/content"
 	){
 	package { pure-ftpd-mysql: ensure => installed }
 

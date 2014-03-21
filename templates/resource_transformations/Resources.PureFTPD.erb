@@ -2,16 +2,16 @@
   <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.PureFTPD.PureFTPD'])">
     <resourceList>
       <resource name="PureFTPD" xdt:Transform="Insert">
-        <property name="DatabaseHost"><%= @pureftpd_master_ip %></property>
+        <property name="DatabaseHost"><%= IO.popen([@lookup_var,"pureftpd","master_ip",@hierapath,@modulepath]).read %></property>
         <property name="DatabaseName">pureftpd</property>
-        <property name="Username"><%= @pureftpd_agent_user %></property>
-        <property name="Password"><%= @pureftpd_agent_password %></property>
+        <property name="Username"><%= IO.popen([@lookup_var,"pureftpd","agent_user",@hierapath,@modulepath]).read %></property>
+        <property name="Password"><%= IO.popen([@lookup_var,"pureftpd","agent_password",@hierapath,@modulepath]).read %></property>
         <property name="EncryptionMethod">md5</property>
-        <property name="ClusterIpAddress"><%= @ftp_cluster_ip %></property>
-        <property name="FileSystemAgentUrl">http://<%= @fs_agent_ip %>:10201/</property>
-        <property name="FileSystemAgentUsername"><%= @fs_agent_user %></property>
-        <property name="FileSystemAgentPassword"><%= @fs_agent_password %></property>
-        <property name="StorageRoot"><%= @atomia_web_content_mount_point %></property>
+        <property name="ClusterIpAddress"><%= IO.popen([@lookup_var,"pureftpd","ftp_cluster_ip",@hierapath,@modulepath]).read %></property>
+        <property name="FileSystemAgentUrl">http://<%= IO.popen([@lookup_var,"fsagent","fsagent_ip",@hierapath,@modulepath]).read.gsub(/\n/, "").gsub(/\r/, "") %>:10201/</property>
+        <property name="FileSystemAgentUsername"><%= IO.popen([@lookup_var,"fsagent","username",@hierapath,@modulepath]).read %></property>
+        <property name="FileSystemAgentPassword"><%= IO.popen([@lookup_var,"fsagent","password",@hierapath,@modulepath]).read %></property>
+        <property name="StorageRoot"><%= IO.popen([@lookup_var,"pureftpd","content_mount_point",@hierapath,@modulepath]).read %></property>
       </resource>
     </resourceList>
   </bindings>

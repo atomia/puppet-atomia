@@ -1,6 +1,8 @@
 class atomia::webinstaller (
 	$agent_username 		= "webinstaller",
 	$agent_password      = "",
+    $content_mount_point = "/storage/content",
+    $webinstaller_ip = $ip
 	) {
 	if $atomia_linux_software_auto_update {
 		package { atomiawebinstaller-api: ensure => latest }

@@ -1,0 +1,47 @@
+atomia::domainreg::service_password: "domainreg_password"
+atomia::domainreg::service_username: "domainreg_username"
+
+atomia::atomiadns::agent_password: "atomiadns_password"
+atomia::atomiadns::nameservers: "ns1.atomia.com.,ns2.atomia.com."
+
+atomia::adjoin::domain_name: "atomia.local"
+atomia::adjoin::short_domain_name: "atomia"
+atomia::adjoin::admin_password: "ad_password"
+
+atomia::cronagent::base_url: "http://127.0.0.1:10001"
+atomia::cronagent::global_auth_token: "cron_auth_token"
+
+atomia::mysql::server_ips: "{ '1.1.1.1','1.1.1.2' }"
+atomia::mysql::mysql_username: "mysql_user"
+atomia::mysql::mysql_password: "mysql_password"
+
+atomia::daggre::ip_addr: "127.0.0.1"
+atomia::daggre::global_auth_token: "daggre_token"
+
+atomia::awstats::agent_password: "awstats_password"
+atomia::awstats::awstats_ip: "127.0.0.1"
+
+atomia::fsagent::password: "fsagent_password"
+atomia::fsagent::fsagent_ip: "127.0.0.1"
+
+atomia::webinstaller::agent_password: "webinstaller_password"
+atomia::webinstaller::webinstaller_ip: "127.0.0.1"
+
+atomia::pureftpd::master_ip: "127.0.0.1"
+atomia::pureftpd::agent_password: "pureftpd_password"
+atomia::pureftpd::ftp_cluster_ip: "2.2.2.2"
+
+atomia::apache_agent::apache_agent_ip: "127.0.0.1"
+atomia::apache_agent::password: "apacheagent_password"
+atomia::apache_agent::cluster_ip: "2.2.2.2"
+
+atomia::mailserver::master_ip: "2.2.2.2"
+atomia::mailserver::agent_password: "mailserver_password"
+atomia::mailserver::cluster_ip: "3.3.3.3"
+
+atomia::iis::iis_master_ip: "2.2.2.2"
+atomia::iis::iis_cluster_ip: "3.3.3.3"
+
+atomia::mssql::server_ips: "{ '1.1.1.1','1.1.1.2' }"
+atomia::mssql::mssql_username: "mssql_user"
+atomia::mssql::mssql_password: "mssql_password"

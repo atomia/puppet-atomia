@@ -2,9 +2,9 @@
   <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.FileSystem.FileSystem'])">
     <resourceList>
       <resource name="FSAgent" xdt:Transform="Insert">
-        <property name="Username"><%= @fs_agent_user %></property>
-        <property name="Password"><%= @fs_agent_password %></property>
-        <property name="URL">http://<%= @fs_agent_ip %>:10201/</property>
+        <property name="Username"><%= IO.popen([@lookup_var,"fsagent","username",@hierapath,@modulepath]).read %></property>
+        <property name="Password"><%= IO.popen([@lookup_var,"fsagent","password",@hierapath,@modulepath]).read %></property>
+        <property name="URL">http://<%= IO.popen([@lookup_var,"fsagent","fsagent_ip",@hierapath,@modulepath]).read.gsub(/\n/, "").gsub(/\r/, "") %>:10201/</property>
       </resource>
     </resourceList>
   </bindings>

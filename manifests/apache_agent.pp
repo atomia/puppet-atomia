@@ -55,7 +55,9 @@ class atomia::apache_agent (
   $content_share_nfs_location,
   # Config share nfs location
   $config_share_nfs_location,
-  $use_nfs3 = 1
+  $use_nfs3 = 1,
+  $cluster_ip = "",
+  $apache_agent_ip = $ip
   
   ) {
     

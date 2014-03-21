@@ -2,11 +2,11 @@
   <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.Dns.Dns'])">
     <resourceList>
       <resource name="AtomiaDNS" xdt:Transform="Insert">
-        <property name="URL"><%= @atomia_dns_url  %></property>
-        <property name="Username"><%= @atomia_dns_agent_user.strip %></property>
-        <property name="Password"><%= @atomia_dns_agent_password.strip %></property>
-        <property name="Nameservers"><%= @nameservers.gsub("[","").gsub("]","").gsub(",",".,").gsub("\"","").strip %>.</property>
-        <property name="NameserverGroup"><%= @atomia_dns_ns_group.strip %></property>
+        <property name="URL"><%= IO.popen([@lookup_var,"atomiadns","atomia_dns_url",@hierapath,@modulepath]).read %></property>
+        <property name="Username"><%= IO.popen([@lookup_var,"atomiadns","agent_user",@hierapath,@modulepath]).read %></property>
+        <property name="Password"><%= IO.popen([@lookup_var,"atomiadns","agent_password",@hierapath,@modulepath]).read %></property>
+        <property name="Nameservers"><%= IO.popen([@lookup_var,"atomiadns","nameservers",@hierapath,@modulepath]).read %></property>
+        <property name="NameserverGroup"><%= IO.popen([@lookup_var,"atomiadns","ns_group",@hierapath,@modulepath]).read %></property>
       </resource>
     </resourceList>
   </bindings>

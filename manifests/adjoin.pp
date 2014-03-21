@@ -74,6 +74,7 @@
 class atomia::adjoin (
   # AD domain name
   $domain_name    = "",
+  $short_domain_name = "",
   $admin_user     = "Administrator",
   $admin_password = "",
   $dc_ip          = "",

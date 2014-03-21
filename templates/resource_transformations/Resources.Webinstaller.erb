@@ -2,11 +2,11 @@
   <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.WebInstaller.WebInstaller'])">
     <resourceList>
       <resource name="Webinstaller" xdt:Transform="Insert">
-        <property name="URL">http://<%= @webinstaller_ip %>/webinstaller</property>
-        <property name="Username"><%= @webinstaller_username %></property>
-        <property name="Password"><%= @webinstaller_password %></property>
+        <property name="URL">http://<%= IO.popen([@lookup_var,"webinstaller","webinstaller_ip",@hierapath,@modulepath]).read.gsub(/\n/, "").gsub(/\r/, "") %>/webinstaller</property>
+        <property name="Username"><%= IO.popen([@lookup_var,"webinstaller","agent_username",@hierapath,@modulepath]).read %></property>
+        <property name="Password"><%= IO.popen([@lookup_var,"webinstaller","agent_password",@hierapath,@modulepath]).read %></property>
         <property name="Timeout">600</property>
-	<property name="StoragePath"><%= @atomia_web_content_mount_point %></property>
+	<property name="StoragePath"><%= IO.popen([@lookup_var,"webinstaller","content_mount_point",@hierapath,@modulepath]).read %></property>
       </resource>
     </resourceList>
   </bindings>

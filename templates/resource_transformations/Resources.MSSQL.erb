@@ -1,17 +1,21 @@
-<% $i = 1 %>
+<% require 'yaml' %>
+<% server_ips = YAML::parse(IO.popen([@lookup_var,"mssql","server_ips",@hierapath,@modulepath]).read.to_s) %>
 <resourceDescription xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
   <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.MSSQL.MSSQL'])">
     <resourceList>
-<% while $i <= @number_of_mssql_servers.to_i do %>
-      <resource name="MSSQL<%= $i %>" xdt:Transform="Insert">
-        <property name="DatabaseServer"><%= @mssql_ip_address[$i - 1] %></property>
-        <property name="PublicIpAddress"><%= @mssql_ip_address[$i - 1] %></property>
-        <property name="User"><%= @mssql_username %></property>
-        <property name="Password"><%= @mssql_password %></property>
+<% server_ips.each do |v| %>
+    <% if defined? v.value  %>
+        <% if v.value != "" %>
+      <resource name="MSSQL<%= v.value %>" xdt:Transform="Insert">
+        <property name="DatabaseServer"><%= v.value %></property>
+        <property name="PublicIpAddress"><%= v.value %></property>
+        <property name="User"><%= IO.popen([@lookup_var,"mssql","mssql_username",@hierapath,@modulepath]).read %></property>
+        <property name="Password"><%= IO.popen([@lookup_var,"mssql","mssql_password",@hierapath,@modulepath]).read %></property>
         <property name="InitialCatalog">master</property>
-        <property name="AdminIpAddress"><%= @mssql_ip_address[$i - 1] %></property>      
+        <property name="AdminIpAddress"><%= v.value %></property>      
       </resource>
-<% $i = $i + 1 %>
+        <% end %>
+     <% end %>    
 <% end %>
     </resourceList>
   </bindings>

@@ -4,7 +4,8 @@ class atomia::mailserver (
 		$master_ip,
 		$agent_password,
 		$slave_password,
-		$install_antispam = 1
+		$install_antispam = 1,
+        $cluster_ip = ""
 	){
 	package { postfix-mysql: ensure => installed }
 	package { dovecot-common: ensure => installed }

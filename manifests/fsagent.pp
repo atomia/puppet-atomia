@@ -3,6 +3,7 @@ class atomia::fsagent(
 	$password,
 	$content_share_nfs_location,
 	$skip_mount        = 0,
+    $fsagent_ip = $ip
 	) {
 
 	package { python-software-properties: ensure => present }

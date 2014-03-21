@@ -2,8 +2,8 @@
   <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.IIS.IIS7'])">
     <resourceList>
       <resource name="IISServerCluster" xdt:Transform="Insert">
-        <property name="IPAddress"><%= @iis_master_ip %></property>
-        <property name="ClusterIpAddress"><%= @iis_cluster_ip %></property>
+        <property name="IPAddress"><%= IO.popen([@lookup_var,"iis","iis_master_ip",@hierapath,@modulepath]).read %></property>
+        <property name="ClusterIpAddress"><%= IO.popen([@lookup_var,"iis","iis_cluster_ip",@hierapath,@modulepath]).read %></property>
         <property name="DefaultResource.Default">true</property>
       </resource>
     </resourceList>
