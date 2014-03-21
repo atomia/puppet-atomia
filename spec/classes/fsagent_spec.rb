@@ -5,13 +5,15 @@ describe 'atomia::fsagent' do
 	# minimum set of default parameters
 	let :params do
 		{
-			:password		=> 'abc123'
+			:password		=> 'abc123',
+            :content_share_nfs_location => 'storage.atomia.com:/storage'
 		}
 	end
 	
 	let :facts do 
 		{
-			:osfamily		=> 'Debian'
+			:osfamily		=> 'Debian',
+            :lsbdistid      => 'Ubuntu'
 		}
 	end
 	
