@@ -61,7 +61,7 @@ class atomia::pureftpd (
 			owner   => root,
 			group   => root,
 			mode    => 400,
-			source  => "puppet:///modules/pureftpd/mysql.schema.sql",
+			source  => "puppet:///modules/atomia/pureftpd/mysql.schema.sql",
 			require => Package["pure-ftpd-mysql"],
 		}
 	}

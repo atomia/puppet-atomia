@@ -36,14 +36,14 @@ class atomia::mysql (
                 owner   => root,
                 group   => root,
                 mode    => 500,
-                source  => "puppet:///modules/atomia_mysql/ubuntu-fix",
+                source  => "puppet:///modules/atomia/mysql/ubuntu-fix",
 	}
 
 	file { "/etc/security/limits.conf":
 		   owner   => root,
 		   group   => root,
 		   mode    => 644,
-		   source  => "puppet:///modules/atomia_mysql/limits.conf",
+		   source  => "puppet:///modules/atomia/mysql/limits.conf",
 	}
 
 
@@ -51,7 +51,7 @@ class atomia::mysql (
 #		   owner   => root,
 #		   group   => root,
 #		   mode    => 644,
-#		   source  => "puppet:///modules/mysql/my.cnf",
+#		   source  => "puppet:///modules/atomia/mysql/my.cnf",
 #	}
 	
 #	if !defined(File[$mysql_datadir]) {
