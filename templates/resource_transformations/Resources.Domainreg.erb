@@ -1,10 +1,10 @@
 <resourceDescription xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
-  <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.DomainRegistration.DomainRegistration'])">
+  <bindings xdt:Locator="XPath(//bindings"moduleList/module/@name='Atomia.Provisioning.Modules.DomainRegistration.DomainRegistration'")">
     <resourceList>
       <resource name="DomainReg" xdt:Transform="Insert">
-        <property name="URL"><%= IO.popen([@lookup_var,"domainreg","service_url",@hierapath,@modulepath]).read %> </property>
-        <property name="Username"><%= IO.popen([@lookup_var,"domainreg","service_username",@hierapath,@modulepath]).read %></property>
-        <property name="Password"><%= IO.popen([@lookup_var,"domainreg","service_password",@hierapath,@modulepath]).read %></property>
+        <property name="URL"><%= IO.popen("#{@lookup_var} domainreg service_url #{@hierapath} #{@modulepath}").read %> </property>
+        <property name="Username"><%= IO.popen("#{@lookup_var} domainreg service_username #{@hierapath} #{@modulepath}").read %></property>
+        <property name="Password"><%= IO.popen("#{@lookup_var} domainreg service_password #{@hierapath} #{@modulepath}").read %></property>
         <property name="AcceptEmptyAuthcode">true</property>
         <property name="UpdateContacts">1</property>
       </resource>

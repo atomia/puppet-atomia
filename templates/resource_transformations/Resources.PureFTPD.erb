@@ -1,17 +1,17 @@
 <resourceDescription xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
-  <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.PureFTPD.PureFTPD'])">
+  <bindings xdt:Locator="XPath(//bindings"moduleList/module/@name='Atomia.Provisioning.Modules.PureFTPD.PureFTPD'")">
     <resourceList>
       <resource name="PureFTPD" xdt:Transform="Insert">
-        <property name="DatabaseHost"><%= IO.popen([@lookup_var,"pureftpd","master_ip",@hierapath,@modulepath]).read %></property>
+        <property name="DatabaseHost"><%= IO.popen("#{@lookup_var} pureftpd master_ip #{@hierapath} #{@modulepath}").read %></property>
         <property name="DatabaseName">pureftpd</property>
-        <property name="Username"><%= IO.popen([@lookup_var,"pureftpd","agent_user",@hierapath,@modulepath]).read %></property>
-        <property name="Password"><%= IO.popen([@lookup_var,"pureftpd","agent_password",@hierapath,@modulepath]).read %></property>
+        <property name="Username"><%= IO.popen("#{@lookup_var} pureftpd agent_user #{@hierapath} #{@modulepath}").read %></property>
+        <property name="Password"><%= IO.popen("#{@lookup_var} pureftpd agent_password #{@hierapath} #{@modulepath}").read %></property>
         <property name="EncryptionMethod">md5</property>
-        <property name="ClusterIpAddress"><%= IO.popen([@lookup_var,"pureftpd","ftp_cluster_ip",@hierapath,@modulepath]).read %></property>
-        <property name="FileSystemAgentUrl">http://<%= IO.popen([@lookup_var,"fsagent","fsagent_ip",@hierapath,@modulepath]).read.gsub(/\n/, "").gsub(/\r/, "") %>:10201/</property>
-        <property name="FileSystemAgentUsername"><%= IO.popen([@lookup_var,"fsagent","username",@hierapath,@modulepath]).read %></property>
-        <property name="FileSystemAgentPassword"><%= IO.popen([@lookup_var,"fsagent","password",@hierapath,@modulepath]).read %></property>
-        <property name="StorageRoot"><%= IO.popen([@lookup_var,"pureftpd","content_mount_point",@hierapath,@modulepath]).read %></property>
+        <property name="ClusterIpAddress"><%= IO.popen("#{@lookup_var} pureftpd ftp_cluster_ip #{@hierapath} #{@modulepath}").read %></property>
+        <property name="FileSystemAgentUrl">http://<%= IO.popen("#{@lookup_var} fsagent fsagent_ip #{@hierapath} #{@modulepath}").read.gsub(/\n/,"").gsub(/\r/,"") %>:10201/</property>
+        <property name="FileSystemAgentUsername"><%= IO.popen("#{@lookup_var} fsagent username #{@hierapath} #{@modulepath}").read %></property>
+        <property name="FileSystemAgentPassword"><%= IO.popen("#{@lookup_var} fsagent password #{@hierapath} #{@modulepath}").read %></property>
+        <property name="StorageRoot"><%= IO.popen("#{@lookup_var} pureftpd content_mount_point #{@hierapath} #{@modulepath}").read %></property>
       </resource>
     </resourceList>
   </bindings>
