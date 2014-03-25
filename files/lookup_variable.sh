@@ -24,7 +24,7 @@ VARIABLE=$2
 TOKEN=`grep -rhi "atomia::${NAMESPACE}::${VARIABLE}" ${HIERA_PATH} | awk '{for(i=2;i<=NF;++i)print $i}' | sed 's/\"//g' | sed "s/\'//g"`
 # If token was not found in hiera look for default in module
 if [ -z "$TOKEN" ]; then
-	TOKEN=`grep -r -i "\\$${VARIABLE}.*=" ${MODULE_PATH}/${NAMESPACE}.pp | grep -Eo '["\047].*["\047]' | sed 's/\"//g' | sed s/\'//g`
+	TOKEN=`grep -r -i "\\$${VARIABLE}.*=" ${MODULE_PATH}/${NAMESPACE}.pp | head -n1 | grep -Eo '["\047].*["\047]' | sed 's/\"//g' | sed s/\'//g`
 fi
 
 echo $TOKEN 
