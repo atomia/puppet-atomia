@@ -2,8 +2,8 @@
   <bindings xdt:Locator="XPath(//bindings"moduleList/module/@name='Atomia.Provisioning.Modules.CronAgent.CronAgent'")">
     <resourceList>
       <resource name="CronAgent" xdt:Transform="Insert">
-        <property name="CronBaseUrl"><%= IO.popen("#{@lookup_var} cronagent base_url #{@hierapath} #{@modulepath}").read %></property>
-        <property name="AuthToken"><%= IO.popen("#{@lookup_var} cronagent global_auth_token #{@hierapath} #{@modulepath}").read %></property>
+        <property name="CronBaseUrl"><%= IO.popen("#{@lookup_var} cronagent base_url #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %></property>
+        <property name="AuthToken"><%= IO.popen("#{@lookup_var} cronagent global_auth_token #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %></property>
       </resource>
     </resourceList>
   </bindings>

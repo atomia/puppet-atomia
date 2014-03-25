@@ -2,16 +2,16 @@
   <bindings xdt:Locator="XPath(//bindings"moduleList/module/@name='Atomia.Provisioning.Modules.PostfixAndDovecot.PostfixAndDovecot'")">
     <resourceList>
       <resource name="PostfixAndDovecot" xdt:Transform="Insert">
-        <property name="DatabaseHost"><%= IO.popen("#{@lookup_var} mailserver master_ip #{@hierapath} #{@modulepath}").read %></property>
+        <property name="DatabaseHost"><%= IO.popen("#{@lookup_var} mailserver master_ip #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %></property>
         <property name="DatabaseName">vmail</property>
         <property name="Username">postfix_agent</property>
-        <property name="Password"><%= IO.popen("#{@lookup_var} mailserver agent_password #{@hierapath} #{@modulepath}").read %></property>
-        <property name="MailIpAddress"><%= IO.popen("#{@lookup_var} mailserver cluster_ip #{@hierapath} #{@modulepath}").read %></property>
-        <property name="Mail2IpAddress"><%= IO.popen("#{@lookup_var} mailserver cluster_ip #{@hierapath} #{@modulepath}").read %></property>
-        <property name="SmtpIpAddress"><%= IO.popen("#{@lookup_var} mailserver cluster_ip #{@hierapath} #{@modulepath}").read %></property>
-        <property name="ImapIpAddress"><%= IO.popen("#{@lookup_var} mailserver cluster_ip #{@hierapath} #{@modulepath}").read %></property>
-        <property name="PopIpAddress"><%= IO.popen("#{@lookup_var} mailserver cluster_ip #{@hierapath} #{@modulepath}").read %></property>
-        <property name="WebmailIpAddress"><%= IO.popen("#{@lookup_var} mailserver cluster_ip #{@hierapath} #{@modulepath}").read %></property>
+        <property name="Password"><%= IO.popen("#{@lookup_var} mailserver agent_password #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %></property>
+        <property name="MailIpAddress"><%= IO.popen("#{@lookup_var} mailserver cluster_ip #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %></property>
+        <property name="Mail2IpAddress"><%= IO.popen("#{@lookup_var} mailserver cluster_ip #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %></property>
+        <property name="SmtpIpAddress"><%= IO.popen("#{@lookup_var} mailserver cluster_ip #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %></property>
+        <property name="ImapIpAddress"><%= IO.popen("#{@lookup_var} mailserver cluster_ip #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %></property>
+        <property name="PopIpAddress"><%= IO.popen("#{@lookup_var} mailserver cluster_ip #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %></property>
+        <property name="WebmailIpAddress"><%= IO.popen("#{@lookup_var} mailserver cluster_ip #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %></property>
       </resource>
     </resourceList>
   </bindings>
