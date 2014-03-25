@@ -1,5 +1,5 @@
 <resourceDescription xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
-  <bindings xdt:Locator="XPath(//bindings"moduleList/module/@name='Atomia.Provisioning.Modules.Apache.Apache'")">
+  <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.Apache.Apache'])">
     <resourceList>
       <resource name="apache" xdt:Transform="Insert">
         <property name="URL">http://<%= IO.popen("#{@lookup_var} apache_agent apache_agent_ip #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'').gsub(/\r\n/,"") %>:9999/ApacheAgentService?wsdl</property>

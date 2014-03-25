@@ -1,7 +1,7 @@
 <% require 'yaml' %>
 <% server_ips = YAML::parse(IO.popen("#{@lookup_var} mssql server_ips #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'').to_s) %>
 <resourceDescription xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
-  <bindings xdt:Locator="XPath(//bindings"moduleList/module/@name='Atomia.Provisioning.Modules.MSSQL.MSSQL'")">
+  <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.MSSQL.MSSQL'])">
     <resourceList>
 <% server_ips.each do |v| %>
     <% if defined? v.value  %>

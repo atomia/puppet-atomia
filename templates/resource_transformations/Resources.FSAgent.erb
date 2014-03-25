@@ -1,5 +1,5 @@
 <resourceDescription xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
-  <bindings xdt:Locator="XPath(//bindings"moduleList/module/@name='Atomia.Provisioning.Modules.FileSystem.FileSystem'")">
+  <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.FileSystem.FileSystem'])">
     <resourceList>
       <resource name="FSAgent" xdt:Transform="Insert">
         <property name="Username"><%= IO.popen("#{@lookup_var} fsagent username #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %></property>
