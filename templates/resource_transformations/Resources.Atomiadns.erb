@@ -5,7 +5,7 @@
         <property name="URL"><%= IO.popen([@lookup_var,"atomiadns","atomia_dns_url",@hierapath,@modulepath]).read %></property>
         <property name="Username"><%= IO.popen([@lookup_var,"atomiadns","agent_user",@hierapath,@modulepath]).read %></property>
         <property name="Password"><%= IO.popen([@lookup_var,"atomiadns","agent_password",@hierapath,@modulepath]).read %></property>
-        <property name="Nameservers"><%= IO.popen([@lookup_var,"atomiadns","nameservers",@hierapath,@modulepath]).read %></property>
+        <property name="Nameservers"><%= IO.popen([@lookup_var,"atomiadns","nameservers",@hierapath,@modulepath]).read.gsub(',','.,').gsub('\\','').gsub('[','').gsub(']','').gsub(/\n/, "").gsub(/\r/, "") %>.</property>
         <property name="NameserverGroup"><%= IO.popen([@lookup_var,"atomiadns","ns_group",@hierapath,@modulepath]).read %></property>
       </resource>
     </resourceList>
