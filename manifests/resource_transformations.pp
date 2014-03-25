@@ -1,7 +1,7 @@
 
 class atomia::resource_transformations (
         $hierapath      = "/etc/puppet/hieradata",
-        $modulepath     = "/etc/puppet/modules",
+        $modulepath     = "/etc/puppet/modules/atomia/manifests",
         $lookup_var     = "/etc/puppet/modules/atomia/files/lookup_variable.sh"
     ) 
   {

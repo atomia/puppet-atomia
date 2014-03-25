@@ -1,6 +1,6 @@
 class atomia::daggre (
 	$global_auth_token,
-	$ip_addr = $ipaddress, 
+	$ip_addr = $ip, 
 	) {
 	
 	include atomia::mongodb
