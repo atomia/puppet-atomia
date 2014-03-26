@@ -27,13 +27,13 @@ class atomia::mailserver (
 		package { pyzor: ensure => installed }
 		package { razor: ensure => installed }
 	
-        	package { arj: ensure => installed }
-       	 	package { bzip2: ensure => installed }
-        	package { cabextract: ensure => installed }
-        	package { cpio: ensure => installed }
-        	package { file: ensure => installed }
-        	package { gzip: ensure => installed }
-        	package { lha: ensure => installed }
+        package { arj: ensure => installed }
+       	package { bzip2: ensure => installed }
+        package { cabextract: ensure => installed }
+        package { cpio: ensure => installed }
+        package { file: ensure => installed }
+        package { gzip: ensure => installed }
+        package { lha: ensure => installed }
 		package { nomarch: ensure => installed } 
 		package { pax: ensure => installed } 
 		package { rar: ensure => installed } 	
@@ -119,7 +119,7 @@ class atomia::mailserver (
 		owner   => root,
 		group   => root,
 		mode    => 444,
-		source  => "puppet:///modules/postfix_mx/mysql.schema.sql",
+		source  => "puppet:///modules/atomia/mailserver/mysql.schema.sql",
 		require => Package["postfix-mysql"]
 	}
 	if !$atomia_mailman_installed {
@@ -137,69 +137,56 @@ class atomia::mailserver (
 		owner   => root,
 		group   => root,
 		mode    => 444,
-		source  => "puppet:///modules/postfix_mx/master.cf",
+		source  => "puppet:///modules/atomia/mailserver/master.cf",
 		require => Package["postfix-mysql"]
 	}
 
-	$generator = "/etc/puppet/modules/postfix_mx/files/generate_postfix_mysql.sh"
-
-	$relay_domains_maps = generate($generator, $db_hosts, $db_name, $db_user, $db_pass, "SELECT domain FROM domain WHERE domain = '%s' AND transport = 'relay'")
-
+	
 	file { "/etc/postfix/mysql_relay_domains_maps.cf":
 		owner   => root,
 		group   => root,
 		mode    => 444,
-		content	=> $relay_domains_maps,
+		content	=> template('atomia/mailserver/mysql_relay_domains_maps.cf.erb'),
 		require => Package["postfix-mysql"]
 	}
-
-	$virtual_alias_maps = generate($generator, $db_hosts, $db_name, $db_user, $db_pass, "SELECT goto FROM alias WHERE email = '%s'")
 
 	file { "/etc/postfix/mysql_virtual_alias_maps.cf":
 		owner   => root,
 		group   => root,
 		mode    => 444,
-		content	=> $virtual_alias_maps,
+		content	=> template('atomia/mailserver/mysql_virtual_alias_maps.cf.erb'),
 		require => Package["postfix-mysql"]
 	}
-
-	$virtual_domains_maps = generate($generator, $db_hosts, $db_name, $db_user, $db_pass, "SELECT domain FROM domain WHERE domain = '%s' AND transport = 'dovecot'")
 
 	file { "/etc/postfix/mysql_virtual_domains_maps.cf":
 		owner   => root,
 		group   => root,
 		mode    => 444,
-		content	=> $virtual_domains_maps,
+		content	=> template('atomia/mailserver/mysql_virtual_domains_maps.cf.erb'),
 		require => Package["postfix-mysql"]
 	}
-
-	$virtual_mailbox_maps = generate($generator, $db_hosts, $db_name, $db_user, $db_pass, "SELECT maildir FROM user WHERE email = '%s'")
 
 	file { "/etc/postfix/mysql_virtual_mailbox_maps.cf":
 		owner   => root,
 		group   => root,
 		mode    => 444,
-		content	=> $virtual_mailbox_maps,
+        content	=> template('atomia/mailserver/mysql_virtual_mailbox_maps.cf.erb'),
 		require => Package["postfix-mysql"]
 	}
-
-	$virtual_transport = generate($generator, $db_hosts, $db_name, $db_user, $db_pass, "SELECT transport FROM domain WHERE domain = '%s'")
 
 	file { "/etc/postfix/mysql_virtual_transport.cf":
 		owner   => root,
 		group   => root,
 		mode    => 444,
-		content	=> $virtual_transport,
+		content	=> template('atomia/mailserver/mysql_virtual_transport.cf.erb'),
 		require => Package["postfix-mysql"]
 	}
-
-	$dovecot_mysql = generate("/etc/puppet/modules/postfix_mx/files/generate_dovecot_mysql.sh", $db_hosts, $db_name, $db_user, $db_pass)
 
 	file { "/etc/dovecot/dovecot-sql.conf":
 		owner   => root,
 		group   => root,
 		mode    => 444,
-		content	=> $dovecot_mysql,
+		content	=> template('atomia/mailserver/dovecot-sql.conf.erb'),
 		require => Package["dovecot-common"],
 	}
 
@@ -207,7 +194,7 @@ class atomia::mailserver (
 		owner   => root,
 		group   => root,
 		mode    => 444,
-		source  => "puppet:///modules/postfix_mx/dovecot.conf",
+		source  => "puppet:///modules/atomia/mailserver/dovecot.conf",
 		require => Package["dovecot-common"],
 	}
 
@@ -295,7 +282,7 @@ class atomia::mailserver (
                 	owner   => root,
                	 	group   => root,
         	        mode    => 644,
-                	source  => "puppet:///modules/postfix_mx/15-content_filter_mode",
+                	source  => "puppet:///modules/atomia/mailserver/15-content_filter_mode",
         	}
 	}
 }
