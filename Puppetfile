@@ -16,4 +16,4 @@ mod "nfs",
   :git => "git://github.com/stefanmortensen/puppet-nfs.git"
   
 mod "openstack",
-  :git => "git::/github.com/stackforge/puppet-openstack"
+  :git => "git://github.com/stackforge/puppet-openstack.git"
