@@ -9,4 +9,4 @@ env:
   - PUPPET_VERSION=3.3.2
 notifications:
   email: true
-gemfile: .gemfile
+gemfile: Gemfile
