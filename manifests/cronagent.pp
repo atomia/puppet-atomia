@@ -3,7 +3,7 @@ class atomia::cronagent (
 	$global_auth_token, 
 	$min_part = 0,  
 	$max_part = 1000, 
-	$mail_host = "", 
+	$mail_host = "localhost", 
 	$mail_port = 25, 
 	$mail_ssl = 0, 
 	$mail_from = "", 

@@ -21,7 +21,13 @@ describe 'atomia::cronagent' do
 	
     end
 
-	it { should contain_file('/etc/default/cronagent').with_content(/abc123/) }
+	it { should contain_file('/etc/default/cronagent')
+        .with_content(/abc123/)
+        .with_content(/MAIL_HOST=localhost/)
+        .with_content(/MAIL_HOST=localhost/)
+        .with_content(/MAIL_PORT=25/)
+        
+    }
 		
 	
 	
