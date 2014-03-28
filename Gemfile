@@ -11,6 +11,6 @@ else
   gem 'puppet', :require => false
 end
 
-
+gem 'rspec'
 gem 'rake'
 gem 'rspec-puppet'
