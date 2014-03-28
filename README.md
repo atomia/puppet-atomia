@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/atomia/puppet-atomia.svg?branch=master)](https://travis-ci.org/atomia/puppet-atomia)
+
 # Getting started - The quick and dirty version #
 
 Install Puppet with Hiera
