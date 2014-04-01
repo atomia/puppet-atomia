@@ -17,14 +17,14 @@ class atomia::fsagent(
 		apt::ppa { 'ppa:chris-lea/node.js': }
 	
 		package { nodejs:
-			ensure => present,
-			require => Apt::Ppa['ppa:chris-lea/node.js']
+			ensure => latest,
+			require => [Apt::Ppa['ppa:chris-lea/node.js'], Exec['apt-get update']]
 		}
 	}
 	else {
-                package { nodejs:
-                        ensure => present,
-                }
+        package { nodejs:
+            ensure => present,
+        }
 	}
 
 	if $atomia_linux_software_auto_update {
