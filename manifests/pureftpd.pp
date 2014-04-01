@@ -82,9 +82,9 @@ class atomia::pureftpd (
 	}
 
 	exec { 'grant-pureftpd-privileges':
-                command => "$mysql_command -e \"GRANT ALL ON pureftpd.* TO 'pureftpd'@'127.0.0.1' IDENTIFIED BY '$pureftpd_password'\"",
-                unless => "$mysql_command -e \"SELECT user, host FROM user WHERE user = 'pureftpd' AND host = '127.0.0.1'\" mysql | grep pureftpd",
-		require => Class[Mysql::Server::Service]
+              command => "$mysql_command -e \"GRANT ALL ON pureftpd.* TO 'pureftpd'@'$fqdn' IDENTIFIED BY '$pureftpd_password'\"",
+              unless => "$mysql_command -e \"SELECT user, host FROM user WHERE user = 'pureftpd' AND host = '$fqdn'\" mysql | grep pureftpd",
+		      require => Class[Mysql::Server::Service]
         }
 
 	file { "/etc/pure-ftpd/db/mysql.conf":
