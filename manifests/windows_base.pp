@@ -60,6 +60,17 @@ class atomia::windows_base (
       ensure => present,
       all    => true
     }
+
+    file { 'c:/install/app-pool-settings.ps1':
+        ensure => 'file',
+        source => "puppet:///modules/atomia/windows_base/app-pool-settings.ps1"
+    }
+    
+    exec { 'app-pool-settings':
+        command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/app-pool-settings.ps1',
+        require => File["c:/install/app-pool-settings.ps1"]
+      }
+    
   }
 
   dism { 'MSMQ-Server': ensure => present }
