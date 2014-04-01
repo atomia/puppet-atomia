@@ -9,6 +9,13 @@ Install Puppet with Hiera
 	apt-get update
 	apt-get install puppetmaster git apache2-utils
 	mkdir /etc/puppet/hieradata
+    
+Install Ruby 1.9.3
+    apt-get install curl
+    curl -sSL https://get.rvm.io | bash -s stable
+    source ~/.rvm/scripts/rvm
+    rvm install 1.9.3
+    rvm default 1.9.3
 
 Create a new hiera.yaml file in /etc/puppet/hiera.yaml with the following content
 
