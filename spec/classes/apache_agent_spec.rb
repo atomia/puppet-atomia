@@ -7,7 +7,8 @@ describe 'atomia::apache_agent' do
 		{
 			:password		=> 'abc123',
 			:content_share_nfs_location	=> "127.0.0.1:/export/content",
-			:config_share_nfs_location	=> "127.0.0.1:/export/configuration"
+			:config_share_nfs_location	=> "127.0.0.1:/export/configuration",
+            :maps_path                  => '/storage/foo/maps'
 		}
 	end
 	
@@ -35,6 +36,7 @@ describe 'atomia::apache_agent' do
 				'group'   => 'root',
 				'mode'    => '440',
 				)
+        .with_content(/VHOSTS_MAP_FILE             = \/storage\/foo\/maps\/vhost.map/)
 	}
 
     it { should contain_file('/etc/statisticscopy.conf').with(
