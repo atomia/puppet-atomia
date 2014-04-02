@@ -64,9 +64,6 @@ Set up your Active Directory domain according to best practices.
 
 Install a database server with Microsoft SQL Server 2008 R2
 
-Add apppooluser, PosixGuest and WindowsAdmin to Active directory,
-apppooluser needs to have the logon as a service right and both WindowsAdmin and apppooluser needs Domain admin privileges
-
 **Connect your windows servers to Puppet Master**
 
 Download and install the latest version of Puppet with the following Powershell commands. Be sure to replace PUPPET_MASTER_SERVER=puppetmaster with your puppetmasters hostname. This can easily be found by going to the puppetmaster and doing "ls /var/lib/puppet/ssl/certs/".
@@ -79,7 +76,7 @@ Approve the certificate on the puppet master
 
 	puppet cert list
 	puppet cert sign <certname>
-
+    
 **Connect your Linux servers to Puppet Master**
 
 Run the following script to connect the node to Puppet Master, replace <puppetmaster> with the hostname of your Puppet Master.
@@ -96,17 +93,25 @@ A standard deployment will contain at a minimum 3 files
 
 - common.yaml (variables common to all nodes)
 - windows.yaml (variables common to all windows nodes)
-- linux.yaml (variables common to all linux nodes)
+- Linux.yaml (variables common to all linux nodes)
 
-The data in these files can be overridden by using the facts $fqdn, $atomia_brand and $atomia_role 
-
-Start with copying these three files to /etc/puppet/hieradata on the Puppet Master.
+You should copy these files from the examples/hieradata folder to your Puppet Master ("/etc/puppet/hieradata"). Fill in the files completely before proceeding.
 
 In order to ease editing of these files there is helper scripts available to run to perform some initial tasks
 
 	/etc/puppet/modules/atomia/files/certificates/set_cert_fingerprints.sh
 
-You should now edit the variables in these files to fit your environment
+**Set up accounts in Active Directory**
+
+On the Puppet Master create a file with the name "/etc/puppet/hieradata/nodes/MainDomainController.yaml" where MainDomainController is the hostname of your first domain controller. This file should contain the following data:
+
+    ---
+    classes:
+      - atomia::active_directory
+
+Now run puppet agent on the domain controller to configure it to be used with Atomia.
+
+**Deploying nodes**
 
 In order to assign a role to a specific node we use facter, there are several ways to add custom facts to facter but the recommended way is to for each node do the following.
 

@@ -1,3 +1,8 @@
 ---
 classes:
    - atomia::atomiarepository
+   
+atomia::adjoin::base_dn: "cn=Users,dc=atomia,dc=local"
+atomia::adjoin::ldap_uris: "ldap://9.9.9.9 ldap://9.9.9.10"
+atomia::adjoin::bind_user: "PosixGuest"
+atomia::adjoin::bind_password: "PosixGuestPassword"
