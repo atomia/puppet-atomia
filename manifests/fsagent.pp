@@ -15,11 +15,15 @@ class atomia::fsagent(
 
 	if $operatingsystem == "Ubuntu" {
 		apt::ppa { 'ppa:chris-lea/node.js': }
-	
-		package { nodejs:
-			ensure => latest,
-			require => [Apt::Ppa['ppa:chris-lea/node.js'], Exec['apt-get update']]
-		}
+
+        package { nodejs:
+                ensure => latest,
+                require => [Apt::Ppa['ppa:chris-lea/node.js'], Exec['apt-get-update']]
+        }
+
+        exec { "apt-get-update":
+                command => "/usr/bin/apt-get update"
+        }
 	}
 	else {
         package { nodejs:

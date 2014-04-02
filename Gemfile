@@ -1,7 +1,10 @@
 source 'https://rubygems.org'
 
 group :development, :test do
-  gem 'puppetlabs_spec_helper', :require => false
+  gem 'rspec'
+  gem 'rake'
+  gem 'rspec-puppet'    
+  gem 'puppetlabs_spec_helper'
   gem 'puppet-lint', '~> 0.3.2'
 end
 
@@ -11,6 +14,4 @@ else
   gem 'puppet', :require => false
 end
 
-gem 'rspec'
-gem 'rake'
-gem 'rspec-puppet'
+

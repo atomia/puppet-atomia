@@ -11,6 +11,7 @@ Install Puppet with Hiera
 	mkdir /etc/puppet/hieradata
     
 Install Ruby 1.9.3
+
     apt-get install curl
     curl -sSL https://get.rvm.io | bash -s stable
     source ~/.rvm/scripts/rvm
