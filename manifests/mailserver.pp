@@ -250,6 +250,19 @@ class atomia::mailserver (
 			subscribe => [ Package["dovecot-common"], File["/etc/dovecot/dovecot.conf"], File["/etc/dovecot/dovecot-sql.conf"] ]
 	}
 
+    group { "virtual":
+        ensure => present
+    }
+    
+    user { "virtual":
+        ensure => present,
+        comment => "virtual",
+        groups => "virtual",
+        membership => minimum,
+        shell => "/bin/bash",
+        require => Group["virtual"],
+    }
+
 	if $install_antispam == 1 {
 
 		# Configure Spam and Virus filtering
