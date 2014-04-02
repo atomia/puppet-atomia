@@ -1,4 +1,6 @@
 class atomia::linux_base {
 
-        package { sudo: ensure => present }
+    package { sudo: ensure => present }
+        
+    include '::ntp'
 }
