@@ -9,6 +9,30 @@ Install Puppet with Hiera
 	apt-get update
 	apt-get install puppetmaster git apache2-utils
 	mkdir /etc/puppet/hieradata
+    cd /etc/puppet
+    puppet resource package puppetdb ensure=latest
+    puppet resource service puppetdb ensure=running enable=true
+    puppet resource package puppetdb-terminus ensure=latest
+    
+Create file /etc/puppet/puppetdb.conf make sure to replace server with your puppetmasters hostname
+
+    [main]
+    server = puppetdb.example.com
+    port = 8081
+    
+Edit /etc/puppet.conf and make sure it contains the following
+    
+    [master]
+    storeconfigs = true
+    storeconfigs_backend = puppetdb
+    
+Edit /etc/puppet/routes.yaml
+
+    ---
+    master:
+       facts:
+       terminus: puppetdb
+       cache: yaml
     
 Install Ruby 1.9.3
 
@@ -49,6 +73,10 @@ Deploying the atomia module is done using librarian-puppet https://github.com/ro
 	cd /etc/puppet
 	echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\"" > Puppetfile
 	librarian-puppet install 
+    
+Finally restart puppet
+
+    service puppetmaster restart
 	
 If you want to update your modules to the latest supported version simply do
 

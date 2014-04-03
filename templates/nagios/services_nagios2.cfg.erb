@@ -1,0 +1,49 @@
+define service {
+        hostgroup_name                  linux-all
+        service_description             PING
+        check_command                   check_ping!200.0,70%!400.0,90%
+        use                             generic-service
+        notification_interval           0 ; set > 0 if you want to be renotified
+}
+
+define service {
+        hostgroup_name                  linux-all
+        service_description             SSH
+        check_command                   check_ssh
+        use                             generic-service
+        notification_interval           0 ; set > 0 if you want to be renotified
+}
+
+define service {
+        hostgroup_name                  linux-all
+        service_description             CPU Utilization
+        check_command                   check_nrpe_1arg!check_load
+        use                             generic-service
+        notification_interval           0 ; set > 0 if you want to be renotified
+}
+
+define service {
+        hostgroup_name                  linux-all     
+        service_description             Total Processes
+        check_command                   check_procs!250!400
+        use                             generic-service
+        notification_interval           0 ; set > 0 if you want to be renotified
+}
+
+define service {
+        hostgroup_name                  linux-all     
+        service_description             Current Users
+        check_command                   check_users!20!50
+        use                             generic-service
+        notification_interval           0 ; set > 0 if you want to be renotified
+}
+
+
+define service {
+        hostgroup_name                  linux-all     
+        service_description             Local hard drive
+        check_command                   !check_nrpe_1arg!check_disk
+        use                             generic-service
+        notification_interval           0 ; set > 0 if you want to be renotified
+}
+
