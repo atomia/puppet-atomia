@@ -2,88 +2,18 @@
 
 # Getting started - The quick and dirty version #
 
-Install Puppet with Hiera
+Install Puppet Master by running 
 
-	wget https://apt.puppetlabs.com/puppetlabs-release-precise.deb
-	dpkg -i puppetlabs-release-precise.deb
-	apt-get update
-	apt-get install puppetmaster git apache2-utils
-	mkdir /etc/puppet/hieradata
-    cd /etc/puppet
-    puppet resource package puppetdb ensure=latest
-    puppet resource service puppetdb ensure=running enable=true
-    puppet resource package puppetdb-terminus ensure=latest
-    
-Create file /etc/puppet/puppetdb.conf make sure to replace server with your puppetmasters hostname
+	wget --no-check-certificate https://raw.github.com/atomia/installation/master/files/install_atomia_puppetmaster.sh && chmod +x install_atomia_puppetmaster.sh
+	./install_atomia_puppetmaster.sh
 
-    [main]
-    server = puppetdb.example.com
-    port = 8081
-    
-Edit /etc/puppet.conf and make sure it contains the following
-    
-    [master]
-    storeconfigs = true
-    storeconfigs_backend = puppetdb
-    
-Edit /etc/puppet/routes.yaml
-
-    ---
-    master:
-       facts:
-       terminus: puppetdb
-       cache: yaml
-    
-Install Ruby 1.9.3
-
-    apt-get install curl
-    curl -sSL https://get.rvm.io | bash -s stable
-    source ~/.rvm/scripts/rvm
-    rvm install 1.9.3
-    rvm default 1.9.3
-
-Create a new hiera.yaml file in /etc/puppet/hiera.yaml with the following content
-
-	:backends:
-	  - yaml
-	:hierarchy:
-	  - "nodes/%{::fqdn}"
-	  - "%{::atomia_role}"
-	  - "%{::atomia_brand}_common"
-	  - "%{::kernel}"
-	  - common
-	:yaml:
-	  :datadir: /etc/puppet/hieradata
-
-Make sure your /etc/puppet/manifests/site.pp file contains the following
-
-	node default {
-	        hiera_include('classes')
-	}
-
-Add the following to /etc/puppet/fileserver.conf
-
-	[atomiacerts]
- 	   path /etc/puppet/atomiacerts
-  	   allow *
-
-Deploying the atomia module is done using librarian-puppet https://github.com/rodjek/librarian-puppet
-
-	gem install librarian-puppet
-	cd /etc/puppet
-	echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\"" > Puppetfile
-	librarian-puppet install 
-    
-Finally restart puppet
-
-    service puppetmaster restart
 	
-If you want to update your modules to the latest supported version simply do
+If you want to update the Atomia puppet module to the latest supported version simply do
 
 	cd /etc/puppet
 	librarian-puppet update
 
-Generate new certificates for your environment, replace arguments to generate_certificates.rb to fit your environment
+On the Puppet Master generate new certificates for your environment, replace arguments to generate_certificates.rb to fit your environment
 
 	cd /etc/puppet/modules/atomia/files/certificates/
 	ruby generate_certificates.rb mydomain.com login order billing my
@@ -147,4 +77,5 @@ In order to assign a role to a specific node we use facter, there are several wa
 	echo "atomia_role=daggre" >> /etc/facter/facts.d/atomiarole.txt
 
 Replace "atomia_role" with the role you want this node to have. In order for this to work there needs to be a matching yaml file in /etc/puppet/hieradata. Example files for each role can be found at https://github.com/atomia/puppet-atomia/tree/master/examples/hieradata
+
 
