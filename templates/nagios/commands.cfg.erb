@@ -1,3 +1,6 @@
+<% $hierapath = "/etc/puppet/hieradata" %>
+<% $modulepath = "/etc/puppet/modules/atomia/manifests" %>
+<% $lookup_var     = "/etc/puppet/modules/atomia/files/lookup_variable.sh" %>
 ###############################################################################
 # COMMANDS.CFG - COMMAND DEFINITIONS FOR NAGIOS 
 ###############################################################################
@@ -27,6 +30,11 @@ define command{
 ################################################################################
 # HOST CHECK COMMANDS
 ################################################################################
+
+define command {
+        command_name    check_http_testsite
+        command_line    $USER1$/check_http -H atomia-nagios-test.net.<%= IO.popen("#{$lookup_var} windows_base appdomain  #{$hierapath} #{$modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %> 
+}
 
 
 

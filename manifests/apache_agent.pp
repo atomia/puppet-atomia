@@ -193,7 +193,16 @@ class atomia::apache_agent (
     owner  => root,
     group  => www-data,
     mode   => 2750,
-    ensure => directory
+    ensure => directory,
+	recurse => true,
+  }
+
+  file { "/storage/configuration/apache":
+    owner  => root,
+    group  => www-data,
+    mode   => 2750,
+    ensure => directory,
+    recurse => true,
   }
 
   file { "${$maps_path}/frmrs.map":
