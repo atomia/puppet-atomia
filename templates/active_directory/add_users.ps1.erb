@@ -121,33 +121,6 @@ Write-Host "Done." -ForegroundColor DarkCyan
 }
 
 
-# Add 100000 User
-$username = "100000"
-$groupname = "100000Group"
-$user100000 = Get-ADUser $username -Properties Name,DistinguishedName
-
-if($user100000.Name -eq $nul){
-    # Check if group exist
-    $group100000 = Get-ADGroup $groupname -Properties Name
-    Try{
-
-        if($group100000.Name -eq $nul){
-            New-ADGroup -Name $groupname -SamAccountName $groupname -GroupCategory Security -GroupScope Global -DisplayName $groupname
-        }
-
-        New-ADUser $username  -OtherAttributes @{displayName=$username + "@dom.ad.atomia.net"; cn=$username; gecos=$env:USERDOMAIN + "\$username"; gidNumber=$username; loginShell="/sbin/nologin"; name=$username; uid=$username; uidNumber=$username; unixHomeDirectory="/storage/content/00/" + $username }
-        Set-ADAccountPassword -Identity $username -Reset -NewPassword (ConvertTo-SecureString -AsPlainText "p@ssw0rd" -Force)
-        Add-ADGroupMember $groupname $username
-        Enable-ADAccount -Identity $username
-
-    }
-    Catch{
-        "Error could not Add user"
-        return 0
-    }
-
-}
-
 # Add apppooluser
 
 if(! (UserExists "apppooluser")){
