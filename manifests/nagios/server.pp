@@ -6,7 +6,9 @@ class atomia::nagios::server(
     # Install Nagios and plugins
     package { [
         'nagios-plugins-standard',
-        'nagios-nrpe-plugin'
+        'nagios-nrpe-plugin',
+		'atomia-manager',
+		'python-pkg-resources'
     ]:
         ensure => installed,
     }
@@ -140,6 +142,12 @@ class atomia::nagios::server(
     Nagios_service <<| |>>  
     Nagios_host <<| |>>
 
+	file { '/root/setup_atomia_account.sh':
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0777',
+		source  => "puppet:///modules/atomia/nagios/setup_atomia_account.sh",
+	}
 }
 
 
