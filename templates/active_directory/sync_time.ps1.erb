@@ -1,0 +1,9 @@
+$ntp = w32tm /query /configuration | select-string -Pattern "NtpServer:"
+
+if(!$ntp.Line.Contains("debian.pool.ntp.org")){
+    net stop w32time
+    w32tm /config /syncfromflags:manual /manualpeerlist:“0.debian.pool.ntp.org,1.debian.pool.ntp.org,2.debian.pool.ntp.org,3.debian.pool.ntp.org”
+    w32tm /config /reliable:yes
+    net start w32time
+    w32tm /resync
+}
