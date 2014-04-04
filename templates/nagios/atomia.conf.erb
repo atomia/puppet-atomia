@@ -1,0 +1,9 @@
+[Automation Server API]
+username=Administrator
+password=Administrator
+<% $hierapath = "/etc/puppet/hieradata" %>
+<% $modulepath = "/etc/puppet/modules/atomia/manifests" %>
+<% $lookup_var     = "/etc/puppet/modules/atomia/files/lookup_variable.sh" %>
+url=https://automationserver.<%= IO.popen("#{$lookup_var} windows_base appdomain #{$hierapath} #{$modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %>/CoreAPIBasicAuth.svc?wsdl
+nativeurl=https://automationserver.<%= IO.popen("#{$lookup_var} windows_base appdomain #{$hierapath} #{$modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %>/NativeAPIBasicAuth.svc?wsdl
+bootstrap=false

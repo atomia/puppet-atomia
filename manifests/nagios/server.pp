@@ -8,19 +8,25 @@ class atomia::nagios::server(
         'nagios-plugins-standard',
         'nagios-nrpe-plugin',
 		'atomia-manager',
-		'python-pkg-resources'
+		'python-pkg-resources',
+		'rubygems',
+		'ruby1.9.1-dev',
     ]:
         ensure => installed,
     }
     
-     
+    package { ['jgrep']:
+		ensure => installed,
+		provider => 'gem',
+		require	=> [Package['rubygems'],Package['ruby1.9.1-dev']],
+	} 
+
     # Add Debian repo to get later version of Nagios
     apt::source { 'debian_stable':
         location          => 'http://ftp.se.debian.org/debian/',
         release           => 'wheezy',
         repos             => 'main',
         required_packages => 'debian-keyring debian-archive-keyring',
-        pin               => '1000',
         include_src       => false,
         key               => '6FB2A1C265FFB764',
         key_server        => 'keyserver.ubuntu.com'
@@ -138,6 +144,23 @@ class atomia::nagios::server(
     }   
  
 
+	# Localhost
+    @@nagios_host { "localhost-host" :
+        use                 => "generic-host",
+        host_name           => "localhost",
+        alias               => "localhost general checks",
+        address             => "localhost" ,
+        target              => "/etc/nagios3/conf.d/localhost_host.cfg",
+
+    }
+
+    @@nagios_service { "localhost-http":
+    	host_name               => "localhost",
+        service_description     => "HTTP Linux",
+        check_command           => "check_http_testsite",
+        use                     => "generic-service",
+        target                  => "/etc/nagios3/conf.d/localhost_services.cfg",
+    }
     
     Nagios_service <<| |>>  
     Nagios_host <<| |>>
@@ -148,7 +171,10 @@ class atomia::nagios::server(
         mode    => '0777',
 		source  => "puppet:///modules/atomia/nagios/setup_atomia_account.sh",
 	}
+
+	exec { '/root/setup_atomia_account.sh':
+		require	=> File['/root/setup_atomia_account.sh'],
+	}
 }
 
 
-#TODO: 
