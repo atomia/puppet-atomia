@@ -53,8 +53,13 @@ class atomia::nagios::server(
     
     file { "/etc/nagios3/conf.d/localhost_nagios2.cfg":
         ensure => absent
-        }
+    }
     
+
+    file { "/etc/nagios3/conf.d/hostgroups_nagios2.cfg.dpkg-dist":
+        ensure => absent,
+    }
+
     file { "/etc/nagios3/htpasswd.users":
         replace => no,
         owner   => root,
@@ -139,17 +144,3 @@ class atomia::nagios::server(
 
 
 #TODO: 
-# Add hostgroups
-#   Windows Atomia applications
-#   Windows domain controllers
-#   Windows Atomia databases
-#   Linux DNS
-#   Linux Atomia agents
-#   Linux FTP
-#   Linux Customer webservers
-#   Linux Customer databases
-#   Linux Mail servers
-#   Linux Load balancers
-#   Windows Customer webservers
-#   Windows Customer databases
-#   Openstack

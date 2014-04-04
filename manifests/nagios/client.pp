@@ -7,6 +7,9 @@ class atomia::nagios::client(
 
     package { [
         'nagios-nrpe-server',
+		'libwww-mechanize-perl',
+		'libconfig-json-perl',
+		'libdatetime-format-iso8601-perl'
     ]:
         ensure => installed,
     }
@@ -44,14 +47,30 @@ class atomia::nagios::client(
     
     @@nagios_host { "${fqdn}-host" :
         use                 => "generic-host",
-        host_name           => "$fqdn",
+        host_name           => $fqdn,
+		alias			    => "${$atomia_role} - ${fqdn}",
         address             => $public_ip ,
         target              => "/etc/nagios3/conf.d/${hostname}_host.cfg",
         hostgroups          => $hostgroup
      
     }
+
+	if ($atomia_role == "daggre") {
+		@@nagios_service { "${fqdn}-daggre":
+			host_name				=> $fqdn,
+			service_description		=> "Daggre disk space",
+			check_command			=> "check_nrpe_1arg!check_daggre_ftp",
+			use						=> "generic-service",
+			target              	=> "/etc/nagios3/conf.d/${hostname}_services.cfg",
+		}
+	}
     
 
+    file { "/usr/lib/nagios/plugins/atomia":
+		source 				=> "puppet:///modules/atomia/nagios/plugins",
+		recurse				=> true,
+		require             => Package["nagios-nrpe-server"]
+	}
     
 
 }
