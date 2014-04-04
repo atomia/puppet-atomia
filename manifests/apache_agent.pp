@@ -165,6 +165,11 @@ class atomia::apache_agent (
     }
   }
 
+  file { "/etc/apache2/conf.d/atomia-pa-apache.conf.ubuntu":
+      content => template("atomia/apache_agent/atomia-pa-apache.conf.ubuntu.erb"),
+	  require => Package["atomia-pa-apache"],
+  }
+
   file { "/etc/statisticscopy.conf":
     owner   => root,
     group   => root,
@@ -184,67 +189,67 @@ class atomia::apache_agent (
   file { "/var/www/cgi-wrappers": mode => 755, }
 
   # ensuring we have maps folder and needed files inside
-  file { "/storage/configuration/maps":
+  file { "${$maps_path}":
     owner  => root,
     group  => www-data,
     mode   => 2750,
     ensure => directory
   }
 
-  file { "/storage/configuration/maps/frmrs.map":
+  file { "${$maps_path}/frmrs.map":
     owner   => root,
     group   => www-data,
     mode    => 440,
     ensure  => present,
-    require => File["/storage/configuration/maps"],
+    require => File["${$maps_path}"],
   }
 
-  file { "/storage/configuration/maps/parks.map":
+  file { "${$maps_path}/parks.map":
     owner   => root,
     group   => www-data,
     mode    => 440,
     ensure  => present,
-    require => File["/storage/configuration/maps"],
+    require => File["${$maps_path}"],
   }
 
-  file { "/storage/configuration/maps/phpvr.map":
+  file { "${$maps_path}/phpvr.map":
     owner   => root,
     group   => www-data,
     mode    => 440,
     ensure  => present,
-    require => File["/storage/configuration/maps"],
+    require => File["${$maps_path}"],
   }
 
-  file { "/storage/configuration/maps/redrs.map":
+  file { "${$maps_path}/redrs.map":
     owner   => root,
     group   => www-data,
     mode    => 440,
     ensure  => present,
-    require => File["/storage/configuration/maps"],
+    require => File["${$maps_path}"],
   }
 
-  file { "/storage/configuration/maps/sspnd.map":
+  file { "${$maps_path}/sspnd.map":
     owner   => root,
     group   => www-data,
     mode    => 440,
     ensure  => present,
-    require => File["/storage/configuration/maps"],
+    require => File["${$maps_path}"],
   }
 
-  file { "/storage/configuration/maps/users.map":
+  file { "${$maps_path}/users.map":
     owner   => root,
     group   => www-data,
     mode    => 440,
     ensure  => present,
-    require => File["/storage/configuration/maps"],
+    require => File["${$maps_path}"],
   }
 
-  file { "/storage/configuration/maps/vhost.map":
+  file { "${$maps_path}/vhost.map":
     owner   => root,
     group   => www-data,
     mode    => 440,
     ensure  => present,
-    require => File["/storage/configuration/maps"],
+    require => File["${$maps_path}"],
   }
 
   if !defined(File['/etc/apache2/sites-enabled/000-default']) {
