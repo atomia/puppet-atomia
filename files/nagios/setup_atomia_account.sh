@@ -19,4 +19,15 @@ if [ "$WEBSITE" != "atomia-nagios-test.net" ]
 then
         echo "Adding website to CsBase <$LOGICAL_ID>"
         atomia service add --account 100000 --parent "$LOGICAL_ID" --servicedata '{ "name" : "CsLinuxWebsite", "properties" : {"Hostname" : "atomia-nagios-test.net", "DomainPrefix" : "null", "DnsZone" : "atomia-nagios-test.net", "InfoEmailPassword" : "abcd1234"}}'
+
+        # Website exists check for statistics services
+        WEBSITEID=`atomia service list --account 100000 --parent "$LOGICAL_ID" | jgrep  "name=CsLinuxWebsite" -s logical_id`
+        STATISTICS_ENABLED=`atomia service list --account 100000 --parent "$WEBSITEID" | jgrep  "name=CsAwstats" -s name`
+
+        if [ "$STATISTICS_ENABLED" != "CsAwstats" ]
+        then
+                echo "Statistics is not enabled"
+                atomia service add --account 100000 --parent "$WEBSITEID" --servicedata '{ "name" : "CsAwstats", "properties" : { "Domain" : "atomia-nagios-test.net", "DnsZone" : "atomia-nagios-test.net", "RootFolderParentPath" : "00" } }'
+        fi
+
 fi
