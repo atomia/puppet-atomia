@@ -32,11 +32,19 @@ class atomia::active_directory (){
     ensure => 'file',
     source => "puppet:///modules/atomia/active_directory/add_users.ps1.erb"
   }
+
+  file { 'c:/install/sync_time.ps1':
+    ensure => 'file',
+    source => "puppet:///modules/atomia/active_directory/sync_time.ps1.erb"
+  }
   
   exec { 'base-install':
     command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/add_users.ps1',
     creates => 'C:\install\installed'
   }
-  
+
+  exec { 'sync-time':
+    command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/sync_time.ps1',
+  }
 }
 
