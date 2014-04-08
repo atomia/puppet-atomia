@@ -4,7 +4,7 @@
 
 Install Puppet Master by running 
 
-	wget --no-check-certificate https://raw.github.com/atomia/installation/master/files/install_atomia_puppetmaster.sh && chmod +x install_atomia_puppetmaster.sh
+	wget --no-check-certificate https://raw.github.com/atomia/puppet-atomia/master/files/install_atomia_puppetmaster.sh && chmod +x install_atomia_puppetmaster.sh
 	./install_atomia_puppetmaster.sh
 
 	
