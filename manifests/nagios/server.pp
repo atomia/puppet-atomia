@@ -1,6 +1,8 @@
 class atomia::nagios::server(
     $username           = "nagios",
-    $password           = "nagios"
+    $password           = "nagios",
+	$admin_pass			= "Administrator",
+	$apache_ip			= hiera('atomia::apache_agent::cluster_ip')
 ) {
 
     # Install Nagios and plugins
@@ -15,6 +17,12 @@ class atomia::nagios::server(
         ensure => installed,
     }
     
+	if ! defined(Package['libwww-mechanize-perl']) {
+		package { 'libwww-mechanize-perl':
+			ensure => installed,
+		}
+	}
+ 
     package { ['jgrep']:
 		ensure => installed,
 		provider => 'gem',
@@ -43,6 +51,14 @@ class atomia::nagios::server(
         pattern             => '/usr/sbin/nagios3 -d /etc/nagios3/nagios.cfg',
         hasstatus           => false
     }
+
+	if !defined(File["/usr/lib/nagios/plugins/atomia"]){
+    	file { "/usr/lib/nagios/plugins/atomia":
+        	        source		=> "puppet:///modules/atomia/nagios/plugins",
+           	     	recurse		=> true,
+           	     	require		=> Package["nagios-plugins-standard"]
+        	}
+	}
     
     file { "/etc/nagios3":
         owner  => root,
@@ -161,6 +177,14 @@ class atomia::nagios::server(
         use                     => "generic-service",
         target                  => "/etc/nagios3/conf.d/localhost_services.cfg",
     }
+
+    @@nagios_service { "localhost-hcp":
+        host_name               => "localhost",
+        service_description     => "HCP login",
+        check_command           => "check_hcp!Administrator!${admin_pass}",
+        use                     => "generic-service",
+        target                  => "/etc/nagios3/conf.d/localhost_services.cfg",
+    }
     
     Nagios_service <<| |>>  
     Nagios_host <<| |>>
@@ -175,6 +199,11 @@ class atomia::nagios::server(
 	exec { '/root/setup_atomia_account.sh':
 		require	=> File['/root/setup_atomia_account.sh'],
 	}
+	
+	host { 'atomia-nagios-test.net':
+		ip	=> $apache_ip,
+	}
+
 }
 
 

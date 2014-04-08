@@ -92,7 +92,7 @@ allowed_hosts=<%= @nagios_ip %>
 #
 # Values: 0=do not allow arguments, 1=allow command arguments
 
-dont_blame_nrpe=0
+dont_blame_nrpe=1
 
 
 
@@ -206,9 +206,14 @@ command[check_all_disks]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -e
 <% $hierapath = "/etc/puppet/hieradata" %>
 <% $modulepath = "/etc/puppet/modules/atomia/manifests" %>
 <% $lookup_var     = "/etc/puppet/modules/atomia/files/lookup_variable.sh" %>
+
 command[check_daggre_ftp]=/usr/lib/nagios/plugins/atomia/check_daggre.pl --uri "http://<%= @public_ip %>:999/g?a=<%= IO.popen("#{$lookup_var} daggre global_auth_token #{$hierapath} #{$modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %>&o=100000&latest=ftp_storage" --timeout 5 --days 1
+command[check_daggre_weblog]=/usr/lib/nagios/plugins/atomia/check_daggre.pl --uri "http://<%= @public_ip %>:999/g?a=<%= IO.popen("#{$lookup_var} daggre global_auth_token #{$hierapath} #{$modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %>&o=100000&latest=web_traffic_bytes" --timeout 5 --days 1
 
 command[check_all_mountpoints] = /usr/lib/nagios/plugins/atomia/check_mountpoints.sh -A
+
+command[check_atomiadns]=/usr/lib/nagios/plugins/atomia/check_atomiadns.sh atomia-nagios-test.net http://localhost/atomiadns <%= @atomiadns_user %> <%= @atomiadns_password %>
+command[check_domainreg]=/usr/lib/nagios/plugins/atomia/check_domainreg.sh $ARG1$
 # The following examples allow user-supplied arguments and can
 # only be used if the NRPE daemon was compiled with support for 
 # command arguments *AND* the dont_blame_nrpe directive in this
