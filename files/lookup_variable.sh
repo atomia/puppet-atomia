@@ -27,4 +27,4 @@ if [ -z "$TOKEN" ]; then
 	TOKEN=`grep -r -i "\\$${VARIABLE}.*=" ${MODULE_PATH}/${NAMESPACE}.pp | head -n1 | grep -Eo '["\047].*["\047]' | sed 's/\"//g' | sed s/\'//g`
 fi
 
-echo $TOKEN 
+echo -n $TOKEN 
