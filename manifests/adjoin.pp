@@ -42,7 +42,7 @@
 #
 # **[no_nscd]
 # Exclude nscd if required
-# (optional) Default: false
+# (optional) Default: 0 (set to 1 to enable)
 
 #
 # === Variables

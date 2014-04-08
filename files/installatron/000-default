@@ -1,0 +1,7 @@
+<VirtualHost *:80>
+        ServerAdmin webmaster@localhost
+
+        DocumentRoot /usr/local/installatron/http
+        Alias /installatron /usr/local/installatron/http
+
+</VirtualHost>
