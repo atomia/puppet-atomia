@@ -37,8 +37,6 @@ PLATFORMS
 
 DEPENDENCIES
   puppet
-  puppet-lint (~> 0.3.2)
-  puppetlabs_spec_helper
-  rake
-  rspec
+  puppet-lint
+  puppetlabs_spec_helper (>= 0.1.0)
   rspec-puppet
