@@ -3,9 +3,10 @@ class atomia::nagios::client(
     $password           = "nagios",
     $public_ip          = $ipaddress_eth0,
     $nagios_ip,          
-	$atomiadns_user		= "atomiadns",
-	$atomiadns_password = hiera("atomia::atomiadns::agent_password"),
 ) {
+
+	$atomiadns_password = generate("/etc/puppet/modules/atomia/files/lookup_variable.sh", "atomiadns", "agent_password")
+	$atomiadns_user  = generate("/etc/puppet/modules/atomia/files/lookup_variable.sh", "atomiadns", "agent_user")
 
 	# Deploy on Windows.
 	if $operatingsystem == 'windows' {
