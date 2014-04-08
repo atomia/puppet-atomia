@@ -5,6 +5,7 @@
 ---
 classes:
   - atomia::atomiadns_powerdns
+  - atomia::nagios::client
 
 atomia::atomiadns_powerdns::agent_password: "password123"
 atomia::atomiadns_powerdns::atomia_dns_url: "http://172.16.32.11/atomiadns"

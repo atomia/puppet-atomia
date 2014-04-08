@@ -1,4 +1,7 @@
 ---
+classes:
+  - atomia::nagios::client
+  
 # Windows variables
 
 # Active directory domain name

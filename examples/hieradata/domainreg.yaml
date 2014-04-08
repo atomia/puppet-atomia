@@ -3,5 +3,6 @@
 ---
 classes:
   - atomia::domainreg
+  - atomia::nagios::client
 
 atomia::domainreg::service_password: "password123"

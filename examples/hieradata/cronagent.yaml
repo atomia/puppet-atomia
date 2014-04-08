@@ -4,5 +4,6 @@
 ---
 classes:
   - atomia::cronagent
+  - atomia::nagios::client
 
 atomia::cronagent::global_auth_token: "token123"

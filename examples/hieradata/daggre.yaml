@@ -4,5 +4,6 @@
 ---
 classes:
   - atomia::daggre
+  - atomia::nagios::client
 
 atomia::daggre::global_auth_token: "token123"

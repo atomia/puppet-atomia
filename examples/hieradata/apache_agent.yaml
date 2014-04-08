@@ -5,6 +5,7 @@
 classes:
   - atomia::apache_agent
   - atomia::adjoin
+  - atomia::nagios::client
 
 atomia::apache_agent::password: "password123"
 

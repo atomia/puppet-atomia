@@ -4,6 +4,7 @@
 ---
 classes:
   - atomia::atomiadns
+  - atomia::nagios::client
 
 # Required variables, if you need to customize more the full list of available variables
 # is documented in the module
