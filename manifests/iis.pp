@@ -53,7 +53,7 @@ class atomia::iis(
   }  
 
   exec { 'setup_iis':
-  	command => "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/setup_iis.ps1 -adminUser $adminUser -adminPassword $adminPassword -apppoolUser $apppoolUser -apppoolUserPassword $apppoolUserPassword",
+  	command => "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/setup_iis.ps1 -adminUser $adminUser -adminPassword $adminPassword -apppoolUser $apppoolUser -apppoolUserPassword $apppoolUserPassword -sharePath $sharePath",
   	require => [File["c:/install/setup_iis.ps1"], File["c:/install/IISSharedConfigurationEnabler.exe"], File["c:/install/LsaStorePrivateData.exe"], File["c:/install/RegistryUnlocker.exe"]],
   	creates => 'c:\windows\install\installed'
   }
