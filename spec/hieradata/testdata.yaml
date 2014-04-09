@@ -11,7 +11,7 @@ atomia::adjoin::admin_password: "ad_password"
 atomia::cronagent::base_url: "http://127.0.0.1:10001"
 atomia::cronagent::global_auth_token: "cron_auth_token"
 
-atomia::mysql::server_ips: "{ '1.1.1.1','1.1.1.2' }"
+atomia::mysql::server_ips: "{'1.1.1.1','1.1.1.2'}"
 atomia::mysql::mysql_username: "mysql_user"
 atomia::mysql::mysql_password: "mysql_password"
 
@@ -42,6 +42,6 @@ atomia::mailserver::cluster_ip: "3.3.3.3"
 atomia::iis::iis_master_ip: "2.2.2.2"
 atomia::iis::iis_cluster_ip: "3.3.3.3"
 
-atomia::mssql::server_ips: "{ '1.1.1.1','1.1.1.2' }"
+atomia::mssql::server_ips: "{'1.1.1.1','1.1.1.2'}"
 atomia::mssql::mssql_username: "mssql_user"
 atomia::mssql::mssql_password: "mssql_password"

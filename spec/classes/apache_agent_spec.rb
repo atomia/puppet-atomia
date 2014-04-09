@@ -69,7 +69,7 @@ describe 'atomia::apache_agent' do
 	it { should contain_file('/var/log/httpd') }
 	it { should contain_file('/var/www/cgi-wrappers') }
 	
-	it { should contain_file('/storage/configuration/maps').with(
+	it { should contain_file('/storage/foo/maps').with(
 			'owner'   => 'root',
 			'group'   => 'www-data',
 			'mode'    => '2750',
