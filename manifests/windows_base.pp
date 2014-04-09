@@ -31,9 +31,11 @@ class atomia::windows_base (
   $mail_bcc_list    = "",
   $mail_reply_to    = "",
   $storage_server_hostname,
-  $mail_dispatcher_interval          = "30") 
+  $mail_dispatcher_interval         = "30",
+  $is_iis							= 0) 
 
   {
+  if( $is_iis == 0 ){
   dism { 'NetFx3': ensure => present }
 
   # 6.1 is 2008 R2, so this matches 2012 and forward
@@ -158,5 +160,5 @@ class atomia::windows_base (
     ensure => 'file',
     source => "puppet:///atomiacerts/empty.crl"
   }
-
+ }
 }
