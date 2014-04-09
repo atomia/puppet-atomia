@@ -3,9 +3,9 @@
     [string]$adminPassword = $(throw "-adminPassword is required.")
     [string]$apppoolUser = "apppooluser",
     [string]$apppoolUserPassword = $(throw "-apppoolUserPassword is required.")
+    [string]$sharePath  = $(throw "-sharePath is required. Example \\storage.atomia.com\configuration\iis")
  )
 
-$sharePath="\\WIN-3QQV4O6N6FV\configuration\iis"
 $iisConfigKeyPath = $sharePath + "\iisConfigurationKey.xml"
 $iisWasKeyPath = $sharePath + "\iisWasKey.xml"
 $schemaPath = $sharePath + "\schema"

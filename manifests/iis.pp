@@ -3,6 +3,7 @@ class atomia::iis(
 	$adminPassword = hiera('atomia::adjoin::admin_password', 'Administrator'),
 	$apppoolUser = "apppooluser",
 	$apppoolUserPassword = hiera('app_password', ''),	
+	$sharePath,
 ){
 
 	dism { 'NetFx3': ensure => present, all => true }
@@ -25,24 +26,30 @@ class atomia::iis(
 	dism { 'IIS-ManagementConsole': ensure => present, all => true  }
 
 	# Deploy installation folder 
+	file { 'c:/install': ensure => 'directory' }
+
   file { 'c:/install/IISSharedConfigurationEnabler.exe':
     ensure => 'file',
-    source => "puppet:///modules/atomia/iis/IISSharedConfigurationEnabler.exe"
+    source => "puppet:///modules/atomia/iis/IISSharedConfigurationEnabler.exe",
+    require => File['c:/install'],
   }
 
   file { 'c:/install/LsaStorePrivateData.exe':
     ensure => 'file',
-    source => "puppet:///modules/atomia/iis/LsaStorePrivateData.exe"
+    source => "puppet:///modules/atomia/iis/LsaStorePrivateData.exe",
+    require => File['c:/install'],
   }
 
   file { 'c:/install/RegistryUnlocker.exe':
     ensure => 'file',
-    source => "puppet:///modules/atomia/iis/RegistryUnlocker.exe"
+    source => "puppet:///modules/atomia/iis/RegistryUnlocker.exe",
+    require => File['c:/install'],
   }  
 
   file { 'c:/install/setup_iis.ps1':
     ensure => 'file',
-    source => "puppet:///modules/atomia/iis/setup_iis.ps1"
+    source => "puppet:///modules/atomia/iis/setup_iis.ps1",
+    require => File['c:/install'],
   }  
 
   exec { 'setup_iis':
