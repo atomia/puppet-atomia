@@ -1,5 +1,8 @@
 class atomia::iis(
-
+	$adminUser = hiera('atomia::adjoin::admin_user', 'Administrator'),
+	$adminPassword = hiera('atomia::adjoin::admin_password', 'Administrator'),
+	$apppoolUser = "apppooluser",
+	$apppoolUserPassword = hiera('app_password', ''),	
 ){
 
 	dism { 'NetFx3': ensure => present, all => true }
@@ -20,5 +23,32 @@ class atomia::iis(
 	dism { 'IIS-BasicAuthentication': ensure => present, all => true  }
 	dism { 'IIS-WebServerManagementTools': ensure => present, all => true  }
 	dism { 'IIS-ManagementConsole': ensure => present, all => true  }
+
+	# Deploy installation folder 
+  file { 'c:/install/IISSharedConfigurationEnabler.exe':
+    ensure => 'file',
+    source => "puppet:///modules/atomia/iis/IISSharedConfigurationEnabler.exe"
+  }
+
+  file { 'c:/install/LsaStorePrivateData.exe':
+    ensure => 'file',
+    source => "puppet:///modules/atomia/iis/LsaStorePrivateData.exe"
+  }
+
+  file { 'c:/install/RegistryUnlocker.exe':
+    ensure => 'file',
+    source => "puppet:///modules/atomia/iis/RegistryUnlocker.exe"
+  }  
+
+  file { 'c:/install/setup_iis.ps1':
+    ensure => 'file',
+    source => "puppet:///modules/atomia/iis/setup_iis.ps1"
+  }  
+
+  exec { 'setup_iis':
+  	command => "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/setup_iis.ps1 -adminUser $adminUser -adminPassword $adminPassword -apppoolUser $apppoolUser -apppoolUserPassword $apppoolUserPassword",
+  	require => [File["c:/install/setup_iis.ps1"], File["c:/install/IISSharedConfigurationEnabler.exe"], File["c:/install/LsaStorePrivateData.exe"], File["c:/install/RegistryUnlocker.exe"]],
+  	creates => 'c:\windows\install\installed'
+  }
 
 }
