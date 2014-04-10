@@ -1,9 +1,10 @@
 class atomia::iis(
 	$adminUser = hiera('atomia::adjoin::admin_user', 'Administrator'),
 	$adminPassword = hiera('atomia::adjoin::admin_password', 'Administrator'),
-	$apppoolUser = "apppooluser",
-	$apppoolUserPassword = hiera('app_password', ''),	
+	$apppoolUser =  "apppooluser",
+	$apppoolUserPassword = hiera('atomia::windows_base::app_password', ''),	
 	$sharePath,
+	$adDomain = hiera('atomia::windows_base::ad_domain', ''),
 ){
 
 	dism { 'NetFx3': ensure => present, all => true }
@@ -31,18 +32,21 @@ class atomia::iis(
   file { 'c:/install/IISSharedConfigurationEnabler.exe':
     ensure => 'file',
     source => "puppet:///modules/atomia/iis/IISSharedConfigurationEnabler.exe",
+	mode   => '0777',
     require => File['c:/install'],
   }
 
   file { 'c:/install/LsaStorePrivateData.exe':
     ensure => 'file',
     source => "puppet:///modules/atomia/iis/LsaStorePrivateData.exe",
+	mode   => '0777',
     require => File['c:/install'],
   }
 
   file { 'c:/install/RegistryUnlocker.exe':
     ensure => 'file',
     source => "puppet:///modules/atomia/iis/RegistryUnlocker.exe",
+	mode   => '0777',
     require => File['c:/install'],
   }  
 
@@ -52,8 +56,8 @@ class atomia::iis(
     require => File['c:/install'],
   }  
 
-  exec { 'setup_iis':
-  	command => "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/setup_iis.ps1 -adminUser $adminUser -adminPassword $adminPassword -apppoolUser $apppoolUser -apppoolUserPassword $apppoolUserPassword -sharePath $sharePath",
+ exec { 'setup_iis':
+	command => "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/setup_iis.ps1 -adminUser ${adDomain}\\${adminUser} -adminPassword $adminPassword -apppoolUser ${adDomain}\\${apppoolUser} -apppoolUserPassword $apppoolUserPassword -sharePath $sharePath",
   	require => [File["c:/install/setup_iis.ps1"], File["c:/install/IISSharedConfigurationEnabler.exe"], File["c:/install/LsaStorePrivateData.exe"], File["c:/install/RegistryUnlocker.exe"]],
   	creates => 'c:\windows\install\installed'
   }

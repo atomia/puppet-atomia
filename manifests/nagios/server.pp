@@ -1,10 +1,10 @@
 class atomia::nagios::server(
     $username           = "nagios",
     $password           = "nagios",
+	$admin_pass			= "Administrator",
 ) {
 
 	$apache_ip  = generate("/etc/puppet/modules/atomia/files/lookup_variable.sh", "apache_agent", "cluster_ip")
-	$admin_pass  = generate("/etc/puppet/modules/atomia/files/lookup_variable.sh", "adjoin", "admin_password")
 
     # Install Nagios and plugins
     package { [
