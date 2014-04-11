@@ -28,7 +28,7 @@ relay_domains = mysql:/etc/postfix/mysql_relay_domains_maps.cf
 virtual_alias_maps = mysql:/etc/postfix/mysql_virtual_alias_maps.cf
 virtual_gid_maps = static:2000
 
-virtual_mailbox_base = /storage/virtual
+virtual_mailbox_base = <%= @mailbox_base %> 
 virtual_mailbox_domains = mysql:/etc/postfix/mysql_virtual_domains_maps.cf
 virtual_mailbox_maps = mysql:/etc/postfix/mysql_virtual_mailbox_maps.cf
 

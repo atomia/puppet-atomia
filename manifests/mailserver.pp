@@ -5,7 +5,10 @@ class atomia::mailserver (
 		$agent_password,
 		$slave_password,
 		$install_antispam = 1,
-        $cluster_ip = ""
+        $cluster_ip = "",
+		$mail_share_nfs_location = "",
+		$use_nfs3 = 1,
+		$mailbox_base = "/storage/virtual"
 	){
 	package { postfix-mysql: ensure => installed }
 	package { dovecot-common: ensure => installed }
@@ -49,6 +52,14 @@ class atomia::mailserver (
 	$db_user_dovecot = "dovecot_vmail"
 	$db_name = "vmail"
 	$db_pass = $agent_password
+
+	if $mail_share_nfs_location != "" {
+  		atomia::nfsmount { 'mount_mail_content':
+    		use_nfs3 => $use_nfs3,
+    		mount_point => '/storage/mailcontent',
+    		nfs_location => $mail_share_nfs_location
+  		}
+	}
 
 	$mysql_command = "/usr/bin/mysql --defaults-file=/etc/mysql/debian.cnf -Ns"
 	$mysql_server_id = inline_template('<%= hostname.scan(/\d+/).first %>')
