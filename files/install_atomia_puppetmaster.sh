@@ -43,7 +43,7 @@ echo "
 
 " >> /etc/puppet/fileserver.conf
 
-mkdir /etc/puppet/atomia
+mkdir -p /etc/puppet/atomia/service_files
 
 echo "
 [main]
@@ -84,5 +84,5 @@ rvm default 2.1.1
 cd /etc/puppet
 gem install librarian-puppet puppet
 librarian-puppet install
-cp /etc/puppet/modules/atomia/files/default_files/* /etc/puppet/atomia/
+cp /etc/puppet/modules/atomia/files/default_files/* /etc/puppet/atomia/service_files/
 "

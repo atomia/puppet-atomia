@@ -16,21 +16,21 @@ class atomia::service_files (
     
   file { '/storage/content/systemservices/public_html/forward.php':
   	source		=> "puppet:///atomia/service_files/forward.php",
-    mode    => 0711,
+    mode    => 0755,
     owner   => root,
     group   => root,
   }
 
   file { '/storage/content/systemservices/public_html/index.php':
     source    => "puppet:///atomia/service_files/index.php",
-    mode    => 0711,
+    mode    => 0755,
     owner   => root,
     group   => root,
   }
 
   file { '/storage/content/systemservices/public_html/suspend.php':
     source    => "puppet:///atomia/service_files/suspend.php",
-    mode    => 0711,
+    mode    => 0755,
     owner   => root,
     group   => root,
   }
