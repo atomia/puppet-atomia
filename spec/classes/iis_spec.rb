@@ -5,6 +5,7 @@ describe 'atomia::iis' do
 	# minimum set of default parameters
 	let :params do
 		{
+			:sharePath		=> "\\\\foo\\bar"
 		}
 	end
 	

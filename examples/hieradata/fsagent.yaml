@@ -3,6 +3,7 @@ classes:
   - atomia::fsagent
   - atomia::adjoin
   - atomia::nagios::client
+  - atomia::service_files
 
 atomia::fsagent::password: "password123
 atomia::fsagent::content_share_nfs_location: "127.0.0.1:/content"

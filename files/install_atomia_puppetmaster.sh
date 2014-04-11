@@ -36,8 +36,14 @@ echo "
 [atomiacerts]
    path /etc/puppet/atomiacerts
    allow *
+
+[atomia]
+   path /etc/puppet/atomia
+   allow *
+
 " >> /etc/puppet/fileserver.conf
 
+mkdir /etc/puppet/atomia
 
 echo "
 [main]
@@ -77,4 +83,6 @@ rvm use 2.1.1
 rvm default 2.1.1
 cd /etc/puppet
 gem install librarian-puppet puppet
-librarian-puppet install"
+librarian-puppet install
+cp /etc/puppet/modules/atomia/files/default_files/* /etc/puppet/atomia/
+"
