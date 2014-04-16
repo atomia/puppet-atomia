@@ -60,6 +60,11 @@ class atomia::fsagent(
                 require => [ Package["atomia-fsagent"], File["/storage/content/backup"] ],
         }
 
+        file { "/storage/configuration":
+            ensure  => directory,
+            mode    => 711,
+        }
+
         file { "/etc/cron.d/clearsessions":
             ensure  => file,
             content => "15 * * * * root lockfile -r0 /var/run/clearsession.lock && (find /storage/configuration/php_session_path -mtime +2 -exec rm -f '{}' '+'; rm -f /var/run/clearsession.lock)"

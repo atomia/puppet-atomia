@@ -31,6 +31,7 @@ define atomia::nfsmount(
 	file { $mount_point:
 		ensure => directory,
 		require => File["/storage"],
+        mode    => 711,
 	}
 
 	
