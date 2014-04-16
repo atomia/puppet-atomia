@@ -34,6 +34,8 @@ class atomia::domainreg (
                 package { atomiadomainregistration-client: ensure => present }
         }
 
+        package { procmail: ensure => latest }
+
         if $ssl_enabled == 1 {
                 include apache_wildcard_ssl
         }
@@ -81,5 +83,9 @@ class atomia::domainreg (
                 ensure => running,
         }
 
+    file { '/etc/cron.d/rotate-domainreg-logs':
+        ensure  => present,
+        content => "0 0 * * * root lockfile -r0 /var/run/rotate-domainreg-logs && (find /var/log/atomiadomainregistration -mtime +14 -exec rm -f '{}' '+'; rm -f /var/run/rotate-domainreg-logs.lock)",
+    }
 }
 

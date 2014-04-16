@@ -14,6 +14,7 @@ class atomia::awstats (
 	package { atomiaprocesslogs: ensure => present }
 
 	package { awstats: ensure => installed }
+    package { procmail: ensure => installed }
 	if !defined(Package['apache2-mpm-worker']) and !defined(Package['apache2-mpm-prefork']) and !defined(Package['apache2']) {
 		package { apache2-mpm-worker: ensure => installed }
 	}
@@ -152,6 +153,11 @@ class atomia::awstats (
 			notify => Exec["force-reload-apache"],
 		}
         }
+
+    file { '/etc/cron.d/rotate-awstats-logs':
+        ensure  => present,
+        content => "0 0 * * * root lockfile -r0 /var/run/rotate-awstats && (find /var/log/awstats/ -mtime +14 -exec rm -f '{}' '+'; rm -f /var/run/rotate-awstats.lock)"
+    }
 
 }
 

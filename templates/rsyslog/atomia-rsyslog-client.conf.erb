@@ -1,0 +1,35 @@
+*.* @<%=@server_ip%>:514
+
+$InputFileName /var/log/fs-agent/*.log
+$InputFileTag fsagent
+$InputFileStateFile fsagent-file1
+$InputFileSeverity info
+$InputFileFacility local7
+$InputRunFileMonitor
+$InputFilePersistStateInterval 1000
+
+
+$InputFileName /var/log/pure-ftpd/*.log
+$InputFileTag pureftp
+$InputFileStateFile pureftp-file1
+$InputFileSeverity info
+$InputFileFacility local7
+$InputRunFileMonitor
+$InputFilePersistStateInterval 1000
+
+$InputFileName /var/log/mysql/error.log
+$InputFileTag mysql 
+$InputFileStateFile mysql-file1
+$InputFileSeverity info
+$InputFileFacility local7
+$InputRunFileMonitor
+$InputFilePersistStateInterval 1000
+
+$InputFileName /var/log/mail.log
+$InputFileTag postfix 
+$InputFileStateFile postfix-file1
+$InputFileSeverity info
+$InputFileFacility local7
+$InputRunFileMonitor
+$InputFilePersistStateInterval 1000
+

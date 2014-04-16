@@ -112,7 +112,7 @@ describe 'atomia::apache_agent' do
         )
     }
 
-    it { should contain_file('/etc/php5/fpm/php.ini') }
+    it { should contain_file('/etc/php5/cgi/php.ini') }
 		
 		
 	

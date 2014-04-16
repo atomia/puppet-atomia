@@ -10,6 +10,7 @@ class atomia::fsagent(
 	package { python: ensure => present}
 	package { 'g++': ensure => present }
 	package { make: ensure => present }
+    package { procmail: ensure => present }
 
 	class { 'apt': }
 
