@@ -320,7 +320,7 @@ class atomia::apache_agent (
     mode    => 644,
   }
 
-  file { "/etc/php5/fpm/php.ini":
+  file { "/etc/php5/cgi/php.ini":
     ensure  => link,
     target  => "/storage/configuration/php.ini",
     require => File["/storage/configuration/php.ini"],
