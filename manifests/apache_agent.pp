@@ -303,6 +303,29 @@ class atomia::apache_agent (
     require => [Package["cgroup-bin"]],
   }
 
+  file { "/storage/configuration/php_session_path":
+    ensure  => directory,
+    owner   => root,
+    group   => root,
+    mode    => 1733,
+    require => Package["php5-cgi"],
+  }
+
+  file { "/storage/configuration/php.ini":
+    replace => "no",
+    ensure  => present,
+    source  => "puppet:///modules/atomia/apache_agent/php.ini",
+    owner   => root,
+    group   => root,
+    mode    => 644,
+  }
+
+  file { "/etc/php5/fpm/php.ini":
+    ensure  => link,
+    target  => "/storage/configuration/php.ini",
+    require => File["/storage/configuration/php.ini"],
+  }
+
   if $should_have_pa_apache == 1 {
     service { atomia-pa-apache:
       name      => apache-agent,

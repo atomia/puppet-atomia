@@ -25,7 +25,7 @@ describe 'atomia::fsagent' do
 
     it { should contain_file('/etc/default/fsagent').with_content(/abc123/)}
 
-		
+    it { should contain_file('/etc/cron.d/clearsessions').with_content(/php_session_path/) }		
 	
 	
 end

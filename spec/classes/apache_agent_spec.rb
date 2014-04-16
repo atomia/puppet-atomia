@@ -97,6 +97,22 @@ describe 'atomia::apache_agent' do
 			'mode'    => '444',
 			)
 		}			
+
+    it { should contain_file('/storage/configuration/php_session_path').with(
+            'owner'     => 'root',
+            'group'     => 'root',
+            'mode'      => '1733',
+        )
+    }
+
+    it { should contain_file('/storage/configuration/php.ini').with(
+            'owner'     => 'root',
+            'group'     => 'root',
+            'mode'      => '644',
+        )
+    }
+
+    it { should contain_file('/etc/php5/fpm/php.ini') }
 		
 		
 	
