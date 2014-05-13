@@ -7,22 +7,10 @@ class atomia::mailserver_fordwarder (
                 $cluster_ip = ""
         ){
         package { postfix-mysql: ensure => installed }
-        package { dovecot-common: ensure => installed }
-        package { libmime-encwords-perl: ensure => installed }
-        package { libemail-valid-perl: ensure => installed }
-        package { libmail-sendmail-perl: ensure => installed }
-        package { liblog-log4perl-perl: ensure => installed }
-        package { libdbd-mysql-perl: ensure => installed }
-        package { dovecot-imapd: ensure => installed }
-        package { dovecot-pop3d: ensure => installed }
-        package { dovecot-mysql: ensure => installed }
-
        
-
         $db_hosts = $ipaddress
         $db_user = "vmail"
         $db_user_smtp = "smtp_vmail"
-        $db_user_dovecot = "dovecot_vmail"
         $db_name = "vmail"
         $db_pass = $agent_password
 
@@ -71,13 +59,6 @@ class atomia::mailserver_fordwarder (
                         unless => "$mysql_command -e \"SELECT user, host FROM user WHERE user = '$db_user_smtp' AND host = '%'\" mysql | /bin/grep $db_user_smtp",
                         require => Class[Mysql::Server::Service]
                 }
-
-                exec { 'grant-postfix-dovecpt-db-user-privileges':
-                        command => "$mysql_command -e \"GRANT ALL ON $db_name.* TO '$db_user_dovecot'@'%' IDENTIFIED BY '$db_pass'\"",
-                        unless => "$mysql_command -e \"SELECT user, host FROM user WHERE user = '$db_user_dovecot' AND host = '%'\" mysql| /bin/grep $db_user_dovecot",
-                        require => Class[Mysql::Server::Service]
-                }
-
         }
         else {
                 # Slave config
@@ -99,16 +80,7 @@ class atomia::mailserver_fordwarder (
                 source  => "puppet:///modules/atomia/mailserver/mysql.schema.sql",
                 require => Package["postfix-mysql"]
         }
-        if !$atomia_mailman_installed {
-
-                file { "/etc/postfix/main.cf":
-                        owner   => root,
-                        group   => root,
-                        mode    => 444,
-                        content  => template('atomia/mailserver/main.cf'),
-                        require => Package["postfix-mysql"]
-                }
-        }
+        
 
         file { "/etc/postfix/master.cf":
                 owner   => root,
@@ -159,35 +131,7 @@ class atomia::mailserver_fordwarder (
                 require => Package["postfix-mysql"]
         }
 
-        file { "/etc/dovecot/dovecot-sql.conf":
-                owner   => root,
-                group   => root,
-                mode    => 444,
-                content => template('atomia/mailserver/dovecot-sql.conf.erb'),
-                require => Package["dovecot-common"],
-        }
 
-        file { "/etc/dovecot/dovecot.conf":
-                owner   => root,
-                group   => root,
-                mode    => 444,
-                source  => "puppet:///modules/atomia/mailserver/dovecot.conf",
-                require => Package["dovecot-common"],
-        }
-
-        file { "/usr/bin/vacation.pl":
-                owner   => root,
-                group   => virtual,
-                mode    => 750,
-                content => template('atomia/mailserver/vacation.pl'),
-        }
-
-        file { "/var/log/vacation.log":
-                owner   => virtual,
-                group   => virtual,
-                mode    => 640,
-                ensure  => present,
-        }
 
         file { "/etc/mailname":
                 owner => root,
@@ -197,21 +141,6 @@ class atomia::mailserver_fordwarder (
                 ensure => present,
         }
 
-        exec { "gen-key":
-                command => "/usr/bin/openssl genrsa -out /etc/dovecot/ssl.key 2048; chown root:root /etc/dovecot/ssl.key; chmod 0700 /etc/dovecot/ssl.key",
-                creates => "/etc/dovecot/ssl.key",
-                provider => "shell"
-        }
-
-        exec { "gen-csr":
-                command => "/usr/bin/openssl req -new -batch -key /etc/dovecot/ssl.key -out /etc/dovecot/ssl.csr",
-                creates => "/etc/dovecot/ssl.csr",
-        }
-
-        exec { "gen-cert":
-                command => "/usr/bin/openssl x509 -req -days 3650 -in /etc/dovecot/ssl.csr -signkey /etc/dovecot/ssl.key -out /etc/dovecot/ssl.crt",
-                creates => "/etc/dovecot/ssl.crt",
-        }
 
         service { postfix:
                         name => postfix,
@@ -220,12 +149,6 @@ class atomia::mailserver_fordwarder (
                         subscribe => [ Package["postfix-mysql"], File["/etc/postfix/main.cf"], File["/etc/postfix/master.cf"] ]
         }
 
-        service { dovecot:
-                        name => dovecot,
-                        enable => true,
-                        ensure => running,
-                        subscribe => [ Package["dovecot-common"], File["/etc/dovecot/dovecot.conf"], File["/etc/dovecot/dovecot-sql.conf"] ]
-        }
 
     group { "virtual":
         ensure => present
