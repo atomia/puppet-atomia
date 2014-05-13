@@ -1,4 +1,4 @@
-class atomia::mailserver_fordwarder (
+class atomia::mailserver_forwarder (
                 $provisioning_host,
                 $is_master = 0,
                 $master_ip,
