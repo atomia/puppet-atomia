@@ -57,7 +57,7 @@ class atomia::apache_agent (
   $config_share_nfs_location,
   $use_nfs3 = 1,
   $cluster_ip = "",
-  $apache_agent_ip = $ip,
+  $apache_agent_ip = $ipaddress,
   $maps_path = "/storage/configuration/apache/maps"
   
   ) {
