@@ -7,7 +7,7 @@ class atomia::awstats (
 		$ssl_cert_key = "",
 		$ssl_cert_file = "",
 		$skip_mount        = 0,
-        $awstats_ip = $ip
+    $awstats_ip = $ipaddress
 	) {
 
   package { atomia-pa-awstats: ensure => present }

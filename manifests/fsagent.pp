@@ -1,115 +1,108 @@
-class atomia::fsagent(
-	$username = "fsagent",
-	$password,
-	$content_share_nfs_location,
-	$skip_mount        = 0,
-    $fsagent_ip = $ip
-	) {
+class atomia::fsagent (
+  $username   = "fsagent",
+  $password,
+  $content_share_nfs_location,
+  $skip_mount = 0,
+  $fsagent_ip = $ipaddress,
+  $use_ssl    = false) {
+  package { python-software-properties: ensure => present }
 
-	package { python-software-properties: ensure => present }
-	package { python: ensure => present}
-	package { 'g++': ensure => present }
-	package { make: ensure => present }
-    package { procmail: ensure => present }
+  package { python: ensure => present }
 
-	class { 'apt': }
+  package { 'g++': ensure => present }
 
-	if $operatingsystem == "Ubuntu" {
-		apt::ppa { 'ppa:chris-lea/node.js': }
+  package { make: ensure => present }
 
-        package { nodejs:
-                ensure => latest,
-                require => [Apt::Ppa['ppa:chris-lea/node.js'], Exec['apt-get-update']]
-        }
+  package { procmail: ensure => present }
 
-        exec { "apt-get-update":
-                command => "/usr/bin/apt-get update"
-        }
-	}
-	else {
-        package { nodejs:
-            ensure => present,
-        }
-	}
+  class { 'apt': }
 
-	if $atomia_linux_software_auto_update {
-		package { atomia-fsagent: ensure => latest }
-	} else {
-		package { atomia-fsagent: ensure => present }
-	}
-	if($skip_mount == 0){
-		atomia::nfsmount { 'mount_content':
-			use_nfs3 => 1,
-			mount_point => '/storage/content',
-			nfs_location => $content_share_nfs_location
-		}
-	}
+  if $operatingsystem == "Ubuntu" {
+    apt::ppa { 'ppa:chris-lea/node.js': }
 
-        file { "/storage/content/backup":
-            	ensure => "directory",
-                owner   => root,
-                group   => root,
-                mode    => 710,
-       }
+    package { nodejs:
+      ensure  => latest,
+      require => [Apt::Ppa['ppa:chris-lea/node.js'], Exec['apt-get-update']]
+    }
 
+    exec { "apt-get-update": command => "/usr/bin/apt-get update" }
+  } else {
+    package { nodejs: ensure => present, }
+  }
 
-        file { "/etc/default/fsagent":
-                owner   => root,
-                group   => root,
-                mode    => 440,
-                content =>  template("atomia/fsagent/settings.cfg.erb"),
-                require => [ Package["atomia-fsagent"], File["/storage/content/backup"] ],
-        }
+  package { atomia-fsagent: ensure => present }
 
-        file { "/storage/configuration":
-            ensure  => directory,
-            mode    => 711,
-        }
+  if ($skip_mount == 0) {
+    atomia::nfsmount { 'mount_content':
+      use_nfs3     => 1,
+      mount_point  => '/storage/content',
+      nfs_location => $content_share_nfs_location
+    }
+  }
 
-        file { "/etc/cron.d/clearsessions":
-            ensure  => file,
-            content => "15 * * * * root lockfile -r0 /var/run/clearsession.lock && (find /storage/configuration/php_session_path -mtime +2 -exec rm -f '{}' '+'; rm -f /var/run/clearsession.lock)"
-            }
+  file { "/storage/content/backup":
+    ensure => "directory",
+    owner  => root,
+    group  => root,
+    mode   => 710,
+  }
 
-		if $fs_agent_ssl {
-			
-			file { "/etc/default/fsagent-ssl":
-                owner   => root,
-                group   => root,
-                mode    => 440,
-				ensure  => present,
-                content => template("atomia/fsagent/settings-ssl.cfg.erb"),
-                require => [ Package["atomia-fsagent"] ],
-			}
-			
-			file { "/etc/init.d/atomia-fsagent-ssl":
-                owner   => root,
-                group   => root,
-                mode    => 755,
-				ensure  => present,
-                content => template("atomia/fsagent/atomia-fsagent-ssl.erb"),
-                require => [ Package["atomia-fsagent"] , File["/etc/default/fsagent-ssl"] ],
-			}
-			
-		}
+  file { "/etc/default/fsagent":
+    owner   => root,
+    group   => root,
+    mode    => 440,
+    content => template("atomia/fsagent/settings.cfg.erb"),
+    require => [Package["atomia-fsagent"], File["/storage/content/backup"]],
+  }
 
-        service { atomia-fsagent:
-                name => atomia-fsagent,
-                enable => true,
-                ensure => running,
-		hasstatus => false,
-		pattern => "/usr/bin/nodejs /usr/lib/atomia-fsagent/main.js",
-                subscribe => [ Package["atomia-fsagent"], File["/etc/default/fsagent"] ],
-        }
-		
-		if $fs_agent_ssl {
-			service { atomia-fsagent-ssl:
-                name => atomia-fsagent-ssl,
-                enable => true,
-                ensure => running,
-				subscribe => [ Package["atomia-fsagent"], File["/etc/default/fsagent-ssl"] ],
-                require => [ Service["atomia-fsagent"] , File["/etc/init.d/atomia-fsagent-ssl"] ],
-			}
-		}
+  file { "/storage/configuration":
+    ensure => directory,
+    mode   => 711,
+  }
+
+  file { "/etc/cron.d/clearsessions":
+    ensure  => file,
+    content => "15 * * * * root lockfile -r0 /var/run/clearsession.lock && (find /storage/configuration/php_session_path -mtime +2 -exec rm -f '{}' '+'; rm -f /var/run/clearsession.lock)"
+  }
+
+  if $use_ssl {
+    file { "/etc/default/fsagent-ssl":
+      owner   => root,
+      group   => root,
+      mode    => 440,
+      ensure  => present,
+      content => template("atomia/fsagent/settings-ssl.cfg.erb"),
+      require => [Package["atomia-fsagent"]],
+    }
+
+    file { "/etc/init.d/atomia-fsagent-ssl":
+      owner   => root,
+      group   => root,
+      mode    => 755,
+      ensure  => present,
+      content => template("atomia/fsagent/atomia-fsagent-ssl.erb"),
+      require => [Package["atomia-fsagent"], File["/etc/default/fsagent-ssl"]],
+    }
+
+  }
+
+  service { atomia-fsagent:
+    name      => atomia-fsagent,
+    enable    => true,
+    ensure    => running,
+    hasstatus => false,
+    pattern   => "/usr/bin/nodejs /usr/lib/atomia-fsagent/main.js",
+    subscribe => [Package["atomia-fsagent"], File["/etc/default/fsagent"]],
+  }
+
+  if $use_ssl {
+    service { atomia-fsagent-ssl:
+      name      => atomia-fsagent-ssl,
+      enable    => true,
+      ensure    => running,
+      subscribe => [Package["atomia-fsagent"], File["/etc/default/fsagent-ssl"]],
+      require   => [Service["atomia-fsagent"], File["/etc/init.d/atomia-fsagent-ssl"]],
+    }
+  }
 }
 

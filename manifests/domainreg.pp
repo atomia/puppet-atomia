@@ -37,7 +37,7 @@ class atomia::domainreg (
         package { procmail: ensure => latest }
 
         if $ssl_enabled == 1 {
-                include apache_wildcard_ssl
+                #include apache_wildcard_ssl
         }
 
         if $opensrs_only == 1

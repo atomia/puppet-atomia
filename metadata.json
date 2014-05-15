@@ -1,13 +1,13 @@
 {
   "name": "puppet-atomia",
-  "version": "0.1.7",
+  "version": "0.2.7",
   "summary": "Puppet module for deploying Atomia",
   "author": "atomia",
   "description": "Module for configuring Atomia",
   "dependencies": [],
   "types": [],
   "checksums": {},
-  "source": "git://git.atomia.com/atomia/puppet-atomia",
+  "source": "https://github.com/atomia/puppet-atomia",
   "project_page": "https://github.com/atomia/puppet-atomia",
   "license": "Apache License, Version 2.0"
 }

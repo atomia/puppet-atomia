@@ -9,7 +9,7 @@ class atomia::cronagent (
 	$mail_from = "", 
 	$mail_user = "", 
 	$mail_pass = "",
-    $base_url  = "http://$ip:10101"
+  $base_url  = "http://$ipaddress:10101"
 
 ){
 	

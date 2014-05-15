@@ -19,7 +19,7 @@ class atomia::atomiadns (
   }
 
   if $ssl_enabled == '1' {
-    include apache_wildcard_ssl
+    #include apache_wildcard_ssl
   }
 
   if !defined(Class['atomia::apache_password_protect']) {
@@ -79,7 +79,7 @@ file { "/usr/bin/atomiadns_config_sync":
 
 exec { "atomiadns_config_sync":
   require => [File["/usr/bin/atomiadns_config_sync"], File["/etc/atomiadns.conf.master"]],
-  command => "/usr/bin/atomiadns_config_sync $atomia_dns_ns_group",
+  command => "/usr/bin/atomiadns_config_sync $dns_ns_group",
   unless  => "/bin/grep  soap_uri /etc/atomiadns.conf",
 }
 

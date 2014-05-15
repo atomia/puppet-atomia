@@ -3,15 +3,11 @@ class atomia::haproxy(
 	$agent_password
 	) {
 	
-	if $atomia_linux_software_auto_update {
-		package { atomia-pa-haproxy: 
-			ensure => latest,
-		}
-	} else {
+
 		package { atomia-pa-haproxy: 
 			ensure => present,
 		}
-	}
+
 
 	$haproxy_conf = generate("/etc/puppet/modules/atomia/files/haproxy/atomia-pa-haproxy.conf.sh", $agent_user,$agent_password)
 
