@@ -13,51 +13,11 @@ $client.DownloadFile( $MvcUrl, (Join-Path $location "AspNetMVC1.msi") )
 "Installing MVC1"
 Start-Process msiexec "/i AspNetMVC1.msi /l* AspNetMVC1.log /quiet" -wait
 
-"Downloading Firefox"
-$firefoxUrl = "http://download-installer.cdn.mozilla.net/pub/firefox/releases/25.0.1/win32/en-GB/Firefox%20Setup%2025.0.1.exe"
-$client.DownloadFile( $firefoxUrl, (Join-Path $location "firefox.exe") )
-"Installing Firefox"
-Start-Process firefox.exe "-ms" -wait
-
-if (!(Test-Path  (Join-Path $location "dotNetFx40_Full_setup.exe")))
-{
-	"Downloading .net4"
-	$net4Url = "http://download.microsoft.com/download/1/B/E/1BE39E79-7E39-46A3-96FF-047F95396215/dotNetFx40_Full_setup.exe"
-	$client.DownloadFile( $net4Url, (Join-Path $location "dotNetFx40_Full_setup.exe") )
-	$net4Log = Join-Path $location "dotNetFx40_Full_setup.log"
-	"Installing .net4"
-	Start-Process dotNetFx40_Full_setup.exe ("/q /log " + $net4Log) -wait
-}
-
 "Downloading WIF"
 $WifUrl = "http://download.microsoft.com/download/D/7/2/D72FD747-69B6-40B7-875B-C2B40A6B2BDD/Windows6.1-KB974405-x64.msu"
 $client.DownloadFile( $WifUrl, (Join-Path $location "Windows6.1-KB974405-x64.msu") )
 "Installing WIF"
 Start-Process wusa "Windows6.1-KB974405-x64.msu /log:Windows6.1-KB974405-x64.evt /quiet /norestart" -wait
-
-"Downloading Notepad++"
-$nppUrl = "http://installer.atomia.com/openstack/data/npp.exe"
-$client.DownloadFile( $nppUrl, (Join-Path $location "npp.exe") )
-"Installing Notepad++"
-Start-Process "npp.exe" "/S" -wait
-
-"Downloading Microsoft C++ 2008 Redistributables (x64)"
-$msredisx64Url = "http://download.microsoft.com/download/d/2/4/d242c3fb-da5a-4542-ad66-f9661d0a8d19/vcredist_x64.exe"
-$client.DownloadFile( $msredisx64Url, (Join-Path $location "vcredist_x64.exe") )
-"Installing Microsoft Visual C++ 2008 Redistributable Package (x64)"
-Start-Process "vcredist_x64.exe" "/q" -wait
-
-"Downloading IE9"
-$ie9Url = "http://download.microsoft.com/download/C/1/6/C167B427-722E-4665-9A40-A37BC5222B0A/IE9-Windows7-x64-enu.exe"
-$client.DownloadFile( $ie9Url, (Join-Path $location "IE9-Windows7-x64-enu.exe") )
-"Installing IE9"
-Start-Process "IE9-Windows7-x64-enu.exe" "/passive /norestart" -wait
-
-"Downloading Windows Update Agent"
-$wuinstallUrl = "http://download.windowsupdate.com/WindowsUpdate/redist/standalone/7.4.7600.226/WindowsUpdateAgent30-x64.exe"
-$client.DownloadFile( $wuinstallUrl, (Join-Path $location "WindowsUpdateAgent30-x64.exe") )
-"Installing Windows Update Agent"
-Start-Process "WindowsUpdateAgent30-x64.exe" "/wuforce /quiet /norestart" -wait
 
 "Disable weak ciphers"
 regedit.exe /s c:\install\disableweakssl.reg
@@ -65,65 +25,5 @@ regedit.exe /s c:\install\disableweakssl.reg
 "Installing MSMQ hotfix"
 Start-Process wusa "c:\install\Windows6.1-KB2554746-x64.msu /log:Windows6.1-KB2554746-x64.evt /quiet /norestart" -wait
 
-"Downloading Atomia Installer"
-$InstallerUrl = "http://installer.atomia.com/Atomia%20Installer-1.4.3.exe"
-$client.DownloadFile( $InstallerUrl, (Join-Path $location "AtomiaInstaller.exe") )
-Start-Process c:\install\AtomiaInstaller.exe ("/q /log AtomiaInstaller.txt /S") -wait
-$WshShell = New-Object -comObject WScript.Shell
-$Shortcut = $WshShell.CreateShortcut("$Home\Desktop\AtomiaInstaller.lnk")
-$Shortcut.TargetPath = "C:\Program Files (x86)\Atomia Installer\appupdaterw.exe"
-$Shortcut.Save()
 
-Function ImportPfxCertificate($CertFileToImport, $CertStoreName)
-{ 
-	# Define The Password That Protects The Private Key
-	# (ALSO see: http://jorgequestforknowledge.wordpress.com/2011/12/15/passwords-containing-special-characters-in-powershell/)
-	$PrivateKeyPassword = ''
-
-	$ImportFlags = "MachineKeySet, Exportable, PersistKeySet"
-	$CertToImport = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2 $CertFileToImport,$PrivateKeyPassword,$ImportFlags
-
-	# Define The Scope And Certificate Store Within That Scope To Import The Certificate Into
-	# Available Cert Store Scopes are "LocalMachine" or "CurrentUser"
-	$CertStoreScope = "LocalMachine"
-	# For Available Cert Store Names See Figure 5 (Depends On Cert Store Scope)
-	#$CertStoreName = "My"
-	$CertStore = New-Object System.Security.Cryptography.X509Certificates.X509Store $CertStoreName, $CertStoreScope
-
-	# Import The Targeted Certificate Into The Specified Cert Store Name Of The Specified Cert Store Scope
-	$CertStore.Open([System.Security.Cryptography.X509Certificates.OpenFlags]::ReadWrite)
-	$CertStore.Add($CertToImport)
-	$CertStore.Close()
-}
-
-ImportPfxCertificate "C:\install\certificates\root.pfx" "Root"
-ImportPfxCertificate "C:\install\certificates\actiontrail.pfx" "My"
-ImportPfxCertificate "C:\install\certificates\wildcard.pfx" "My"
-ImportPfxCertificate "C:\install\certificates\accountapi.pfx" "My"
-ImportPfxCertificate "C:\install\certificates\automationserver.pfx" "My"
-ImportPfxCertificate "C:\install\certificates\billingencrypt.pfx" "My"
-ImportPfxCertificate "C:\install\certificates\billingapi.pfx" "My"
-ImportPfxCertificate "C:\install\certificates\billing.pfx" "My"
-ImportPfxCertificate "C:\install\certificates\guicert.pfx" "My"
-ImportPfxCertificate "C:\install\certificates\guicert.pfx" "TrustedPeople"
-ImportPfxCertificate "C:\install\certificates\stssigning.pfx" "My"
-ImportPfxCertificate "C:\install\certificates\stssigning.pfx" "TrustedPeople"
-ImportPfxCertificate "C:\install\certificates\automationencrypt.pfx" "My"
-ImportPfxCertificate "C:\install\certificates\hcp.pfx" "My"
-ImportPfxCertificate "C:\install\certificates\orderapi.pfx" "My"
-ImportPfxCertificate "C:\install\certificates\sts.pfx" "My"
-ImportPfxCertificate "C:\install\certificates\userapi.pfx" "My"
-ImportPfxCertificate "C:\install\certificates\admin.pfx" "My"
-ImportPfxCertificate "C:\install\certificates\login.pfx" "My"
-
-if (Test-Path "f:\xensetup.exe")
-{
-        "Installing XEN tools"
-        Start-Process "f:\xensetup.exe" "/S /norestart" -wait
-}
-else
-{
-        "Not installing XEN tools"
-}
-
-new-item C:\install\installed -itemtype directory
+new-item C:\install\install_base.txt -itemtype file

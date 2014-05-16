@@ -6,6 +6,7 @@ mod "puppetlabs/apt", ">= 1.4.1"
 mod "puppetlabs/mysql"
 mod "puppetlabs/ntp"
 mod "opentable/nsclient"
+mod "rismoney/chocolatey"
   
 mod "dism",
   :git => "git://github.com/jimmybergman/puppetlabs-dism.git"
