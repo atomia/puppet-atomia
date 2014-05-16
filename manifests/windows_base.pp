@@ -224,11 +224,13 @@ class atomia::windows_base (
   file { 'C:\install\install_certificates.ps1':
     ensure => 'file',
     source => "puppet:///modules/atomia/windows_base/install_certificates.ps1",
+    require => File['c:/install/certificates'],
   }
   exec { 'install-certificates':
     command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file C:\install\install_certificates.ps1',
     creates => 'C:\install\install_certificates.txt',
-  }  
+    require => File['C:\install\install_certificates.ps1'],
+    }  
   
   # Install Atomia Installer
   file { 'C:\install\install_atomia_installer.ps1':
