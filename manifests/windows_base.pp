@@ -32,7 +32,7 @@ class atomia::windows_base (
   $mail_reply_to    = "",
   $storage_server_hostname,
   $mail_dispatcher_interval         = "30",
-  $is_iis							= 0) 
+  $is_iis             = 0) 
 
   {
   if( $is_iis == 0 ){
@@ -151,14 +151,27 @@ class atomia::windows_base (
     source => "puppet:///modules/atomia/windows_base/installcert.ps1"
   }
 
-  file { 'c:/install/certificates':
-    source  => 'puppet:///atomiacerts/certificates',
-    recurse => true
+  if($vagrant){
+    file { 'c:/install/certificates':
+      source  => 'puppet:///modules/atomiacerts/certificates',
+      recurse => true
+    }
+  
+    file { 'C:\inetpub\wwwroot\empty.crl':
+      ensure => 'file',
+      source  => 'puppet:///modules/atomiacerts/empty.crl',
+    }    
   }
-
-  file { 'C:\inetpub\wwwroot\empty.crl':
-    ensure => 'file',
-    source => "puppet:///atomiacerts/empty.crl"
+  else {
+    file { 'c:/install/certificates':
+      source  => 'puppet:///atomiacerts/certificates',
+      recurse => true
+    }
+  
+    file { 'C:\inetpub\wwwroot\empty.crl':
+      ensure => 'file',
+      source => "puppet:///atomiacerts/empty.crl"
+    }
   }
  }
 }
