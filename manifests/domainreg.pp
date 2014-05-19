@@ -81,6 +81,7 @@ class atomia::domainreg (
                 name => apache2,
                 enable => true,
                 ensure => running,
+                require => Package['atomiadomainregistration-masterserver'],
         }
 
     file { '/etc/cron.d/rotate-domainreg-logs':

@@ -17,4 +17,7 @@ mod "openssl",
   
 mod "nfs",
   :git => "git://github.com/stefanmortensen/puppet-nfs.git"
+
+mod "httpauth",
+  :git => "git://github.com/jamtur01/puppet-httpauth.git"
   

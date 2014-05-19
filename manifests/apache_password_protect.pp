@@ -20,8 +20,7 @@
 
 
 class atomia::apache_password_protect ($username, $password) {
-  $htconf = generate("/usr/bin/htpasswd", "-bn", $username, $password)
-
+  
   file { "/etc/apache2":
     ensure => directory,
     owner  => root,
@@ -37,15 +36,21 @@ class atomia::apache_password_protect ($username, $password) {
     require => File["/etc/apache2"],
   }
 
+  httpauth { $username:
+    file     => '/etc/apache2/htpasswd.conf',
+    password => $password,
+    mechanism => basic,
+    ensure => present,
+    require => File['/etc/apache2'],
+  }
+
   file { "/etc/apache2/htpasswd.conf":
-    replace => no,
     owner   => root,
     group   => root,
     mode    => 444,
-    content => $htconf,
     require => File["/etc/apache2"],
   }
-
+  
   file { "/etc/apache2/conf.d/passwordprotect":
     owner   => root,
     group   => root,
