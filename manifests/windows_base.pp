@@ -179,7 +179,7 @@ class atomia::windows_base (
   exec { 'install-chocolatey':
     command => "iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))",
     provider  => powershell,
-    unless  => 'Test-Path C:\Chocolatey'
+    onlyif  => 'Test-Path C:\Chocolatey'
   }
   
   exec { 'set-chocolatey-path':
@@ -271,7 +271,7 @@ class atomia::windows_base (
   }
 
 
-  if($vagrant){
+  if($::vagrant){
     file { 'c:/install/certificates':
       source  => 'puppet:///modules/atomiacerts/certificates',
       recurse => true

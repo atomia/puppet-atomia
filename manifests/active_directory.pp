@@ -39,15 +39,15 @@ class atomia::active_directory (
     content => template('atomia/active_directory/sync_time.ps1.erb'),
   }
   
-  if($vagrant){
+  if($::vagrant){
 	  file { 'c:/install/add_users_vagrant.ps1':
 	    ensure => 'file',
 	    content => template('atomia/active_directory/add_users_vagrant.ps1.erb'),
 	  }  
     exec { 'add-ad-users-vagrant':
-      command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/add_users.ps1',
+      command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/add_users_vagrant.ps1',
       creates => 'C:\install\installed',
-      require => File['c:/install/add_users.ps1'],
+      require => File['c:/install/add_users_vagrant.ps1'],
     }
   
   } else {

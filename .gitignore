@@ -5,4 +5,5 @@ spec/fixtures/
 *.pfx
 *.crt
 *.crl
-*metadata.json
+metadata.json
+/metadata.json
