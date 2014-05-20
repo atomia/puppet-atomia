@@ -13,12 +13,6 @@ describe 'atomia::domainreg' do
 		it { should contain_file('domainreg.conf.puppet').with_path('/etc/domainreg.conf.puppet') }
     end
     
-    it { should contain_file('/etc/apache2/htpasswd.conf').with(
-    			'owner'   => 'root',
-				'group'   => 'root',
-				'mode'    => '444',
-				).with_content(/domainreg/)
-	}    
 
 
 end

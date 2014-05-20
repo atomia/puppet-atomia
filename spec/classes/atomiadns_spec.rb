@@ -16,12 +16,6 @@ describe 'atomia::atomiadns' do
 	end
 	
  
-    it { should contain_file('/etc/apache2/htpasswd.conf').with(
-    			'owner'   => 'root',
-				'group'   => 'root',
-				'mode'    => '444',
-				).with_content(/atomiadns/)
-	}
 
     it { should contain_file('/etc/atomiadns.conf.master').with(
     			'owner'   => 'root',

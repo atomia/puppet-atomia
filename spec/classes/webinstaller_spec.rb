@@ -9,13 +9,6 @@ describe 'atomia::webinstaller' do
 		}
 	end
     
-    it { should contain_file('/etc/apache2/htpasswd.conf').with(
-    			'owner'   => 'root',
-				'group'   => 'root',
-				'mode'    => '444',
-				).with_content(/webinstaller/)
-	}    
-
 
 end
 
