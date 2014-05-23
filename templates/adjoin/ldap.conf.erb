@@ -1,5 +1,5 @@
 base <%= @base_dn %>
-uri <%= ldap_uris %>
+uri <%= @ldap_uris %>
 ldap_version 3
 binddn cn=<%= @bind_user %>,<%= @base_dn %>
 bindpw <%= @bind_password %>

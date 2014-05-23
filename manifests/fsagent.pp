@@ -40,11 +40,25 @@ class atomia::fsagent (
     }
   }
 
+  if !defined(File["/storage"]) {
+    file { "/storage":
+      ensure => directory,
+    }
+  }
+
+  if !defined(File["/storage/content"]) {
+    file { "/storage/content":
+      ensure => directory,
+      require => File["/storage"],
+    }
+  }
+
   file { "/storage/content/backup":
     ensure => "directory",
     owner  => root,
     group  => root,
     mode   => 710,
+    require => File["/storage/content"],
   }
 
   file { "/etc/default/fsagent":
@@ -58,11 +72,12 @@ class atomia::fsagent (
   file { "/storage/configuration":
     ensure => directory,
     mode   => 711,
+    require => File["/storage"],
   }
 
   file { "/etc/cron.d/clearsessions":
     ensure  => file,
-    content => "15 * * * * root lockfile -r0 /var/run/clearsession.lock && (find /storage/configuration/php_session_path -mtime +2 -exec rm -f '{}' '+'; rm -f /var/run/clearsession.lock)"
+    content => "15 * * * * root lockfile -r0 /var/run/clearsession.lock && (find /storage/configuration/php_session_path -mtime +2 -exec rm -f '{}' '+'; rm -f /var/run/clearsession.lock) \n"
   }
 
   if $use_ssl {
