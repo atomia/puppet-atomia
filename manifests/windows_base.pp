@@ -237,10 +237,12 @@ class atomia::windows_base (
     ensure => 'file',
     source => "puppet:///modules/atomia/windows_base/install_atomia_installer.ps1",
   }
+
   exec { 'install-atomia-installer':
     command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file C:\install\install_atomia_installer.ps1',
     creates => 'C:\install\install_atomia_installer.txt',
   }    
+
   file { 'C:\ProgramData\Atomia Installer\appupdater.ini':
     ensure => 'file',
     source => "puppet:///modules/atomia/windows_base/appupdater.ini",
@@ -252,6 +254,7 @@ class atomia::windows_base (
     command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file C:\install\base.ps1',
     creates => 'C:\install\install_base.txt',
   }  
+
 
   file { 'C:\Program Files (x86)\Atomia': ensure => 'directory' }
 
