@@ -27,12 +27,14 @@ define atomia::nfsmount(
       ensure => directory,
     }
   }
-  	
+
+  if !defined(File[$mount_point]) {
 	file { $mount_point:
 		ensure => directory,
 		require => File["/storage"],
         mode    => 711,
 	}
+}
 
 	
 	if $operatingsystem != "Debian" {
