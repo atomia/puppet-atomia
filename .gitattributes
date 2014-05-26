@@ -7,3 +7,5 @@
 
 *.msu binary
 *.msi binary
+*.tar.gz binary
+*.exe binary

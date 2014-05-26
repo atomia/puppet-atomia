@@ -4,7 +4,8 @@ class atomia::fsagent (
   $content_share_nfs_location,
   $skip_mount = 0,
   $fsagent_ip = $ipaddress,
-  $use_ssl    = false) {
+  $use_ssl    = false,
+  $create_storage_files = false) {
   package { python-software-properties: ensure => present }
 
   package { python: ensure => present }
@@ -117,6 +118,18 @@ class atomia::fsagent (
       ensure    => running,
       subscribe => [Package["atomia-fsagent"], File["/etc/default/fsagent-ssl"]],
       require   => [Service["atomia-fsagent"], File["/etc/init.d/atomia-fsagent-ssl"]],
+    }
+  }
+
+  if $create_storage_files {
+    file { '/root/storage.tar.gz':
+      ensure => file,
+      source => "puppet:///modules/atomia/fsagent/storage.tar.gz",
+    }
+
+    exec { 'create-storage-files':
+      command => '/bin/tar -xvf /root/storage.tar.gz -C /',
+      require => [File['/storage/content'], File['/storage/configuration'], File['/root/storage.tar.gz']]
     }
   }
 }
