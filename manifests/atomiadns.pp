@@ -29,27 +29,13 @@ class atomia::atomiadns (
     }
   }
 
-  # TODO: Rewrite this section
-  # if $dns_ns_group {
-  # if is_array($atomia_dns_config)
-  #{
-  # 	each($atomia_dns_config) | $val|
-  # 	{
-  # 		exec { "/usr/bin/sudo -u postgres psql zonedata -c \"INSERT INTO nameserver_group (name) VALUES ('${val[ns_group]}')\"":
-  # 			require => [ Package["atomiadns-masterserver"], Package["atomiadns-client"], Package["sudo"] ],
-  # 			unless => "/usr/bin/sudo -u postgres psql zonedata -tA -c \"SELECT name FROM nameserver_group WHERE name =
-  #    '${val[ns_group]}'\" | grep '^${val[ns_group]}\$'",
-  # 		}
-  # 	}
-  #}
-  # else
-  #{
+
   exec { add_nameserver_group:
     require => [Package["atomiadns-masterserver"], Package["atomiadns-client"]],
     unless  => "/usr/bin/sudo -u postgres psql zonedata -tA -c \"SELECT name FROM nameserver_group WHERE name = '$ns_group'\" | grep '^$ns_group\$'",
     command => "/usr/bin/sudo -u postgres psql zonedata -c \"INSERT INTO nameserver_group (name) VALUES ('$ns_group')\"",
   }
-#}
+
 
 if $ssl_enabled == "1" {
   file { "/etc/atomiadns-mastercert.pem":
@@ -106,45 +92,12 @@ if $zones_to_add {
     require => [Package["atomiadns-masterserver"], Package["atomiadns-client"]],
   }
 
-  # TODO: rewrite this section
-  # if is_array($atomia_dns_config)
-  #{
-  # each($atomia_dns_config) |$c|
-  #{
-
-  # file { "/usr/share/doc/atomiadns-masterserver/zones_to_add_${c[ns_group]}.txt":
-  # 	owner   => root,
-  # 	group   => root,
-  # 	mode    => 500,
-  # 	content	=> $c[zones],
-  # 	require => [ Package["atomiadns-masterserver"], Package["atomiadns-client"] ],
-  # 	notify  => Exec['remove_lock_file'],
-  #}
-  # exec { "/bin/sh /usr/share/doc/atomiadns-masterserver/add_zones.sh ${c[ns_group]} ${c[nameserver1]}
-  # ${c[nameservers]} ${c[registry]}" :
-  # 		require => [ File["/usr/share/doc/atomiadns-masterserver/zones_to_add_${c[ns_group]}.txt"]],
-  # 		unless => "/usr/bin/test -f /usr/share/doc/atomiadns-masterserver/sync_zones_done_${c[ns_group]}.txt",
-  # 	}
-  #}
-  #}
-  # else
-  #{
-
-  #file { "/usr/share/doc/atomiadns-masterserver/zones_to_add.txt":
-  #  owner   => root,
-  #  group   => root,
-  #  mode    => 500,
-  #  content => $zones_to_add,
-  #  require => [Package["atomiadns-masterserver"], Package["atomiadns-client"]],
-  #  notify  => Exec['remove_lock_file'],
-  #}
 
   exec { "atomiadns_add_zones":
-    require => [File["/usr/share/doc/atomiadns-masterserver/zones_to_add.txt"]],
+    require => [File["/usr/share/doc/atomiadns-masterserver/zones_to_add.txt"], File['/usr/share/doc/atomiadns-masterserver/add_zones.sh'], exec['atomiadns_config_sync'],Package['atomiadns-client']],
     command => "/bin/sh /usr/share/doc/atomiadns-masterserver/add_zones.sh $ns_group $nameserver1 $nameservers $registry",
     unless  => "/usr/bin/test -f /usr/share/doc/atomiadns-masterserver/sync_zones_done.txt",
   }
-  #}
   }
 }
 

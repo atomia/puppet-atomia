@@ -43,7 +43,7 @@ class atomia::apache_password_protect ($username, $password) {
     ensure => present,
     require => File['/etc/apache2'],
   }
-
+  ->
   file { "/etc/apache2/htpasswd.conf":
     owner   => root,
     group   => root,

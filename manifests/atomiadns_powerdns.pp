@@ -30,6 +30,7 @@
 #        agent_password   => 'abc123',
 #        atomia_dns_url   => 'http://127.0.0.1/atomiadns',
 #}
+
 class atomia::atomiadns_powerdns (
   # If ssl should be enabled or not
   $ssl_enabled = 0,
@@ -60,7 +61,7 @@ class atomia::atomiadns_powerdns (
       Package["atomiadns-powerdns-database"],
       Package["atomiadns-powerdnssync"],
       File["/etc/atomiadns.conf.powerdnssync"]],
-    subscribe => [File["/etc/atomiadns.conf.powerdnssync"]],
+    #subscribe => [File["/etc/atomiadns.conf.powerdnssync"]],
   }
 
   if $ssl_enabled == '1' {
@@ -73,11 +74,7 @@ class atomia::atomiadns_powerdns (
 
   }
 
-  exec { "/usr/bin/atomiapowerdnssync add_server $atomia_dns_ns_group && /etc/init.d/atomiadns-powerdnssync stop && /etc/init.d/atomiadns-powerdnssync start && /usr/bin/atomiapowerdnssync full_reload_online"
-  :
-    require => Package["atomiadns-powerdnssync"],
-    unless  => ["/usr/bin/atomiapowerdnssync get_server"],
-  }
+
 
   file { "/etc/atomiadns.conf.powerdnssync":
     owner   => root,
@@ -85,26 +82,28 @@ class atomia::atomiadns_powerdns (
     mode    => 444,
     content => template("atomia/atomiadns_powerdns/atomiadns.conf.powerdnssync.erb"),
     require => [Package["atomiadns-powerdns-database"], Package["atomiadns-powerdnssync"]],
-    notify  => Exec["atomiadns_config_sync"],
+    #notify  => Exec["atomiadns_config_sync"],
   }
 
-  if !defined(File["/usr/bin/atomiadns_config_sync"]) {
-    file { "/usr/bin/atomiadns_config_sync":
+  if !defined(File["/usr/bin/atomiadns_powerdns_config_sync"]) {
+    file { "/usr/bin/atomiadns_powerdns_config_sync":
       owner   => root,
       group   => root,
       mode    => 500,
       source  => "puppet:///modules/atomia/atomiadns_powerdns/atomiadns_config_sync",
       require => [Package["atomiadns-powerdns-database"], Package["atomiadns-powerdnssync"]],
     }
-
-    exec { "atomiadns_config_sync":
-      refreshonly => true,
-      require     => File["/usr/bin/atomiadns_config_sync"],
-      before      => Service["atomiadns-powerdnssync"],
-      command     => "/usr/bin/atomiadns_config_sync $atomia_dns_ns_group",
-    }
-
   }
 
+  exec { "atomiadns_powerdns_config_sync":
+    require     => [File["/usr/bin/atomiadns_powerdns_config_sync"],File["/etc/atomiadns.conf.powerdnssync"], Package['atomiadns-powerdnssync']],
+    command     => "/usr/bin/atomiadns_powerdns_config_sync $atomia_dns_ns_group",
+  }  
+  ->
+  exec { "add-server":
+    command => "/usr/bin/atomiapowerdnssync add_server $atomia_dns_ns_group && /etc/init.d/atomiadns-powerdnssync stop && /etc/init.d/atomiadns-powerdnssync start && /usr/bin/atomiapowerdnssync full_reload_online",
+    #require => [Package["atomiadns-powerdnssync"],Exec['atomiadns_powerdns_config_sync'],Service['atomiadns-powerdnssync']],
+    unless  => ["/usr/bin/atomiapowerdnssync get_server"],
+  }
 }
 
