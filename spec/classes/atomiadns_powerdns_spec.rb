@@ -35,7 +35,7 @@ describe 'atomia::atomiadns_powerdns' do
     
     it { should contain_file('/etc/atomiadns.conf.powerdnssync').with_content(/abc123/) }
     it { should contain_file('/etc/atomiadns.conf.powerdnssync').with_content(/;soap_cacert = \/etc\/atomiadns-mastercert\.pem/) }
-    it { should contain_file('/usr/bin/atomiadns_config_sync') }
+    it { should contain_file('/usr/bin/atomiadns_powerdns_config_sync') }
     
     describe 'ssl is enabled' do 
 		let :params do
