@@ -34,9 +34,9 @@ class atomia::testenvironment::local_nfs_server($hostip='127.0.0.1',$content_sha
   }
   ->
   file {'/etc/exports':
-    content => "/export/configuration 192.168.33.21(rw,async,no_root_squash,no_subtree_check)
-/export/content 192.168.33.21(rw,async,no_root_squash,no_subtree_check)
-/export/mail 192.168.33.21(rw,async,no_root_squash,no_subtree_check)
+    content => "/export/configuration 192.168.33.0/24(rw,async,no_root_squash,no_subtree_check)
+/export/content 192.168.33.0/24(rw,async,no_root_squash,no_subtree_check)
+/export/mail 192.168.33.0/24(rw,async,no_root_squash,no_subtree_check)
 ",
   require => Package['nfs-kernel-server'],
   notify => Service['nfs-kernel-server'],}
