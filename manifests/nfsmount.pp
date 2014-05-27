@@ -42,7 +42,7 @@ define atomia::nfsmount(
 			service {'idmapd' :
 				ensure => running,
 				subscribe => File['/etc/idmapd.conf'],
-				requre => [Package['nfs-common']],
+				require => [Package['nfs-common']],
 			}
 		}
 	}
