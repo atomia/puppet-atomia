@@ -11,7 +11,8 @@ describe 'atomia::daggre' do
 	
 	let :facts do 
 		{
-			:osfamily		=> 'Debian'
+			:osfamily		=> 'Debian',
+			:lsbdistid		=> 'Ubuntu',
 		}
 	end
 	
