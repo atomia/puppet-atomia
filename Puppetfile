@@ -20,4 +20,7 @@ mod "nfs",
 
 mod "httpauth",
   :git => "git://github.com/jamtur01/puppet-httpauth.git"
+
+mod "htpasswd"
+  :git => "git://github.com/leinaddm/puppet-htpasswd.git"
   

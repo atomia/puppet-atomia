@@ -36,13 +36,12 @@ class atomia::apache_password_protect ($username, $password) {
     require => File["/etc/apache2"],
   }
 
-  httpauth { $username:
-    file     => '/etc/apache2/htpasswd.conf',
-    password => $password,
-    mechanism => basic,
-    ensure => present,
+
+  htpasswd { $username:
+    cryptpasswd => ht_sha1($password),  
+    target      => '/etc/apache2/htpasswd.conf',
     require => File['/etc/apache2'],
-  }
+  }  
   ->
   file { "/etc/apache2/htpasswd.conf":
     owner   => root,
