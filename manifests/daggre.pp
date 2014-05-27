@@ -1,10 +1,25 @@
-class atomia::daggre ($global_auth_token, $ip_addr = $ipaddress) {
+class atomia::daggre ($global_auth_token, $ip_addr = $ipaddress, $content_share_nfs_location = '', $config_share_nfs_location = '', $use_nfs3 = true ) {
   
   include atomia::mongodb
 
+  class { 'apt': }
+  
+  if $operatingsystem == "Ubuntu" {
+    apt::ppa { 'ppa:chris-lea/node.js': }
+
+    package { nodejs:
+      ensure  => latest,
+      require => [Apt::Ppa['ppa:chris-lea/node.js'], Exec['apt-get-update']]
+    }
+
+    exec { "apt-get-update": command => "/usr/bin/apt-get update" }
+  } else {
+    package { nodejs: ensure => present, }
+  }
+
   package { "daggre":
     ensure  => present,
-    require => Package["mongodb-10gen"]
+    require => [Package["mongodb-10gen"], Package["nodejs"]],
   }
 
   package { "atomia-daggre-reporters-disk":
@@ -40,6 +55,22 @@ class atomia::daggre ($global_auth_token, $ip_addr = $ipaddress) {
     pattern   => ".*/usr/bin/daggre.*",
     require   => [Package["daggre"], File["/etc/default/daggre"]],
     subscribe => File["/etc/default/daggre"],
+  }
+
+  if $content_share_nfs_location != '' {
+    atomia::nfsmount { 'mount_content':
+      use_nfs3 => $use_nfs3,
+      mount_point => '/storage/content',
+      nfs_location => $content_share_nfs_location
+    }
+  }
+  
+  if $config_share_nfs_location != '' {
+    atomia::nfsmount { 'mount_config':
+      use_nfs3 => $use_nfs3,
+      mount_point => '/storage/configuration',
+      nfs_location => $config_share_nfs_location
+    }
   }
 
 }

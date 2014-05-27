@@ -19,7 +19,7 @@ define atomia::nfsmount(
       remounts => false,
       options => "rw,noatime",
       ensure => mounted,
-      require => File[$mount_point]
+      require => [File[$mount_point], Package['nfs-common']],
     }
   
   if !defined(File["/storage"]) {
@@ -41,7 +41,8 @@ define atomia::nfsmount(
 	  if !defined(Service["idmapd"]){
 			service {'idmapd' :
 				ensure => running,
-				subscribe => File['/etc/idmapd.conf']
+				subscribe => File['/etc/idmapd.conf'],
+				requre => [Package['nfs-common']],
 			}
 		}
 	}
