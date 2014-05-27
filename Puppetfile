@@ -1,7 +1,5 @@
 forge "http://forge.puppetlabs.com"
 
-
-mod "joshcooper/powershell", ">= 0.0.5"
 mod "puppetlabs/apt", ">= 1.4.1"
 mod "puppetlabs/mysql"
 mod "puppetlabs/ntp"
@@ -23,4 +21,9 @@ mod "httpauth",
 
 mod "htpasswd"
   :git => "git://github.com/leinaddm/puppet-htpasswd.git"
+
+mod "powershell"
+  :git => "git://github.com/joshcooper/puppetlabs-powershell.git"
+
+
   
