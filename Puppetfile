@@ -3,8 +3,10 @@ forge "http://forge.puppetlabs.com"
 mod "puppetlabs/apt", ">= 1.4.1"
 mod "puppetlabs/mysql"
 mod "puppetlabs/ntp"
-mod "rismoney/chocolatey"
-  
+
+mod "chocolatey"
+  :git =>  "git://github.com/chocolatey/puppet-chocolatey.git"
+
 mod "dism",
   :git => "git://github.com/jimmybergman/puppetlabs-dism.git"
   
