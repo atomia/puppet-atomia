@@ -33,5 +33,8 @@ mod "htpasswd",
 mod "powershell",
   :git => "git://github.com/joshcooper/puppetlabs-powershell.git"
 
+mod "download_file",
+  :git => "git://github.com/stefanmortensen/puppet-download_file.git"
+
 
   
