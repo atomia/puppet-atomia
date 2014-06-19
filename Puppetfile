@@ -19,7 +19,7 @@ mod "openssl",
   :git => "git://github.com/camptocamp/puppet-openssl.git"
 
 mod "nsclient",
-  :git => "git://github.com/opentable/puppet-nsclient.git"  
+  :git => "git://github.com/stefanmortensen/puppet-nsclient.git"  
   
 mod "nfs",
   :git => "git://github.com/stefanmortensen/puppet-nfs.git"
