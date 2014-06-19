@@ -14,7 +14,7 @@ If you want to update the Atomia puppet module to the latest supported version s
 On the Puppet Master generate new certificates for your environment, replace arguments to generate_certificates.rb to fit your environment
 
 	cd /etc/puppet/modules/atomia/files/certificates/
-	ruby generate_certificates.rb mydomain.com login order billing my
+	ruby generate_certificates.rb mydomain.com login order billing hcp
 
 Set up your Active Directory domain according to best practices.
 
