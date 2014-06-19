@@ -5,7 +5,7 @@ mod "puppetlabs/mysql"
 mod "puppetlabs/ntp"
 
 mod "chocolatey"
-  :git =>  "git://github.com/chocolatey/puppet-chocolatey.git"
+  :git => "git://github.com/chocolatey/puppet-chocolatey.git"
 
 mod "dism",
   :git => "git://github.com/jimmybergman/puppetlabs-dism.git"
