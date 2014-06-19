@@ -3,7 +3,6 @@ forge "http://forge.puppetlabs.com"
 mod "puppetlabs/apt", ">= 1.4.1"
 mod "puppetlabs/mysql"
 mod "puppetlabs/ntp"
-mod "opentable/nsclient"
 mod "rismoney/chocolatey"
   
 mod "dism",
@@ -11,7 +10,9 @@ mod "dism",
   
 mod "openssl",
   :git => "git://github.com/camptocamp/puppet-openssl.git"
-  
+
+mod "nsclient",
+  :git => "git://github.com/opentable/puppet-nsclient.git"  
   
 mod "nfs",
   :git => "git://github.com/stefanmortensen/puppet-nfs.git"
