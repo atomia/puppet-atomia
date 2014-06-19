@@ -1,8 +1,13 @@
 forge "http://forge.puppetlabs.com"
 
-mod "puppetlabs/apt", ">= 1.4.1"
-mod "puppetlabs/mysql"
-mod "puppetlabs/ntp"
+mod "apt",
+  :git => "git://github.com/puppetlabs/puppetlabs-apt.git"
+
+mod "mysql",
+  :git => "git://github.com/puppetlabs/puppetlabs-mysql.git"
+
+mod "ntp",
+  :git => "git://github.com/puppetlabs/puppetlabs-ntp.git"
 
 mod "chocolatey",
   :git => "git://github.com/chocolatey/puppet-chocolatey.git"
