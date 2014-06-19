@@ -4,7 +4,7 @@ mod "puppetlabs/apt", ">= 1.4.1"
 mod "puppetlabs/mysql"
 mod "puppetlabs/ntp"
 
-mod "chocolatey"
+mod "chocolatey",
   :git => "git://github.com/chocolatey/puppet-chocolatey.git"
 
 mod "dism",
