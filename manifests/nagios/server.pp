@@ -164,7 +164,7 @@ class atomia::nagios::server(
         owner   => 'root',
         group   => 'root',
         mode    => '0644',
-        content => template('atomia/nagios/atomia.cfg.erb'),
+        content => template('atomia/nagios/atomia.conf.erb'),
         require => Package["atomia-manager"]
     }   
 
