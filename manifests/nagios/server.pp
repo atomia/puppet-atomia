@@ -159,7 +159,14 @@ class atomia::nagios::server(
         require => File["/etc/nagios3/conf.d"],
         notify  => Service["nagios3"]
     }   
- 
+
+    file { '/etc/atomia.conf':
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        content => template('atomia/nagios/atomia.cfg.erb'),
+        require => Package["atomia-manager"]
+    }   
 
 	# Localhost
     @@nagios_host { "localhost-host" :
