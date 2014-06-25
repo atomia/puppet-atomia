@@ -3,7 +3,7 @@ class atomia::awstats (
 		$agent_password,
 		$ssl_enabled = 0,
 		$content_share_nfs_location,
-		$configuration_share_nfs_location,
+		$configuration_share_nfs_location = '',
 		$ssl_cert_key = "",
 		$ssl_cert_file = "",
 		$skip_mount        = 0,
@@ -25,10 +25,13 @@ class atomia::awstats (
 			nfs_location => $content_share_nfs_location
 		}
 
-		atomia::nfsmount { 'mount_configuration':
-			use_nfs3 => 1,
-			mount_point => '/storage/configuration',
-			nfs_location => $configuration_share_nfs_location
+		if($configuration_share_nfs_location != '')
+		{
+			atomia::nfsmount { 'mount_configuration':
+				use_nfs3 => 1,
+				mount_point => '/storage/configuration',
+				nfs_location => $configuration_share_nfs_location
+			}
 		}
     }
 	if $ssl_enabled == 1 {
