@@ -9,7 +9,8 @@ class atomia::mailserver (
   $mail_share_nfs_location = "",
   $use_nfs3                = 1,
   $mailbox_base            = "/storage/virtual",
-  $atomia_mailman_installed = false) {
+  $atomia_mailman_installed = false,
+  $mysql_server_id        = "") {
   package { postfix-mysql: ensure => installed }
 
   package { dovecot-common: ensure => installed }
@@ -88,8 +89,11 @@ class atomia::mailserver (
   }
 
   $mysql_command = "/usr/bin/mysql --defaults-file=/etc/mysql/debian.cnf -Ns"
-  $mysql_server_id = inline_template('<%= hostname.scan(/\d+/).first %>')
-
+  if($mysql_server_id == "")
+  {
+    $mysql_server_id = inline_template('<%= hostname.scan(/\d+/).first %>')
+  }
+  
   if $is_master == 1 {
     class { 'mysql::server':
       override_options => {
