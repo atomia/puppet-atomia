@@ -91,14 +91,18 @@ class atomia::mailserver (
   $mysql_command = "/usr/bin/mysql --defaults-file=/etc/mysql/debian.cnf -Ns"
   if($mysql_server_id == "")
   {
-    $mysql_server_id = inline_template('<%= hostname.scan(/\d+/).first %>')
+    $mysql_id = inline_template('<%= hostname.scan(/\d+/).first %>')
   }
-  
+  else
+  {
+    $mysql_id = $mysql_server_id
+  }
+
   if $is_master == 1 {
     class { 'mysql::server':
       override_options => {
         'mysqld' => {
-          'server_id'    => "$mysql_server_id",
+          'server_id'    => "$mysql_id",
           'log_bin'      => '/var/log/mysql/mysql-bin.log',
           'binlog_do_db' => "$db_name",
           'bind_address' => $master_ip
@@ -153,7 +157,7 @@ class atomia::mailserver (
     class { 'mysql::server':
       override_options => {
         mysqld => {
-          'server_id'    => "$mysql_server_id",
+          'server_id'    => "$mysql_id",
           'log_bin'      => '/var/log/mysql/mysql-bin.log',
           'binlog_do_db' => "$db_name",
           'bind_address' => "$ipaddress"
