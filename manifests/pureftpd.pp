@@ -11,7 +11,8 @@ class atomia::pureftpd (
   $ssl_enabled         = 0,
   $skip_mount          = 0,
   $skip_mysql          = 0,
-  $content_mount_point = "/storage/content") {
+  $content_mount_point = "/storage/content",
+  $passive_port_range   = "49152 65534") {
   package { pure-ftpd-mysql: ensure => installed }
 
   $mysql_command = "/usr/bin/mysql --defaults-file=/etc/mysql/debian.cnf -Ns"
@@ -156,7 +157,7 @@ class atomia::pureftpd (
     owner   => root,
     group   => root,
     mode    => 444,
-    content => "49152 65534",
+    content => $passive_port_range,
     require => Package["pure-ftpd-mysql"],
     notify  => Service["pure-ftpd-mysql"],
   }
