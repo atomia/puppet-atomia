@@ -29,7 +29,7 @@ class atomia::mysql (
 
 	exec { "delete-test-db":
 		command => "$mysql_command -e \"DROP DATABASE test;\" ",
-		onlyif => "$mysql_command -e \"SHOW DATABASES;\" | grep test"
+		onlyif => "$mysql_command -e \"SHOW DATABASES;\" | egrep ^test$"
 	}
 
 	file { "/etc/cron.hourly/ubuntu-mysql-fix":
