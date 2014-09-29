@@ -1,9 +1,11 @@
 #!/bin/bash
 echo "Installing Puppet Master"
 HOSTNAME=`hostname --fqdn`
-wget https://apt.puppetlabs.com/puppetlabs-release-precise.deb
-dpkg -i puppetlabs-release-precise.deb
-rm puppetlabs-release-precise.deb
+DISTNAME=`lsb_release -a | grep Codename: | awk '{print $2}'`
+PUPPETURL="https://apt.puppetlabs.com/puppetlabs-release-$DISTNAME.deb"
+wget $PUPPETURL
+dpkg -i puppetlabs-release-$DISTNAME.deb
+rm puppetlabs-release-$DISTNAME.deb
 apt-get update
 apt-get install -y puppetmaster git apache2-utils curl rubygems
 cd /etc/puppet
