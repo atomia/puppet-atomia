@@ -15,18 +15,18 @@ puppet resource package puppetdb-terminus ensure=latest
 mkdir /etc/puppet/hieradata
 
 
-echo "
+echo -e "
 :backends:
   - yaml
 :hierarchy:
-  - "nodes/%{::fqdn}"
-  - "%{::atomia_role}"
-  - "%{::atomia_brand}_common"
-  - "%{::kernel}"
+  - \"nodes/%{::fqdn}\"
+  - \"%{::atomia_role}\"
+  - \"%{::atomia_brand}_common\"
+  - \"%{::kernel}\"
   - common
 :yaml:
   :datadir: /etc/puppet/hieradata
-" > /etc/puppet/hiera.yaml
+" > test.yaml
 
 echo "
 node default {
