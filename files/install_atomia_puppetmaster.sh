@@ -26,7 +26,7 @@ echo -e "
   - common
 :yaml:
   :datadir: /etc/puppet/hieradata
-" > test.yaml
+" > /etc/puppet/hiera.yaml  
 
 echo "
 node default {
