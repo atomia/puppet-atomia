@@ -9,3 +9,4 @@
 *.msi binary
 *.tar.gz binary
 *.exe binary
+*.deb binary
