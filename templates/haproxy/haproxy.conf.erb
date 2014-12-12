@@ -1,0 +1,57 @@
+global
+        daemon
+        maxconn 30000
+	tune.ssl.default-dh-param 2048
+
+defaults
+	mode http
+	timeout connect 5000ms
+	timeout client 50000ms
+	timeout server 50000ms
+
+frontend apachecluster
+	bind <%= @apache_cluster_ip %>:80
+	bind <%= @apache_cluster_ip %>:443 ssl crt /etc/haproxy/atomia_certificates/default.pem crt /etc/haproxy/atomia_certificates
+	http-request add-header X-Proto https if { ssl_fc }
+	default_backend apache_servers
+
+frontend iiscluster
+	bind <%= @iis_cluster_ip %>:80
+	bind <%= @iis_cluster_ip %>:443 ssl crt /etc/haproxy/atomia_certificates/default.pem crt /etc/haproxy/atomia_certificates
+	http-request add-header X-Proto https if { ssl_fc }
+	default_backend iis_servers
+
+frontend mailcluster
+	bind <%= @mail_cluster_ip %>:25
+	bind <%= @mail_cluster_ip %>:110
+	bind <%= @mail_cluster_ip %>:143
+	bind <%= @mail_cluster_ip %>:587
+	default_backend mail_servers
+
+frontend ftpcluster
+	bind <%= @ftp_cluster_ip %>:21
+	default_backend ftp_servers
+
+backend apache_servers
+	balance roundrobin
+<% @apache_cluster_nodes.split(",").each do |node| -%>
+	server <%= node %>:80
+<% end -%>
+
+backend iis_servers
+	balance roundrobin
+<% @iis_cluster_nodes.split(",").each do |node| -%>
+	server <%= node %>:80
+<% end -%>
+
+backend mail_servers
+	balance roundrobin
+<% @mail_cluster_nodes.split(",").each do |node| -%>
+	server <%= node %>
+<% end -%>
+
+backend ftp_servers
+	balance roundrobin
+<% @ftp_cluster_nodes.split(",").each do |node| -%>
+	server <%= node %>
+<% end -%>
