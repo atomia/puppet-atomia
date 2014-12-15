@@ -3,6 +3,7 @@ class atomia::haproxy (
   $agent_password = "default_password",
   $enable_agent = 1,
   $certificate_sync_source = "root@fsagent:/storage/content/ssl",
+  $certificate_sync_ssh_key = "",
   $certificate_default_cert = "",
   $apache_cluster_ip = "127.0.0.1",
   $apache_cluster_nodes = "",
@@ -78,7 +79,51 @@ class atomia::haproxy (
       ensure	=> directory,
       owner	=> root,
       group	=> root,
-      mode	=> 755
+      mode	=> 755,
+      require	=> Package["haproxy"]
+    }
+
+    package { "rsync":
+    	ensure => present
+    }
+
+    file { "/etc/haproxy/sync_certificates.sh":
+      ensure	=> file,
+      owner	=> root,
+      group	=> root,
+      mode	=> 755,
+      source	=> "puppet:///modules/atomia/haproxy/sync_certificates.sh",
+      require	=> [ Package["haproxy"], Package["rsync"] ]
+    }
+
+
+    if $certificate_sync_ssh_key != "" {
+	file { "/root/.ssh":
+		ensure	=> directory,
+		owner	=> root,
+		group	=> root,
+		mode	=> 700,
+	}
+
+	file { "/root/.ssh/id_rsa":
+		ensure	=> file,
+		owner	=> root,
+		group	=> root,
+		mode	=> 600,
+		content => $certificate_sync_ssh_key
+	}
+
+	$sync_certs_cron = template("atomia/haproxy/sync_certificates.cron")
+
+	file { "/etc/cron.d/atomia-sync-certificates":
+		ensure	=> file,
+		owner	=> root,
+		group	=> root,
+		mode	=> 644,
+		content => $sync_certs_cron,
+		require => File["/root/.ssh/id_rsa"]
+
+	}
     }
 
     if $certificate_default_cert == "" {

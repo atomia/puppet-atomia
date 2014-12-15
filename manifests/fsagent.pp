@@ -5,7 +5,8 @@ class atomia::fsagent (
   $skip_mount = 0,
   $fsagent_ip = $ipaddress,
   $use_ssl    = false,
-  $create_storage_files = false) {
+  $create_storage_files = false,
+  $allow_ssh_key = "") {
   package { python-software-properties: ensure => present }
 
   package { python: ensure => present }
@@ -130,6 +131,23 @@ class atomia::fsagent (
     exec { 'create-storage-files':
       command => '/bin/tar -xvf /root/storage.tar.gz -C /',
       require => [File['/storage/content'], File['/storage/configuration'], File['/root/storage.tar.gz']]
+    }
+  }
+
+  if $allow_ssh_key != "" {
+    file { '/root/.ssh':
+      ensure => directory,
+      owner => root,
+      group => root,
+      mode => 700
+    }
+
+    file { '/root/.ssh/authorized_keys2':
+      ensure => file,
+      owner => root,
+      group => root,
+      mode => 600,
+      content => $allow_ssh_key
     }
   }
 }
