@@ -1,1 +1,1 @@
-* * * * * flock -n /var/lock/certsync.lock /etc/haproxy/sync_certificates.sh "<%= @certificate_sync_source %>"
+* * * * * root flock -n /var/lock/certsync.lock /etc/haproxy/sync_certificates.sh "<%= @certificate_sync_source %>"
