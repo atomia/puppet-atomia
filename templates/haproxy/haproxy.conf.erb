@@ -1,7 +1,8 @@
 global
-        daemon
-        maxconn 30000
+	daemon
+	maxconn 30000
 	tune.ssl.default-dh-param 2048
+	stats socket /tmp/haproxy
 
 defaults
 	mode http
@@ -29,6 +30,7 @@ frontend mailcluster
 	default_backend mail_servers
 
 frontend ftpcluster
+	mode tcp
 	bind <%= @ftp_cluster_ip %>:21
 	default_backend ftp_servers
 
@@ -51,7 +53,8 @@ backend mail_servers
 <% end -%>
 
 backend ftp_servers
+	option httpchk
 	balance roundrobin
 <% @ftp_cluster_nodes.split(",").each do |node| -%>
-	server <%= node %>
+	server <%= node %> check port 9200
 <% end -%>

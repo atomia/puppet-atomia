@@ -13,7 +13,9 @@ class atomia::pureftpd (
   $skip_mysql          = 0,
   $content_mount_point = "/storage/content",
   $passive_port_range   = "49152 65534") {
+
   package { pure-ftpd-mysql: ensure => installed }
+  package { xinetd: ensure => installed }
 
   $mysql_command = "/usr/bin/mysql --defaults-file=/etc/mysql/debian.cnf -Ns"
 
@@ -225,5 +227,38 @@ class atomia::pureftpd (
       require => Package["pure-ftpd-mysql"],
       notify  => Service["pure-ftpd-mysql"],
     }
+  }
+
+  service { xinetd:
+    name      => xinetd,
+    ensure    => running,
+    subscribe => [
+      Package["xinetd"]
+    ]
+  }
+
+  augeas { "add-heathcheck-service":
+    changes => [
+        "ins service-name after /files/etc/services/service-name[last()]",
+        "set /files/etc/services/service-name[last()] check_ftp_health",
+        "set /files/etc/services/service-name[. = 'check_ftp_health']/port 9200",
+        "set /files/etc/services/service-name[. = 'check_ftp_health']/protocol tcp"
+    ],
+    onlyif => "match /files/etc/services/service-name[. = 'check_ftp_health'] size == 0"
+  }
+
+  file { "/opt/check_ftp_health":
+    owner   => nobody,
+    group   => root,
+    mode    => 744,
+    source  => "puppet:///modules/atomia/pureftpd/check_ftp_health"
+  }
+
+  file { "/etc/xinetd.d/check_ftp_health":
+    owner   => root,
+    group   => root,
+    source => "puppet:///modules/atomia/pureftpd/check_ftp_health_xinetd",
+    notify => Service["xinetd"],
+    require => Package["xinetd"]
   }
 }

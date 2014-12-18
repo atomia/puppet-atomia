@@ -1,0 +1,15 @@
+# default: on
+# description: check_ftp_health
+service check_ftp_health
+{
+        flags           = REUSE
+        socket_type     = stream
+        port            = 9200
+        wait            = no
+        user            = nobody
+        server          = /opt/check_ftp_health
+        log_on_failure  += USERID
+        disable         = no
+        only_from       = 0.0.0.0/0
+        per_source      = UNLIMITED
+}

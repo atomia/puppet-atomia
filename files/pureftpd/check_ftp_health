@@ -1,0 +1,16 @@
+#!/bin/sh
+
+NFS_ALIVE=`df -h | grep content | wc -l`
+PUREFTPD_RUNNING=`ps auxwww | grep "pure-ftpd (SERVER)" | grep -v grep | wc -l`
+MYSQL_RUNNING=`ps auxwww | grep "/usr/sbin/mysqld" | grep -v grep | wc -l`
+
+if [ $NFS_ALIVE -eq 1 ] && [ $PUREFTPD_RUNNING -eq 1 ] && [ $MYSQL_RUNNING -eq 1 ]
+then
+    /bin/echo -e "HTTP/1.1 200 OK"
+    /bin/echo -e "Content-Type: Content-Type: text/plain"
+    /bin/echo -e ""
+else
+    /bin/echo -e "HTTP/1.1 503 Service Unavailable"
+    /bin/echo -e "Content-Type: Content-Type: text/plain"
+    /bin/echo -e ""
+fi
