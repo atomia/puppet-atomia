@@ -276,6 +276,14 @@ class atomia::mailserver (
     ensure  => present,
   }
 
+  file { "/etc/maildomain":
+    owner   => root,
+    group   => root,
+    mode    => 444,
+    content => $domain,
+    ensure  => present,
+  }
+  
   exec { "gen-key":
     command  => "/usr/bin/openssl genrsa -out /etc/dovecot/ssl.key 2048; chown root:root /etc/dovecot/ssl.key; chmod 0700 /etc/dovecot/ssl.key",
     creates  => "/etc/dovecot/ssl.key",

@@ -1,3 +1,7 @@
+#================================================#
+#    This file is managed trough puppetmaster    #
+#================================================#
+
 smtpd_sasl_auth_enable = yes
 smtpd_sasl_type = dovecot
 smtpd_sasl_path = private/auth
@@ -6,7 +10,8 @@ smtpd_banner = $myhostname ESMTP $mail_name (Ubuntu)
 biff = no
 append_dot_mydomain = no
 readme_directory = no
-myorigin = /etc/mailname
+mydomain = /etc/maildomain
+myorigin = $mydomain
 mynetworks = 127.0.0.0/8
 recipient_delimiter = +
 inet_interfaces = all
