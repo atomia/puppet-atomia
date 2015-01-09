@@ -4,7 +4,7 @@ fixtures:
     apt: "https://github.com/puppetlabs/puppetlabs-apt.git"
     stdlib: "https://github.com/puppetlabs/puppetlabs-stdlib.git"
     mysql: "https://github.com/puppetlabs/puppetlabs-mysql.git"
-    dism: "https://github.com/jimmybergman/puppetlabs-dism.git" 
+    dism: "https://github.com/puppetlabs/puppetlabs-dism.git" 
     httpauth: "https://github.com/jamtur01/puppet-httpauth"
     htpasswd: "https://github.com/leinaddm/puppet-htpasswd.git"
   symlinks:

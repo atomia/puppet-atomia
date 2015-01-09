@@ -1,4 +1,5 @@
-spec/fixtures/
+spec/fixtures/*
+spec/fixtures/modules/atomia/*
 *.bundle
 *.key
 *.csr
@@ -10,3 +11,5 @@ metadata.json
 /metadata.json
 /metadata.json
 /metadata.json
+.vagrant
+
