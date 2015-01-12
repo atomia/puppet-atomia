@@ -25,6 +25,11 @@ class puppet()
     ensure => latest,
   }
 
+  exec { 'install-rake':
+  command => '/usr/bin/gem install rake',
+  require => Package['rubygems-integration'],
+  }
+
   exec { 'install-bundler':
     command => '/usr/bin/gem install bundler',
     require => Package['rubygems-integration'],

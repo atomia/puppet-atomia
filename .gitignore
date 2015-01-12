@@ -1,4 +1,4 @@
-spec/fixtures/*
+spec/fixtures/manifests/*
 spec/fixtures/modules/atomia/*
 *.bundle
 *.key
