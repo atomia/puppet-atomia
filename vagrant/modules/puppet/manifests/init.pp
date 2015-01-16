@@ -22,7 +22,21 @@ class puppet()
   }
 
   package { 'rubygems-integration':
+    ensure  => latest,
+    require => Package['ruby-dev'],
+  }
+
+  package { 'ruby-dev':
+    ensure  => latest,
+    require => Package['g++'],
+  }
+
+  package { 'g++':
     ensure => latest,
+  }
+
+  host { 'controller':
+    ip => '185.69.44.75',
   }
 
   exec { 'install-rake':
