@@ -1,2 +1,7 @@
 ---
-atomia::profile::dns::certificate: "mycert"
+atomia::profile::dns::certificate: mycert
+atomia::profile::dns::atomiadns_password: password
+atomia::profile::dns::nameservers:
+  - ns1.atomia.com
+  - ns2.atomia.com
+atomia::profile::dns::registry: registry.atomia.com  

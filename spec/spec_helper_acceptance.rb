@@ -13,10 +13,11 @@ RSpec.configure do |c|
   c.formatter = :documentation
 
   # Configure all nodes in nodeset
-#  c.before :suite do
-#    puppet_module_install(:source => proj_root, :module_name => 'atomia')
-#    hosts.each do |host|
-#      on host, puppet('module','install','puppetlabs-stdlib'), { :acceptable_exit_codes => [0,1] }
-#    end
-#  end
+  c.before :suite do
+    # Install module
+    puppet_module_install(:source => proj_root, :module_name => 'atomia')
+    hosts.each do |host|
+      on host, puppet('module','install','puppetlabs-stdlib'), { :acceptable_exit_codes => [0,1] }
+    end
+  end
 end

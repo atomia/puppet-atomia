@@ -1,11 +1,11 @@
-<% if @ssl_enabled == "1" %>
+<% if @certficate != false %>
 <%      ssl="soap_cacert = /etc/atomiadns-mastercert.pem" %>
 <% else %>
 <%      ssl=";soap_cacert = /etc/atomiadns-mastercert.pem" %>
 <% end %>
 
-soap_uri = <%= @atomia_dns_url %>
-soap_username = <%= @agent_user %>
-soap_password = <%= @agent_password %>
+soap_uri = <%= @atomiadns_url %>
+soap_username = <%= @atomiadns_user %>
+soap_password = <%= @atomiadns_password %>
 <%= ssl %>
 servername = <%= @hostname %>

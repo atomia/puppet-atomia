@@ -1,5 +1,8 @@
 spec/fixtures/manifests/*
 spec/fixtures/modules/atomia/*
+spec/acceptance/nodesets/
+junit
+log
 *.bundle
 *.key
 *.csr

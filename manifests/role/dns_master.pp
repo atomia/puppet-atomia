@@ -8,5 +8,9 @@
 # === Requires
 
 class atomia::role::dns_master {
-  class { '::atomia::profile::dns::atomiadns_master'}
+  include atomia::profile::general::atomia_repository
+  include atomia::profile::dns::atomiadns_master
+
+  Class['atomia::profile::general::atomia_repository'] ->
+  Class['atomia::profile::dns::atomiadns_master']
 }

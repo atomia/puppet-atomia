@@ -1,11 +1,11 @@
 # Getting started #
 
-Install Puppet Master by running 
+Install Puppet Master by running
 
 	wget --no-check-certificate https://raw.github.com/atomia/puppet-atomia/master/files/install_atomia_puppetmaster.sh && chmod +x install_atomia_puppetmaster.sh
 	./install_atomia_puppetmaster.sh
 
-	
+
 If you want to update the Atomia puppet module to the latest supported version simply do
 
 	cd /etc/puppet
@@ -25,7 +25,7 @@ Install a database server with Microsoft SQL Server 2008 R2
 Download and install the latest version of Puppet with the following Powershell commands. Be sure to replace PUPPET_MASTER_SERVER=puppetmaster with your puppetmasters hostname. This can easily be found by going to the puppetmaster and doing "ls /var/lib/puppet/ssl/certs/".
 
 	Dism /online /Enable-Feature /FeatureName:NetFx3 /All
-	(new-object System.Net.WebClient).Downloadfile("https://downloads.puppetlabs.com/windows/puppet-3.6.2.msi", "puppet.msi") 
+	(new-object System.Net.WebClient).Downloadfile("https://downloads.puppetlabs.com/windows/puppet-3.6.2.msi", "puppet.msi")
 	msiexec /qn /i puppet.msi PUPPET_MASTER_SERVER=puppetmaster
 
 Run puppet agent, you will find it on the start menu under puppet -> run puppet agent.
@@ -34,7 +34,7 @@ Approve the certificate on the puppet master
 
 	puppet cert list
 	puppet cert sign <certname>
-    
+
 ## Connect your Linux servers to Puppet Master ##
 
 Run the following script to connect the node to Puppet Master, replace <puppetmaster> with the hostname of your Puppet Master.
@@ -45,7 +45,7 @@ Run the following script to connect the node to Puppet Master, replace <puppetma
 
 ## Configure your hiera data ##
 
-You will find example hiera configurations in the examples/hieradata folder in this repository. 
+You will find example hiera configurations in the examples/hieradata folder in this repository.
 
 A standard deployment will contain at a minimum 3 files
 
@@ -98,9 +98,31 @@ Some Applications require some extra steps, they are listed below.
 In order to have Puppet deploy resource transformations automatically the server running automation server needs to have the class "atomia::resource_transformations" assigned (no variables need to be passed).
 
 
+# If you are a developer #
 
+## Running tests ##
 
+Included in the repository is a Vagrant setup which will provision a machine for you which is prepared to run the test suits. Considering you have a working
+Vagrant installation simply do:
 
+		vagrant up
+		vagrant ssh
 
+Once inside your virtual machine cd to /vagrant and run the tests
 
+Unit tests:
 
+		#Run all tests
+		cd /vagrant
+		rake spec
+
+		#Run a specific test
+		rake spec SPEC=spec/classes/profiles/atomiadns_master_spec.rb
+
+Acceptance tests:
+
+I recommend using our internal OpenStack cloud for running tests, for obvious reasons all required info are not provided in the repo but contact stefan@atomia.com if you think you should be allowed to access it :). The tests can be run with Vagrant as well by configuring a vagrant nodeset.
+
+When you got your nodes set up run the tests with
+
+		bundle exec rspec spec/acceptance/atomiadns_spec.pp

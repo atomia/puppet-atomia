@@ -1,5 +1,8 @@
 forge "http://forge.puppetlabs.com"
 
+mod "stdlib"
+  :git => "git://github.com/puppetlabs/puppetlabs-stdlib.git"
+
 mod "apt",
   :git => "git://github.com/puppetlabs/puppetlabs-apt.git"
 
@@ -13,13 +16,13 @@ mod "rismoney/chocolatey"
 
 mod "dism",
   :git => "git://github.com/jimmybergman/puppetlabs-dism.git"
-  
+
 mod "openssl",
   :git => "git://github.com/camptocamp/puppet-openssl.git"
 
 mod "nsclient",
-  :git => "git://github.com/stefanmortensen/puppet-nsclient.git"  
-  
+  :git => "git://github.com/stefanmortensen/puppet-nsclient.git"
+
 mod "nfs",
   :git => "git://github.com/stefanmortensen/puppet-nfs.git"
 
@@ -34,6 +37,3 @@ mod "powershell",
 
 mod "download_file",
   :git => "git://github.com/stefanmortensen/puppet-download_file.git"
-
-
-  

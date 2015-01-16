@@ -1,10 +1,12 @@
 require 'spec_helper'
 
+
 describe 'atomia::profile::dns::atomiadns_master' do
 
   let :facts do
     {
-      :osfamily		=> 'Debian'
+      :atomia_role  => 'atomiadns_master',
+      :osfamily		  => 'Debian'
     }
   end
 
@@ -26,4 +28,15 @@ describe 'atomia::profile::dns::atomiadns_master' do
   end
 
   it { should_not contain_file('/etc/atomiadns-mastercert.pem') }
+
+  it { should contain_file('/etc/atomiadns.conf.master')\
+    .with_content(/\s*soap_password = password*/)}
+
+  it { should contain_file('/usr/bin/atomiadns_config_sync') }
+
+  it { should contain_file('/usr/share/doc/atomiadns-masterserver/zones_to_add.txt')
+    .with_content(/\s*preview.atomia.com/ )
+    .with_content(/\s*cloud.atomia.com*/)}
+
+  it { should contain_file('/usr/share/doc/atomiadns-masterserver/add_zones.sh')}
 end

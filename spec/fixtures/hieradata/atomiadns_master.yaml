@@ -1,0 +1,11 @@
+---
+atomia::profile::dns::atomiadns_password: "password"
+atomia::profile::dns::atomiadns_master::dns_zones:
+  - preview.atomia.com
+  - mysql.atomia.com
+  - mssql.atomia.com
+  - cloud.atomia.com
+atomia::profile::dns::nameservers:
+  - ns1.atomia.com
+  - ns2.atomia.com
+atomia::profile::dns::registry: registry.atomia.com    
