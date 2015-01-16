@@ -188,23 +188,24 @@ class atomia::profile::dns::atomiadns_master (
     }
   }
 
+  augeas {'include_confd':
+    changes => [
+    'set /files/etc/apache2/apache2.conf/directive[last() + 1] IncludeOptional',
+    'set /files/etc/apache2/apache2.conf/directive[last()]/arg conf.d/*',
+    ],
+    onlyif  =>
+      "match /files/etc/apache2/apache2.conf/directive/arg[.='conf.d/'] \
+      size == 0",
+    require => Package['atomiadns-masterserver'],
+    notify  => Service['apache2'],
+  }
+
   #### Services
 
   service { 'apache2':
     ensure => running,
     name   => 'apache2',
     enable => true,
-  }
-
-  augeas {'include_confd':
-    changes => [
-    'set /files/etc/apache2/apache2.conf/directive[last() + 1] IncludeOptional',
-    'set /files/etc/apache2/apache2.conf/directive[last()]/arg conf.d/*'
-    ],
-    onlyif  =>
-    'match /files/etc/apache2/apache2.conf/directive/arg "conf.d/*"',
-    require => Package['atomiadns-masterserver'],
-    notify  => Service['apache2'],
   }
 
 }
