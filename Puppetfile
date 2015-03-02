@@ -35,5 +35,5 @@ mod "powershell",
 mod "download_file",
   :git => "git://github.com/stefanmortensen/puppet-download_file.git"
 
-
-  
+mod "postgresql",
+  :git => "git://github.com/puppetlabs/puppetlabs-postgresql.git"
