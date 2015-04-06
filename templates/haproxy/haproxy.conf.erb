@@ -1,11 +1,28 @@
 global
+	log /dev/log    local0
+	log /dev/log    local1 notice
+	chroot /var/lib/haproxy
+	stats socket /run/haproxy/admin.sock mode 660 level admin
+	stats timeout 30s
+	user haproxy
+	group haproxy
 	daemon
 	maxconn 30000
 	tune.ssl.default-dh-param 2048
 	stats socket /tmp/haproxy
 
+	# Default ciphers to use on SSL-enabled listening sockets.
+	ssl-default-bind-ciphers kEECDH+aRSA+AES:kRSA+AES:+AES256:RC4-SHA:!kEDH:!LOW:!EXP:!MD5:!aNULL:!eNULL
+	ssl-default-bind-options no-sslv3
+		
 defaults
+	log global
 	mode http
+	option dontlognull
+	option redispatch
+	retries 3
+	timeout http-request 10s
+	timeout queue 1m
 	timeout connect 5000ms
 	timeout client 50000ms
 	timeout server 50000ms
@@ -13,12 +30,14 @@ defaults
 frontend apachecluster
 	bind <%= @apache_cluster_ip %>:80
 	bind <%= @apache_cluster_ip %>:443 ssl crt /etc/haproxy/atomia_certificates/default.pem crt /etc/haproxy/atomia_certificates
+	option  http-server-close
 	http-request add-header X-Proto https if { ssl_fc }
 	default_backend apache_servers
 
 frontend iiscluster
 	bind <%= @iis_cluster_ip %>:80
 	bind <%= @iis_cluster_ip %>:443 ssl crt /etc/haproxy/atomia_certificates/default.pem crt /etc/haproxy/atomia_certificates
+	option  http-server-close
 	http-request add-header X-Proto https if { ssl_fc }
 	default_backend iis_servers
 
@@ -37,13 +56,13 @@ frontend ftpcluster
 backend apache_servers
 	balance roundrobin
 <% @apache_cluster_nodes.split(",").each do |node| -%>
-	server <%= node %>:80
+	server <%= node %>:80 check
 <% end -%>
 
 backend iis_servers
 	balance roundrobin
 <% @iis_cluster_nodes.split(",").each do |node| -%>
-	server <%= node %>:80
+	server <%= node %>:80 check
 <% end -%>
 
 backend mail_servers
