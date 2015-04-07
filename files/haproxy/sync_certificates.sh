@@ -40,9 +40,9 @@ find "$synced_dir" -type f -path "*/keys/*" | while read key; do
 		old_cert_bundle_to_remove=""
 		cert_subject=`openssl x509 -noout -subject -in "$cert" |\
 			awk -F 'CN=' '{ print $2 }' | cut -d " " -f 1`
-		echo "$cert_subject" >> "$certs_on_storage"
 		cert_end_date=`date +%s \
 			-d "$(openssl x509 -noout -enddate -in "$cert" | cut -d "=" -f 2- | sed 's/^[[:space:]]*//')"`
+		echo "$cert_subject"_"$cert_end_date" >> "$certs_on_storage"
 		if [ -n "$cert_end_date" ] && [ -n "$cert_subject" ]; then
 			cert_for_same_cn=`ls "$haproxy_cert_dir" | grep "^${cert_subject}_" \
 				| cut -d "_" -f 2 | cut -d . -f 1 | head -n 1`
@@ -94,7 +94,9 @@ cert_diff=`mktemp`
 find "$haproxy_cert_dir" -type f -not -name 'default.pem' | while read active_cert; do
 	# or if this bundle was created previously
 	active_cert_subject=`openssl x509 -noout -subject -in "$active_cert" | awk -F 'CN=' '{ print $2 }' | cut -d " " -f 1`
-	echo "$active_cert_subject" >> "$active_certs"
+	active_cert_end_date=`date +%s \
+		-d "$(openssl x509 -noout -enddate -in "$cert" | cut -d "=" -f 2- | sed 's/^[[:space:]]*//')"`
+	echo "$active_cert_subject"_"$active_cert_end_date" >> "$active_certs"
 done
 
 # Find certificates no more available on shared storage
@@ -103,7 +105,7 @@ rm -f "$certs_on_storage" "$active_certs"
 
 # Remove certificates from actives
 cat "$cert_diff" | while read line; do
-	obsolete_cert="$haproxy_cert_dir/${line}*.pem"
+	obsolete_cert="$haproxy_cert_dir/${line}.pem"
 	rm -f "$obsolete_cert"
 	echo "OK: removing obsolete certificate bundle for $line from $obsolete_cert"
 done
