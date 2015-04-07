@@ -29,6 +29,7 @@ done
 
 # Go through all customer certificates with keys and create bundles in the dir haproxy uses
 newcerts_loaded=`mktemp`
+certs_on_storage=`mktemp`
 echo "0" > "$newcerts_loaded"
 find "$synced_dir" -type f -path "*/keys/*" | while read key; do
 	cert=`echo "$key" | sed 's,/keys/,/certificates/,'`
@@ -39,7 +40,7 @@ find "$synced_dir" -type f -path "*/keys/*" | while read key; do
 		old_cert_bundle_to_remove=""
 		cert_subject=`openssl x509 -noout -subject -in "$cert" |\
 			awk -F 'CN=' '{ print $2 }' | cut -d " " -f 1`
-		echo "$cert_subject" >> certs.temp
+		echo "$cert_subject" >> "$certs_on_storage"
 		cert_end_date=`date +%s \
 			-d "$(openssl x509 -noout -enddate -in "$cert" | cut -d "=" -f 2- | sed 's/^[[:space:]]*//')"`
 		if [ -n "$cert_end_date" ] && [ -n "$cert_subject" ]; then
@@ -87,22 +88,24 @@ find "$synced_dir" -type f -path "*/keys/*" | while read key; do
 	fi
 done
 
+active_certs=`mktemp`
+cert_diff=`mktemp`
 # Synchronize public certificates folder with active ones
 find "$haproxy_cert_dir" -type f -not -name 'default.pem' | while read active_cert; do
-				# or if this bundle was created previously
-				active_cert_subject=`openssl x509 -noout -subject -in "$active_cert" | awk -F 'CN=' '{ print $2 }' | cut -d " " -f 1`
-				echo "$active_cert_subject" >> activecerts.temp
+	# or if this bundle was created previously
+	active_cert_subject=`openssl x509 -noout -subject -in "$active_cert" | awk -F 'CN=' '{ print $2 }' | cut -d " " -f 1`
+	echo "$active_cert_subject" >> "$active_certs"
 done
 
 # Find certificates no more available on shared storage
-grep -Fxv -f certs.temp activecerts.temp > cert_difference.temp
-rm -f certs.temp activecerts.temp
+grep -Fxv -f "$certs_on_storage" "$active_certs" > "$cert_diff"
+rm -f "$certs_on_storage" "$active_certs"
 
 # Remove certificates from actives
-cat cert_difference.temp | while read line; do
-		obsolete_cert="$haproxy_cert_dir/${line}*.pem"
-		rm -f $obsolete_cert
-		echo "OK: removing obsolete certificate bundle for $line from $obsolete_cert"
+cat "$cert_diff" | while read line; do
+	obsolete_cert="$haproxy_cert_dir/${line}*.pem"
+	rm -f "$obsolete_cert"
+	echo "OK: removing obsolete certificate bundle for $line from $obsolete_cert"
 done
 
 if [ x"$(cat "$newcerts_loaded")" = x"1" ]; then
@@ -110,5 +113,5 @@ if [ x"$(cat "$newcerts_loaded")" = x"1" ]; then
 	/etc/init.d/haproxy reload
 fi
 
-rm -f "cert_difference.temp"
+rm -f "$cert_diff"
 rm -f "$newcerts_loaded"
