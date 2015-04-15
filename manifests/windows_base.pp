@@ -37,7 +37,10 @@ class atomia::windows_base (
   {
   if( $is_iis == 0 ){
     
-	  dism { 'NetFx3': ensure => present }
+	  dism { 'NetFx3':
+	  	ensure 	=> present,
+		all	=> true,
+	  }
 	
 	  # 6.1 is 2008 R2, so this matches 2012 and forward
 	  # see http://msdn.microsoft.com/en-us/library/windows/desktop/ms724832(v=vs.85).aspx
