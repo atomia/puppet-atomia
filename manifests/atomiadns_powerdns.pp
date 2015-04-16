@@ -43,7 +43,7 @@ class atomia::atomiadns_powerdns (
   package { atomiadns-powerdnssync: ensure => present }
 
   if $lsbdistrelease == "14.04" { 
-	package { pdns-recursor:
+	package { pdns-server:
     ensure  => present,
     require => [Service["atomiadns-powerdnssync"]]}
   } else {
