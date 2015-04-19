@@ -25,7 +25,7 @@ Install a database server with Microsoft SQL Server 2008 R2
 Download and install the latest version of Puppet with the following Powershell commands. Be sure to replace PUPPET_MASTER_SERVER=puppetmaster with your puppetmasters hostname. This can easily be found by going to the puppetmaster and doing "ls /var/lib/puppet/ssl/certs/".
 
 	Dism /online /Enable-Feature /FeatureName:NetFx3 /All
-	(new-object System.Net.WebClient).Downloadfile("https://downloads.puppetlabs.com/windows/puppet-3.6.2.msi", "puppet.msi") 
+	(new-object System.Net.WebClient).Downloadfile("https://downloads.puppetlabs.com/windows/puppet-latest.msi", "puppet.msi") 
 	msiexec /qn /i puppet.msi PUPPET_MASTER_SERVER=puppetmaster
 
 Run puppet agent, you will find it on the start menu under puppet -> run puppet agent.
@@ -39,7 +39,7 @@ Approve the certificate on the puppet master
 
 Run the following script to connect the node to Puppet Master, replace <puppetmaster> with the hostname of your Puppet Master.
 
-	wget --no-check-certificate https://raw.github.com/atomia/installation/master/Files/bootstrap_linux.sh && chmod +x bootstrap_linux.sh
+	wget --no-check-certificate https://raw.github.com/atomia/puppet-atomia/master/files/bootstrap_linux.sh && chmod +x bootstrap_linux.sh
 	./bootstrap_linux.sh <puppetmaster>
 	rm boostrap_linux.sh
 
