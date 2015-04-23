@@ -18,7 +18,7 @@ class atomia::mysql (
 		password_hash	=> mysql_password($mysql_password),
 	}
 
-	mysql_grant { "$mysql_username/*.*":
+	mysql_grant { "$mysql_username@$provisioning_host/*.*":
   		ensure     => 'present',
   		options    => ['GRANT'],
   		privileges => ['ALL'],
