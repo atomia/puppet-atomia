@@ -56,10 +56,9 @@ port = 8081
 " > /etc/puppet/puppetdb.conf
 
 echo "
-[master]
 storeconfigs = true
 storeconfigs_backend = puppetdb
-" >> /etc/puppet.conf
+" >> /etc/puppet/puppet.conf
 
 echo "
 ---
