@@ -8,6 +8,8 @@ dpkg -i puppetlabs-release-$DISTNAME.deb
 rm puppetlabs-release-$DISTNAME.deb
 apt-get update
 apt-get install -y puppetmaster git apache2-utils curl rubygems
+# Following should remove annoying templatedir deprecation warning
+sed -i "/templatedir/d" /etc/puppet/puppet.conf
 cd /etc/puppet
 puppet resource package puppetdb ensure=latest
 puppet resource service puppetdb ensure=running enable=true
@@ -67,6 +69,7 @@ master:
       cache: yaml
 " >  /etc/puppet/routes.yaml
 
+curl -sSL https://rvm.io/mpapis.asc | gpg --import -
 curl -sSL https://get.rvm.io | bash -s stable
 
 
