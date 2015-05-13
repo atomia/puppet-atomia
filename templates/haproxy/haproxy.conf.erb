@@ -76,4 +76,8 @@ backend ftp_servers
 	balance roundrobin
 <% @ftp_cluster_nodes.split(",").each_with_index do |node, index| -%>
 	server ftp<%=index+1 %> <%= node %> check port 9200
+<<<<<<< HEAD
 <% end -%>
+=======
+<% end -%>
+>>>>>>> 1a5e05435dee575530e5bd82d54faf0722fe9c96
