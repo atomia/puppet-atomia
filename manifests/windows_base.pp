@@ -8,6 +8,7 @@ class atomia::windows_base (
   $actiontrail      = "actiontrail",
   $login            = "login",
   $order            = "order",
+  $store	    = "store",
   $billing          = "billing",
   $admin            = "admin",
   $hcp              = "hcp",
