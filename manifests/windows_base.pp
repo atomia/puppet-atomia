@@ -86,6 +86,11 @@ class atomia::windows_base (
 	      all    => true,
 	    }
 	
+	    dism { 'RSAT-AD-PowerShell':
+	      ensure => present,
+	      all    => true,
+	    }
+
 	    file { 'c:/install/app-pool-settings.ps1':
 	        ensure => 'file',
 	        source => "puppet:///modules/atomia/windows_base/app-pool-settings.ps1"
