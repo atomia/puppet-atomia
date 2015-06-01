@@ -14,51 +14,36 @@ define service {
         notification_interval           0 ; set > 0 if you want to be renotified
 }
 
+
 define service {
         hostgroup_name                  linux-all
         service_description             CPU Utilization
-        check_command                   check_nrpe_1arg!check_load
-        use                             generic-service
-        notification_interval           0 ; set > 0 if you want to be renotified
-}
-
-define service {
-        hostgroup_name                  linux-all     
-        service_description             Total Processes
-        check_command                   check_procs!250!400
-        use                             generic-service
-        notification_interval           0 ; set > 0 if you want to be renotified
-}
-
-define service {
-        hostgroup_name                  linux-all     
-        service_description             Current Users
-        check_command                   check_users!20!50
-        use                             generic-service
-        notification_interval           0 ; set > 0 if you want to be renotified
-}
-
-
-define service {
-        hostgroup_name                  linux-all     
-        service_description             Local hard drive
-        check_command                   !check_nrpe_1arg!check_all_disks
+        check_command                   check_nrpe_1arg!check_load!0.7,0.6,0.5!0.9,0.8,0.7*
         use                             generic-service
         notification_interval           0 ; set > 0 if you want to be renotified
 }
 
 define service {
         hostgroup_name                  linux-all
-        service_description             NFS mounts 
-        check_command                   !check_nrpe_1arg!check_all_mountpoints
+        service_description             Current Users
+        check_command                   check_nrpe_1arg!check_users!20!50
         use                             generic-service
         notification_interval           0 ; set > 0 if you want to be renotified
 }
+
+define service {
+        hostgroup_name                  linux-all
+        service_description             Local hard drive
+        check_command                   check_nrpe_1arg!check_disk!20!10!/
+        use                             generic-service
+        notification_interval           0 ; set > 0 if you want to be renotified
+}
+
 
 define service {
 		hostgroup_name					windows-all
 		service_description				CPU utilization
-		check_command				 	check_nscp!'CPULOAD -l 5,80,90'	
+		check_command				 	check_nscp!'CPULOAD -l 5,80,90'
 		use                             generic-service
 		notification_interval           0 ; set > 0 if you want to be renotified
 }
