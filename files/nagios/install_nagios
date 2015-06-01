@@ -1,0 +1,19 @@
+#!/bin/sh
+cd ~
+curl -L -O http://prdownloads.sourceforge.net/sourceforge/nagios/nagios-4.0.8.tar.gz
+tar xvf nagios-*.tar.gz
+cd nagios-*
+./configure --with-nagios-group=nagios --with-command-group=nagcmd
+make all
+sudo make install
+sudo make install-commandmode
+sudo make install-init
+sudo make install-config
+sudo /usr/bin/install -c -m 644 sample-config/httpd.conf /etc/apache2/sites-available/nagios.conf
+cd ~
+curl -L -O http://nagios-plugins.org/download/nagios-plugins-2.0.3.tar.gz
+tar xvf nagios-plugins-*.tar.gz
+cd nagios-plugins-*
+./configure --with-nagios-user=nagios --with-nagios-group=nagios --with-openssl
+make
+sudo make install
