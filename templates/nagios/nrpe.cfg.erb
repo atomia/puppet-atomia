@@ -1,7 +1,7 @@
 #############################################################################
-# Sample NRPE Config File 
+# Sample NRPE Config File
 # Written by: Ethan Galstad (nagios@nagios.org)
-# 
+#
 # Last Modified: 11-23-2007
 #
 # NOTES:
@@ -46,9 +46,9 @@ server_port=5666
 
 
 # NRPE USER
-# This determines the effective user that the NRPE daemon should run as.  
+# This determines the effective user that the NRPE daemon should run as.
 # You can either supply a username or a UID.
-# 
+#
 # NOTE: This option is ignored if NRPE is running under either inetd or xinetd
 
 nrpe_user=nagios
@@ -56,9 +56,9 @@ nrpe_user=nagios
 
 
 # NRPE GROUP
-# This determines the effective group that the NRPE daemon should run as.  
+# This determines the effective group that the NRPE daemon should run as.
 # You can either supply a group name or a GID.
-# 
+#
 # NOTE: This option is ignored if NRPE is running under either inetd or xinetd
 
 nrpe_group=nagios
@@ -66,7 +66,7 @@ nrpe_group=nagios
 
 
 # ALLOWED HOST ADDRESSES
-# This is an optional comma-delimited list of IP address or hostnames 
+# This is an optional comma-delimited list of IP address or hostnames
 # that are allowed to talk to the NRPE daemon.
 #
 # Note: The daemon only does rudimentary checking of the client's IP
@@ -77,16 +77,16 @@ nrpe_group=nagios
 # NOTE: This option is ignored if NRPE is running under either inetd or xinetd
 
 allowed_hosts=<%= @nagios_ip %>
- 
+
 
 
 # COMMAND ARGUMENT PROCESSING
 # This option determines whether or not the NRPE daemon will allow clients
 # to specify arguments to commands that are executed.  This option only works
 # if the daemon was configured with the --enable-command-args configure script
-# option.  
+# option.
 #
-# *** ENABLING THIS OPTION IS A SECURITY RISK! *** 
+# *** ENABLING THIS OPTION IS A SECURITY RISK! ***
 # Read the SECURITY file for information on some of the security implications
 # of enabling this variable.
 #
@@ -102,9 +102,9 @@ dont_blame_nrpe=1
 # command line from the command definition.
 #
 # *** THIS EXAMPLE MAY POSE A POTENTIAL SECURITY RISK, SO USE WITH CAUTION! ***
-# Usage scenario: 
+# Usage scenario:
 # Execute restricted commmands using sudo.  For this to work, you need to add
-# the nagios user to your /etc/sudoers.  An example entry for alllowing 
+# the nagios user to your /etc/sudoers.  An example entry for alllowing
 # execution of the plugins from might be:
 #
 # nagios          ALL=(ALL) NOPASSWD: /usr/lib/nagios/plugins/
@@ -113,7 +113,7 @@ dont_blame_nrpe=1
 # without asking for a password.  If you do this, make sure you don't give
 # random users write access to that directory or its contents!
 
-# command_prefix=/usr/bin/sudo 
+# command_prefix=/usr/bin/sudo
 
 
 
@@ -200,8 +200,12 @@ command[check_users]=/usr/lib/nagios/plugins/check_users -w 5 -c 10
 command[check_load]=/usr/lib/nagios/plugins/check_load -w 15,10,5 -c 30,25,20
 command[check_hda1]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p /dev/hda1
 command[check_zombie_procs]=/usr/lib/nagios/plugins/check_procs -w 5 -c 10 -s Z
-command[check_total_procs]=/usr/lib/nagios/plugins/check_procs -w 150 -c 200 
+command[check_total_procs]=/usr/lib/nagios/plugins/check_procs -w 150 -c 200
 command[check_all_disks]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -e
+command[check_apache_procs]=/usr/lib/nagios/plugins/check_procs -c 1: -w 3: -C apache2
+command[check_php_procs]=/usr/lib/nagios/plugins/check_procs -c 100 -w 50 -a php
+command[check_powerdnssync_procs]=/usr/lib/nagios/plugins/check_procs -c 1: -a atomiapowerdnssync
+command[check_powerdns_procs]=/usr/lib/nagios/plugins/check_procs -c 2: -a pdns_server
 
 <% $hierapath = "/etc/puppet/hieradata" %>
 <% $modulepath = "/etc/puppet/modules/atomia/manifests" %>
@@ -212,26 +216,25 @@ command[check_daggre_weblog]=/usr/lib/nagios/plugins/atomia/check_daggre.pl --ur
 
 command[check_all_mountpoints] = /usr/lib/nagios/plugins/atomia/check_mountpoints.sh -A
 
-command[check_atomiadns]=/usr/lib/nagios/plugins/atomia/check_atomiadns.sh atomia-nagios-test.net http://localhost/atomiadns <%= @atomiadns_user %> <%= @atomiadns_password %>
+command[check_atomiadns]=/usr/lib/nagios/plugins/atomia/check_atomiadns.sh atomia-nagios-test.net http://localhost/atomiadns $ARG1$ $ARG2$
 command[check_domainreg]=/usr/lib/nagios/plugins/atomia/check_domainreg.sh $ARG1$
 # The following examples allow user-supplied arguments and can
-# only be used if the NRPE daemon was compiled with support for 
+# only be used if the NRPE daemon was compiled with support for
 # command arguments *AND* the dont_blame_nrpe directive in this
 # config file is set to '1'.  This poses a potential security risk, so
 # make sure you read the SECURITY file before doing this.
 
-#command[check_users]=/usr/lib/nagios/plugins/check_users -w $ARG1$ -c $ARG2$
-#command[check_load]=/usr/lib/nagios/plugins/check_load -w $ARG1$ -c $ARG2$
-#command[check_disk]=/usr/lib/nagios/plugins/check_disk -w $ARG1$ -c $ARG2$ -p $ARG3$
-#command[check_procs]=/usr/lib/nagios/plugins/check_procs -w $ARG1$ -c $ARG2$ -s $ARG3$
+command[check_users]=/usr/lib/nagios/plugins/check_users -w $ARG1$ -c $ARG2$
+command[check_load]=/usr/lib/nagios/plugins/check_load -w $ARG1$ -c $ARG2$
+command[check_disk]=/usr/lib/nagios/plugins/check_disk -w $ARG1$ -c $ARG2$ -p $ARG3$
+command[check_procs]=/usr/lib/nagios/plugins/check_procs -w $ARG1$ -c $ARG2$ -s $ARG3$
 
 #
 # local configuration:
 #	if you'd prefer, you can instead place directives here
 include=/etc/nagios/nrpe_local.cfg
 
-# 
+#
 # you can place your config snipplets into nrpe.d/
 # only snipplets ending in .cfg will get included
 include_dir=/etc/nagios/nrpe.d/
-
