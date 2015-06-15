@@ -14,7 +14,7 @@ then
 elif [ $DISTNAME = "trusty" ]
 then
 	apt-get install -y puppetmaster git apache2-utils curl rubygems-integration
-	echo "14.04 packages installed... 
+	echo "14.04 packages installed... "
 else
 	echo "This Linux version is not supported right now"
 fi		
