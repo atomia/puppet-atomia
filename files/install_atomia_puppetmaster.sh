@@ -4,7 +4,7 @@
 ESC_SEQ="\x1b["
 COL_RESET=$ESC_SEQ"39;49;00m"
 COL_RED=$ESC_SEQ"31;01m"
-COL_GREEN=$ESC_SEQ"32;00m"
+COL_GREEN=$ESC_SEQ"32m"
 
 echo -e "$COL_GREEN Installing Puppet Master $COL_RESET"
 HOSTNAME=`hostname --fqdn`
