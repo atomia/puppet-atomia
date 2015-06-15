@@ -7,6 +7,17 @@ wget $PUPPETURL
 dpkg -i puppetlabs-release-$DISTNAME.deb
 rm puppetlabs-release-$DISTNAME.deb
 apt-get update
+if [ $DISTNAME = "precise"]
+then
+	apt-get install -y puppetmaster git apache2-utils curl rubygems
+	echo "12.04 packages installed... "
+elif [ $DISTNAME = "trusty" ]
+then
+	apt-get install -y puppetmaster git apache2-utils curl rubygems-integration
+	echo "14.04 packages installed... 
+else
+	echo "This Linux version is not supported right now"
+fi		
 apt-get install -y puppetmaster git apache2-utils curl rubygems
 # Following should remove annoying templatedir deprecation warning
 sed -i "/templatedir/d" /etc/puppet/puppet.conf
@@ -75,7 +86,7 @@ curl -sSL https://get.rvm.io | bash -s stable
 source "/usr/local/rvm/scripts/rvm"
 /usr/local/rvm/bin/rvm install 2.1.1
 
-echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref => \"stable\"" > Puppetfile
+echo "mod \"atomia\", :git =>\"git://github.com/branislavvukelic/puppet-atomia.git\", :ref => \"master\"" > Puppetfile
 
 service puppetmaster restart
 cd /etc/puppet
@@ -86,7 +97,7 @@ echo "***** To complete the installation please run the following commands: ****
 rvm use 2.1.1
 rvm default 2.1.1
 cd /etc/puppet
-gem install librarian-puppet puppet
+gem install librarian-puppet puppet:3.8.1
 librarian-puppet install
 cp /etc/puppet/modules/atomia/files/default_files/* /etc/puppet/atomia/service_files/
 "
