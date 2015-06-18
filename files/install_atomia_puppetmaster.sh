@@ -1,5 +1,12 @@
 #!/bin/bash
-echo "Installing Puppet Master"
+# Define some colors for readability
+ 
+ESC_SEQ="\x1b["
+COL_RESET=$ESC_SEQ"39;49;00m"
+COL_RED=$ESC_SEQ"31;01m"
+COL_GREEN=$ESC_SEQ"32m"
+
+echo -e "$COL_GREEN Installing Puppet Master $COL_RESET"
 HOSTNAME=`hostname --fqdn`
 DISTNAME=`lsb_release -a | grep Codename: | awk '{print $2}'`
 PUPPETURL="https://apt.puppetlabs.com/puppetlabs-release-$DISTNAME.deb"
@@ -7,8 +14,23 @@ wget $PUPPETURL
 dpkg -i puppetlabs-release-$DISTNAME.deb
 rm puppetlabs-release-$DISTNAME.deb
 apt-get update
-apt-get install -y puppetmaster git apache2-utils curl rubygems
-# Following should remove annoying templatedir deprecation warning
+#
+# Adding packages for correct Ubuntu version
+#
+if [ $DISTNAME = "precise" ]
+then
+	apt-get install -y puppetmaster git apache2-utils curl rubygems
+	echo -e "$COL_GREEN 12.04 packages installed... $COL_RESET"
+elif [ $DISTNAME = "trusty" ]
+then
+	apt-get install -y puppetmaster git apache2-utils curl rubygems-integration
+	echo -e "$COL_GREEN 14.04 packages installed... $COL_RESET"
+else
+	echo -e "$COL_RED This Linux version is not supported right now $COL_RESET"
+fi
+#
+# Following line should remove annoying templatedir deprecation warning
+#
 sed -i "/templatedir/d" /etc/puppet/puppet.conf
 cd /etc/puppet
 puppet resource package puppetdb ensure=latest
@@ -28,7 +50,7 @@ echo -e "
   - common
 :yaml:
   :datadir: /etc/puppet/hieradata
-" > /etc/puppet/hiera.yaml  
+" > /etc/puppet/hiera.yaml
 
 echo "
 node default {
@@ -86,7 +108,7 @@ echo "***** To complete the installation please run the following commands: ****
 rvm use 2.1.1
 rvm default 2.1.1
 cd /etc/puppet
-gem install librarian-puppet puppet
+gem install librarian-puppet puppet:3.8.1
 librarian-puppet install
 cp /etc/puppet/modules/atomia/files/default_files/* /etc/puppet/atomia/service_files/
 "

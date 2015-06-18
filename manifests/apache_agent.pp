@@ -150,7 +150,7 @@ class atomia::apache_agent (
   if $atomia_clustered != 0 {
     exec { "/bin/sed 's/%h/%{X-Forwarded-For}i/' -i /etc/apache2/conf.d/atomia-pa-apache.conf.ubuntu":
       unless  => "/bin/grep 'X-Forwarded-For' /etc/apache2/conf.d/atomia-pa-apache.conf.ubuntu",
-      require => Package["atomia-pa-apache"],
+      require => [Package["atomia-pa-apache"], File["/etc/apache2/conf.d/atomia-pa-apache.conf.ubuntu"]],
       notify  => Exec["force-reload-apache"],
     }
   }
@@ -323,7 +323,7 @@ class atomia::apache_agent (
   file { "/etc/php5/cgi/php.ini":
     ensure  => link,
     target  => "/storage/configuration/php.ini",
-    require => File["/storage/configuration/php.ini"],
+    require => [File["/storage/configuration/php.ini"], Package["php5-cgi"]],
   }
 
   if $should_have_pa_apache == 1 {
