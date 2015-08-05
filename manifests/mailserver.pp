@@ -8,7 +8,7 @@ class atomia::mailserver (
   $cluster_ip              = "",
   $mail_share_nfs_location = "",
   $use_nfs3                = 1,
-  $mailbox_base            = "/storage/virtual",
+  $mailbox_base            = "/storage/mailcontent",
   $atomia_mailman_installed = false,
   $mysql_server_id        = "") {
   package { postfix-mysql: ensure => installed }
@@ -83,7 +83,7 @@ class atomia::mailserver (
   if $mail_share_nfs_location != "" {
     atomia::nfsmount { 'mount_mail_content':
       use_nfs3     => $use_nfs3,
-      mount_point  => '/storage/mailcontent',
+      mount_point  => $mailbox_base,
       nfs_location => $mail_share_nfs_location
     }
   }
@@ -129,7 +129,7 @@ class atomia::mailserver (
     }
 
     exec { 'grant-postfix-db-user-privileges':
-      command => "$mysql_command -e \"CREATE USER '$db_user'@'localhost' IDENTIFIED BY '$db_pass';GRANT ALL PRIVILEGES ON $db_name.* TO '$db_user'@'%'\"",
+      command => "$mysql_command -e \"CREATE USER '$db_user'@'localhost' IDENTIFIED BY '$db_pass';GRANT ALL PRIVILEGES ON $db_name.* TO '$db_user'@'%'\"";FLUSH PRIVILEGES\";",
       unless  => "$mysql_command -e \"SELECT user, host FROM user WHERE user = '$db_user' \" mysql | /bin/grep $db_user",
       require => Class[Mysql::Server::Service]
     }
@@ -314,10 +314,15 @@ class atomia::mailserver (
     subscribe => [Package["dovecot-common"], File["/etc/dovecot/dovecot.conf"], File["/etc/dovecot/dovecot-sql.conf"]]
   }
 
-  group { "virtual": ensure => present }
+  group { "virtual": 
+	gid        => 2000, 
+	ensure => present,
+  }
 
   user { "virtual":
     ensure     => present,
+	uid        => 2000
+	gid        => 2000
     comment    => "virtual",
     groups     => "virtual",
     membership => minimum,
