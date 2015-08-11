@@ -7,7 +7,8 @@ class atomia::nagios::client(
     $apache_agent_class = "atomia::nagios::client::apache_agent",
     $atomiadns_master_class = "atomia::nagios::client::atomiadns_master",
     $nameserver_class       = "atomia::nagios::client::nameserver",
-    $fsagent_class          = "atomia::nagios::client::fsagent"
+    $fsagent_class          = "atomia::nagios::client::fsagent",
+    $awstats_class          = "atomia::nagios::client::awstats"
 ) {
 
 	# Deploy on Windows.
@@ -44,32 +45,46 @@ class atomia::nagios::client(
 
     # Define hostgroups based on custom fact
     case $atomia_role {
-        'apache_agent':         { $hostgroup = 'linux-customer-webservers,linux-all'
-          class { "${$apache_agent_class}":
-          }
+
+        'apache_agent': {
+          $hostgroup = 'linux-customer-webservers,linux-all'
+          class { "${$apache_agent_class}": }
         }
-        'atomiadns_master':     { $hostgroup = 'linux-dns,linux-all'
-          class { "${atomiadns_master_class}":
-          }
-          class { "${nameserver_class}":
-          }          
+
+        'atomiadns_master': {
+          $hostgroup = 'linux-dns,linux-all'
+          class { "${atomiadns_master_class}": }
+          class { "${nameserver_class}": }
         }
-        'nameserver':           { $hostgroup = 'linux-dns,linux-all'
-          class { "${nameserver_class}":
-          }
+
+        'nameserver': {
+          $hostgroup = 'linux-dns,linux-all'
+          class { "${nameserver_class}": }
         }
-        'awstats':              { $hostgroup = 'linux-atomia-agents,linux-all'}
+
+        'awstats': {
+          $hostgroup = 'linux-atomia-agents,linux-all'
+          class { "${awstats_class}": }
+        }
+
         'cronagent':            { $hostgroup = 'linux-atomia-agents,linux-all'}
         'daggre':               { $hostgroup = 'linux-atomia-agents,linux-all'}
         'domainreg':            { $hostgroup = 'linux-atomia-agents,linux-all'}
         'fsagent':              {
           $hostgroup = 'linux-atomia-agents,linux-all'
-            class { "${fsagent_class}":
+          class { "${fsagent_class}":
               account_used_for_checks => $atomia_account
-            }
           }
+        }
         'nameserver':           { $hostgroup = 'linux-dns,linux-all'}
         'pureftpd':             { $hostgroup = 'linux-ftp-servers,linux-all'}
+        'haproxy':              { $hostgroup = 'linux-atomia-agents,linux-all'}
+        'iis':                  { $hostgroup = 'linux-atomia-agents,linux-all'}
+        'installatron':         { $hostgroup = 'linux-atomia-agents,linux-all'}
+        'mailserver':           { $hostgroup = 'linux-atomia-agents,linux-all'}
+        'mysql':                { $hostgroup = 'linux-atomia-agents,linux-all'}
+        'phpmyadmin':           { $hostgroup = 'linux-atomia-agents,linux-all'}
+        'postgresql':           { $hostgroup = 'linux-atomia-agents,linux-all'}
 
     }
     if ! defined(Service['nagios-nrpe-server']) {

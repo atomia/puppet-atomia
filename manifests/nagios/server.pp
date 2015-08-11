@@ -1,5 +1,5 @@
 class atomia::nagios::server(
-  $username   = 'nagios',
+  $username   = 'nagiosadmin',
   $password   = 'nagios',
   $admin_pass = 'Administrator',
 ) {
@@ -22,6 +22,7 @@ class atomia::nagios::server(
       'rubygems',
       'ruby1.9.1-dev',
       'python-pkg-resources',
+      'nagios-nrpe-plugin'
     ]:
       ensure => installed,
     }
@@ -65,24 +66,18 @@ class atomia::nagios::server(
     notify      => [Exec['enable-nagios-site'], File['nagios-servers-dir']]
   }
 
-  file { 'nagios-servers-dir':
-    ensure  => 'directory',
-    path    => '/usr/local/nagios/etc/servers',
-    owner   => 'nagios',
-    recurse => true,
-    notify  => Service['nagios']
-  }
-
   exec { 'enable_rewrite':
     command => '/usr/sbin/a2enmod rewrite',
     unless  => '/usr/bin/test -f /etc/apache2/mods-enabled/rewrite.load',
-    notify  => Exec['reload-apache']
+    notify  => Exec['reload-apache'],
+    require => Package['apache2']
   }
 
   exec { 'enable_cgi':
     command => '/usr/sbin/a2enmod cgi',
     unless  => '/usr/bin/test -f /etc/apache2/mods-enabled/cgi.load',
-    notify  => Exec['reload-apache']
+    notify  => Exec['reload-apache'],
+    require => Package['apache2']
   }
 
   exec { 'reload-apache':
@@ -93,15 +88,18 @@ class atomia::nagios::server(
   exec { 'enable-nagios-site':
     command     => '/usr/sbin/a2ensite nagios.conf',
     refreshonly => true,
-    notify      => [Exec['reload-apache'], Exec['add-httpasswd-user']]
+    notify      => [Exec['reload-apache'], Exec['add-httpasswd-user']],
+    require => Package['apache2']
   }
 
   service { 'nagios':
-    ensure => 'running'
+    ensure => 'running',
+    require => [Exec['install_nagios'], Package['apache2']],
   }
 
   service { 'apache2':
-    ensure  => 'running'
+    ensure  => 'running',
+    require => Package['apache2']
   }
 
   exec { 'add-httpasswd-user':
@@ -114,25 +112,34 @@ class atomia::nagios::server(
   file { '/usr/local/nagios/etc/objects/atomia-commands.cfg':
     ensure  => 'file',
     owner   => 'nagios',
-    content => template('atomia/nagios/commands.cfg.erb')
+    content => template('atomia/nagios/commands.cfg.erb'),
+    require => Exec['install_nagios']
   }
 
   file { '/usr/local/nagios/etc/objects/atomia-hostgroups.cfg':
     ensure  => 'file',
     owner   => 'nagios',
-    content => template('atomia/nagios/hostgroups.cfg.erb')
+    content => template('atomia/nagios/hostgroups.cfg.erb'),
+    require => Exec['install_nagios']
   }
 
   file { '/usr/local/nagios/etc/objects/atomia-services.cfg':
     ensure  => 'file',
     owner   => 'nagios',
-    content => template('atomia/nagios/services.cfg.erb')
+    content => template('atomia/nagios/services.cfg.erb'),
+    require => Exec['install_nagios']
   }
 
   file { '/etc/nagios/nrpe.cfg':
     ensure  => 'file',
     owner   => 'nagios',
-    content => template('atomia/nagios/nrpe.cfg.erb')
+    content => template('atomia/nagios/nrpe.cfg.erb'),
+    require => [Package['nagios-nrpe-server'],Exec['install_nagios']]
+  }
+
+  file_line { 'add-plugin-lib':
+    path  => '/usr/local/nagios/etc/resource.cfg',
+    line  => '$USER2$=/usr/lib/nagios/plugins'
   }
 
   # Mod nagios.cfg, exec cause no Augeas support for Nagios 4 :(
@@ -145,13 +152,15 @@ class atomia::nagios::server(
   exec { 'uncomment-commands':
     command => '/bin/sed -i \'s/\#cfg_file\=\/usr\/local\/nagios\/etc\/objects\/commands.cfg/cfg_file\=\/usr\/local\/nagios\/etc\/objects\/commands.cfg/g\' /usr/local/nagios/etc/nagios.cfg',
     onlyif  => '/bin/grep -c "#cfg_file=/usr/local/nagios/etc/objects/commands.cfg" /usr/local/nagios/etc/nagios.cfg',
-    notify  => Service['nagios']
+    notify  => Service['nagios'],
+    require => Exec['install_nagios']
   }
 
   exec { 'comment-default-localhost':
-    command => '/bin/sed -i \'s/cfg_file=\/usr\/local\/nagios\/etc\/objects\/commands.cfg/#cfg_file=\/usr\/local\/nagios\/etc\/objects\/commands.cfg/\' /usr/local/nagios/etc/nagios.cfg',
-    unless  => '/bin/grep -c "#cfg_file=/usr/local/nagios/etc/objects/commands.cfg" /usr/local/nagios/etc/nagios.cfg',
-    notify  => Service['nagios']
+    command => '/bin/sed -i \'s/cfg_file=\/usr\/local\/nagios\/etc\/objects\/localhost.cfg/#cfg_file=\/usr\/local\/nagios\/etc\/objects\/localhost.cfg/\' /usr/local/nagios/etc/nagios.cfg',
+    unless  => '/bin/grep -c "#cfg_file=/usr/local/nagios/etc/objects/localhost.cfg" /usr/local/nagios/etc/nagios.cfg',
+    notify  => Service['nagios'],
+    require => Exec['install_nagios']
   }
 
   exec { 'add-atomia-commands-cfg':
@@ -168,6 +177,12 @@ class atomia::nagios::server(
     notify  => Service['nagios'],
   }
 
+  exec { 'add-atomia-services-cfg':
+    command => '/bin/echo "cfg_file=/usr/local/nagios/etc/objects/atomia-services.cfg" >> /usr/local/nagios/etc/nagios.cfg',
+    unless  => '/bin/grep -c "cfg_file=/usr/local/nagios/etc/objects/atomia-services.cfg" /usr/local/nagios/etc/nagios.cfg',
+    require => File['/usr/local/nagios/etc/objects/atomia-services.cfg'],
+    notify  => Service['nagios'],
+  }
 
   # End modding nagios.cfg
 
@@ -175,7 +190,7 @@ class atomia::nagios::server(
     file { '/usr/local/nagios/libexec/atomia':
       source  => 'puppet:///modules/atomia/nagios/plugins',
       recurse => true,
-      require => Package['nagios-plugins']
+      require => [Package['nagios-plugins'],Exec['install_nagios']]
     }
   }
 
@@ -205,7 +220,16 @@ class atomia::nagios::server(
       target              => '/usr/local/nagios/etc/servers/localhost_service.cfg'
   }
 
+  file { 'nagios-servers-dir':
+    ensure  => 'directory',
+    path    => '/usr/local/nagios/etc/servers',
+    owner   => 'nagios',
+    recurse => true,
+    notify  => Service['nagios']
+  }
+  ->
   Nagios_host <<| |>>
+  ->
   Nagios_service <<| |>>
 
   host { 'atomia-nagios-test.net':
