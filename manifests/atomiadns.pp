@@ -25,10 +25,15 @@ class atomia::atomiadns (
   if !defined(Class['atomia::apache_password_protect']) {
     class { 'atomia::apache_password_protect':
       username => $agent_user,
-      password => $agent_password
+      password => $agent_password,
+      require => [Package["atomiadns-masterserver"], Package["atomiadns-client"]],
     }
   }
 
+  service { apache2:
+    ensure => running,
+    require => [Package["atomiadns-masterserver"], Package["atomiadns-client"]],
+  }
 
   exec { add_nameserver_group:
     require => [Package["atomiadns-masterserver"], Package["atomiadns-client"]],

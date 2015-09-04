@@ -57,5 +57,13 @@ class atomia::apache_password_protect ($username, $password) {
     source  => "puppet:///modules/atomia/apache_password_protect/passwordprotect",
     require => File["/etc/apache2/conf.d"],
   }
+  
+  if $lsbdistrelease == "14.04" {
+    exec { "create_link_24":
+    require => File["/etc/apache2/conf.d/passwordprotect"],
+    command => "/bin/ln -s /etc/apache2/conf.d/passwordprotect /etc/apache2/conf-enabled/passwordprotect.conf",
+    unless  => "/usr/bin/test -f /etc/apache2/conf-enabled/passwordprotect.conf",
+    }
+  }
 }
 
