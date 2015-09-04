@@ -56,7 +56,11 @@ class atomia::mailserver (
 
     package { gzip: ensure => installed }
 
-    package { lha: ensure => installed }
+    if $lsbdistrelease == "14.04" {
+      package { lhasa: ensure => installed }
+    } else {
+      package { lha: ensure => installed }
+    }
 
     package { nomarch: ensure => installed }
 
