@@ -27,16 +27,16 @@ class atomia::mailnfsmount(
 	}
 
 	if storage_nfs_location {
-		mount { "/storage/virtual":
+		mount { "/storage/mailcontent":
 			device => $storage_nfs_location,
 			fstype => $fs_type,
 			remounts => false,
 			options => "rw",
 			ensure => mounted,
-			require => File["/storage/virtual"],
+			require => File["/storage/mailcontent"],
 		}
 
-		file { "/storage/virtual":
+		file { "/storage/mailcontent":
 			ensure => directory,
 			require => File["/storage"],
 			owner => "virtual",

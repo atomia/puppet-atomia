@@ -8,7 +8,7 @@ class atomia::mailserver (
   $cluster_ip              = "",
   $mail_share_nfs_location = "",
   $use_nfs3                = 1,
-  $mailbox_base            = "/storage/virtual",
+  $mailbox_base            = "/storage/mailcontent",
   $atomia_mailman_installed = false,
   $mysql_server_id        = "") {
   package { postfix-mysql: ensure => installed }
@@ -56,7 +56,11 @@ class atomia::mailserver (
 
     package { gzip: ensure => installed }
 
-    package { lha: ensure => installed }
+    if $lsbdistrelease == "14.04" {
+      package { lhasa: ensure => installed }
+    } else {
+      package { lha: ensure => installed }
+    }
 
     package { nomarch: ensure => installed }
 
@@ -71,6 +75,7 @@ class atomia::mailserver (
     package { zip: ensure => installed }
 
     package { zoo: ensure => installed }
+
   }
 
   $db_hosts = $ipaddress
@@ -83,8 +88,16 @@ class atomia::mailserver (
   if $mail_share_nfs_location != "" {
     atomia::nfsmount { 'mount_mail_content':
       use_nfs3     => $use_nfs3,
-      mount_point  => '/storage/mailcontent',
-      nfs_location => $mail_share_nfs_location
+      mount_point  => $mailbox_base,
+      nfs_location => $mail_share_nfs_location,
+      #require => File["/storage/mailcontent"],
+      }
+    file { "/storage/mailcontent":
+      ensure => directory,
+      require => File["/storage"],
+      owner => "virtual",
+      group => "virtual",
+      mode => 775,
     }
   }
 
@@ -111,7 +124,7 @@ class atomia::mailserver (
     }
 
     exec { 'grant-replicate-privileges':
-      command => "$mysql_command -e \"GRANT REPLICATION SLAVE ON *.* TO 'slave_user'@'%' IDENTIFIED BY '$slave_password';FLUSH PRIVILEGES\";",
+      command => "$mysql_command -e \"GRANT REPLICATION SLAVE ON *.* TO 'slave_user'@'%' IDENTIFIED BY '$slave_password';FLUSH PRIVILEGES;\"",
       unless  => "$mysql_command -e \"SELECT user, host FROM user WHERE user = 'slave_user'\" mysql | /bin/grep slave_user",
       require => Class[Mysql::Server::Service]
     }
@@ -129,7 +142,7 @@ class atomia::mailserver (
     }
 
     exec { 'grant-postfix-db-user-privileges':
-      command => "$mysql_command -e \"CREATE USER '$db_user'@'localhost' IDENTIFIED BY '$db_pass';GRANT ALL PRIVILEGES ON $db_name.* TO '$db_user'@'%'\"",
+      command => "$mysql_command -e \"CREATE USER '$db_user'@'localhost' IDENTIFIED BY '$db_pass';GRANT ALL PRIVILEGES ON $db_name.* TO '$db_user'@'%';FLUSH PRIVILEGES;\"",
       unless  => "$mysql_command -e \"SELECT user, host FROM user WHERE user = '$db_user' \" mysql | /bin/grep $db_user",
       require => Class[Mysql::Server::Service]
     }
@@ -287,17 +300,20 @@ class atomia::mailserver (
   exec { "gen-key":
     command  => "/usr/bin/openssl genrsa -out /etc/dovecot/ssl.key 2048; chown root:root /etc/dovecot/ssl.key; chmod 0700 /etc/dovecot/ssl.key",
     creates  => "/etc/dovecot/ssl.key",
-    provider => "shell"
+    provider => "shell",
+    require => Package["dovecot-common"],
   }
 
   exec { "gen-csr":
     command => "/usr/bin/openssl req -new -batch -key /etc/dovecot/ssl.key -out /etc/dovecot/ssl.csr",
     creates => "/etc/dovecot/ssl.csr",
+    onlyif => "/usr/bin/test -f /etc/dovecot/ssl.key",
   }
 
   exec { "gen-cert":
     command => "/usr/bin/openssl x509 -req -days 3650 -in /etc/dovecot/ssl.csr -signkey /etc/dovecot/ssl.key -out /etc/dovecot/ssl.crt",
     creates => "/etc/dovecot/ssl.crt",
+    onlyif => "/usr/bin/test -f /etc/dovecot/ssl.csr",
   }
 
   service { postfix:
@@ -314,10 +330,18 @@ class atomia::mailserver (
     subscribe => [Package["dovecot-common"], File["/etc/dovecot/dovecot.conf"], File["/etc/dovecot/dovecot-sql.conf"]]
   }
 
-  group { "virtual": ensure => present }
+  group { "virtual": 
+    name => "virtual",
+    gid        => 2000, 
+    ensure => present,
+  }
 
   user { "virtual":
+    name       => "virtual",
     ensure     => present,
+    uid        => 2000,
+    gid        => 2000,
+    home       => "/var/spool/mail",
     comment    => "virtual",
     groups     => "virtual",
     membership => minimum,
@@ -331,19 +355,23 @@ class atomia::mailserver (
     user { 'clamav':
       ensure => 'present',
       groups => 'amavis',
+      require => [Package["amavisd-new"], Package["clamav-daemon"]],
     }
 
     user { 'amavis':
       ensure => 'present',
       groups => 'clamav',
+      require => [Package["amavisd-new"], Package["clamav-daemon"]],
     }
 
     exec { "enable-spamd": command => "/bin/sed -i /etc/default/spamassassin -e 's/ENABLED=0/ENABLED=1/' && /bin/sed -i /etc/default/spamassassin -e 's/CRON=0/CRON=1/' ", 
+      require => Package["spamassassin"],
     }
 
     service { "spamassassin":
       enable => true,
-      ensure => running
+      ensure => running,
+      require => Package["spamassassin"],
     }
 
     service { "amavis":
@@ -357,7 +385,7 @@ class atomia::mailserver (
       group  => root,
       mode   => 644,
       source => "puppet:///modules/atomia/mailserver/15-content_filter_mode",
+      require => Package["amavisd-new"],
     }
   }
 }
-

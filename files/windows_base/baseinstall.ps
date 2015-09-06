@@ -25,5 +25,7 @@ regedit.exe /s c:\install\disableweakssl.reg
 "Installing MSMQ hotfix"
 Start-Process wusa "c:\install\Windows6.1-KB2554746-x64.msu /log:Windows6.1-KB2554746-x64.evt /quiet /norestart" -wait
 
+Add-WindowsFeature RSAT-AD-PowerShell
+
 
 new-item C:\install\install_base.txt -itemtype file

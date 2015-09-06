@@ -3,26 +3,8 @@
 <% $lookup_var     = "/etc/puppet/modules/atomia/files/lookup_variable.sh" %>
 <% $hcp_url = "https://" + IO.popen("#{$lookup_var} windows_base hcp #{$hierapath} #{$modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') + "." + IO.popen("#{$lookup_var} windows_base appdomain #{$hierapath} #{$modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %>
 ###############################################################################
-# COMMANDS.CFG - COMMAND DEFINITIONS FOR NAGIOS 
+# COMMANDS.CFG - COMMAND DEFINITIONS FOR NAGIOS
 ###############################################################################
-
-
-################################################################################
-# NOTIFICATION COMMANDS
-################################################################################
-
-
-# 'notify-host-by-email' command definition
-define command{
-	command_name	notify-host-by-email
-	command_line	/usr/bin/printf "%b" "***** Nagios *****\n\nNotification Type: $NOTIFICATIONTYPE$\nHost: $HOSTNAME$\nState: $HOSTSTATE$\nAddress: $HOSTADDRESS$\nInfo: $HOSTOUTPUT$\n\nDate/Time: $LONGDATETIME$\n" | /usr/bin/mail -s "** $NOTIFICATIONTYPE$ Host Alert: $HOSTNAME$ is $HOSTSTATE$ **" $CONTACTEMAIL$
-	}
-
-# 'notify-service-by-email' command definition
-define command{
-	command_name	notify-service-by-email
-	command_line	/usr/bin/printf "%b" "***** Nagios *****\n\nNotification Type: $NOTIFICATIONTYPE$\n\nService: $SERVICEDESC$\nHost: $HOSTALIAS$\nAddress: $HOSTADDRESS$\nState: $SERVICESTATE$\n\nDate/Time: $LONGDATETIME$\n\nAdditional Info:\n\n$SERVICEOUTPUT$\n" | /usr/bin/mail -s "** $NOTIFICATIONTYPE$ Service Alert: $HOSTALIAS$/$SERVICEDESC$ is $SERVICESTATE$ **" $CONTACTEMAIL$
-	}
 
 
 
@@ -34,7 +16,7 @@ define command{
 
 define command {
         command_name    check_http_testsite
-        command_line    $USER1$/check_http -H atomia-nagios-test.net 
+        command_line    $USER1$/check_http -H atomia-nagios-test.net
 }
 
 define command {
@@ -49,25 +31,36 @@ define command {
 
 define command {
 	command_name	check_domainreg
-	command_line	$USER1$/atomia/check_domainreg.sh $ARG1$ 
+	command_line	$USER1$/atomia/check_domainreg.sh $ARG1$
+}
+
+define command {
+	command_name	check_fsagent
+	command_line	$USER1$/atomia/check_fsagent.sh $ARG1$ $ARG2$ $ARG3$ $ARG4$
+}
+
+define command{
+        command_name    check_local_procs_all_states
+        command_line    $USER1$/check_procs -w $ARG1$ -c $ARG2$
+}
+
+define command {
+	command_name	check_mountpoints
+	command_line	$USER1$/atomia/check_mountpoints.sh $ARG1$
+}
+
+define command {
+	command_name	check_dig
+	command_line	$USER1$/check_dig -H $ARG1$ -l $ARG2$ -A $ARG3$
 }
 
 
-#DATA COMMANDS
-################################################################################
+define command {
+       command_name                             check_nrpe
+       command_line                             $USER1$/check_nrpe -H $HOSTADDRESS$ -t 30 -c $ARG1$ $ARG2$
+}
 
-
-# 'process-host-perfdata' command definition
-define command{
-	command_name	process-host-perfdata
-	command_line	/usr/bin/printf "%b" "$LASTHOSTCHECK$\t$HOSTNAME$\t$HOSTSTATE$\t$HOSTATTEMPT$\t$HOSTSTATETYPE$\t$HOSTEXECUTIONTIME$\t$HOSTOUTPUT$\t$HOSTPERFDATA$\n" >> /var/lib/nagios3/host-perfdata.out
-	}
-
-
-# 'process-service-perfdata' command definition
-define command{
-	command_name	process-service-perfdata
-	command_line	/usr/bin/printf "%b" "$LASTSERVICECHECK$\t$HOSTNAME$\t$SERVICEDESC$\t$SERVICESTATE$\t$SERVICEATTEMPT$\t$SERVICESTATETYPE$\t$SERVICEEXECUTIONTIME$\t$SERVICELATENCY$\t$SERVICEOUTPUT$\t$SERVICEPERFDATA$\n" >> /var/lib/nagios3/service-perfdata.out
-	}
-
-
+define command {
+       command_name                             check_nrpe_1arg
+       command_line                             $USER1$/check_nrpe -H $HOSTADDRESS$ -t 30 -c $ARG1$ -a $ARG2$ $ARG3$ $ARG4$
+}

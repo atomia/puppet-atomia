@@ -46,6 +46,9 @@ class atomia::atomiadns_powerdns (
 	package { pdns-server:
     ensure  => present,
     require => [Service["atomiadns-powerdnssync"]]}
+	package { pdns-backend-mysql:
+	ensure => present,
+	require => [Package[pdns-server]]}
   } else {
   	package { pdns-static:
     ensure  => present,
