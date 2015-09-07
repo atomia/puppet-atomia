@@ -3,8 +3,8 @@
 ---
 classes:
   - atomia::awstats
-  - atomia::nagios::client
 
-atomia::awstats::agent_password: "test123"
-atomia::awstats::content_share_nfs_location: "127.0.0.1:/export/content"
-atomia::awstats::configuration_share_nfs_location: "127.0.0.1:/export/configuration"
+atomia::awstats::agent_user: "awstats"
+atomia::awstats::agent_password: "password123"
+atomia::awstats::content_share_nfs_location: "storage1.atomia.local:/gv0"
+atomia::awstats::configuration_share_nfs_location: "storage1.atomia.local:/gv1"

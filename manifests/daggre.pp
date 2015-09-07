@@ -1,4 +1,10 @@
-class atomia::daggre ($global_auth_token, $ip_addr = $ipaddress, $content_share_nfs_location = '', $config_share_nfs_location = '', $use_nfs3 = true ) {
+class atomia::daggre (
+	$global_auth_token, 
+	$ip_addr = $ipaddress, 
+	$content_share_nfs_location = '', 
+	$config_share_nfs_location = '', 
+	$use_nfs3 = true 
+	) {
   
   include atomia::mongodb
 

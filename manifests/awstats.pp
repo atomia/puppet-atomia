@@ -1,12 +1,12 @@
 class atomia::awstats (
-		$agent_user = "awstats",
-		$agent_password,
-		$ssl_enabled = 0,
-		$content_share_nfs_location,
-		$configuration_share_nfs_location = '',
-		$ssl_cert_key = "",
-		$ssl_cert_file = "",
-		$skip_mount        = 0,
+	$agent_user = "awstats",
+	$agent_password,
+	$ssl_enabled = 0,
+	$content_share_nfs_location,
+	$configuration_share_nfs_location = '',
+	$ssl_cert_key = "",
+	$ssl_cert_file = "",
+	$skip_mount        = 0,
     $awstats_ip = $ipaddress
 	) {
 
@@ -122,27 +122,27 @@ class atomia::awstats (
 	}
 
 	if !defined(File['/etc/apache2/sites-available/default']) {
-	        file { "/etc/apache2/sites-available/default":
+		file { "/etc/apache2/sites-available/default":
 			ensure	=> absent,
 		}
 	}
 
 	if !defined(File['/etc/apache2/sites-enabled/000-default']) {
-	        file { "/etc/apache2/sites-enabled/000-default":
+		file { "/etc/apache2/sites-enabled/000-default":
 			ensure	=> absent,
 		}
 	}
 
 	if !defined(Service['apache2']) {
-	        service { apache2:
+		service { apache2:
 			name => apache2,
 			enable => true,
-	                ensure => running,
+			ensure => running,
 		}
 	}
 
 	if !defined(Exec['force-reload-apache']) {
-	        exec { "force-reload-apache":
+		exec { "force-reload-apache":
 			refreshonly => true,
 			before => Service["apache2"],
 			command => "/etc/init.d/apache2 force-reload",
@@ -150,12 +150,12 @@ class atomia::awstats (
 	}
 
 	if !defined(Exec['/usr/sbin/a2enmod rewrite']) {
-	        exec { "/usr/sbin/a2enmod rewrite":
+		exec { "/usr/sbin/a2enmod rewrite":
 			unless => "/usr/bin/test -f /etc/apache2/mods-enabled/rewrite.load",
 			require => Package["apache2-mpm-worker"],
 			notify => Exec["force-reload-apache"],
 		}
-        }
+	}
 
     file { '/etc/cron.d/rotate-awstats-logs':
         ensure  => present,

@@ -1,5 +1,4 @@
 class atomia::cronagent (
-
 	$global_auth_token, 
 	$min_part = 0,  
 	$max_part = 1000, 
@@ -9,12 +8,11 @@ class atomia::cronagent (
 	$mail_from = "", 
 	$mail_user = "", 
 	$mail_pass = "",
-  $base_url  = "http://$ipaddress:10101"
+	$base_url  = "http://$ipaddress:10101"
+	){
 
-){
-	
 	include atomia::mongodb
-	
+
 	package { "atomia-cronagent": 
 		ensure => present,
 		require => Package["mongodb-10gen"]
@@ -24,22 +22,20 @@ class atomia::cronagent (
 		ensure => present,
 	}
 
-
 	file { "/etc/default/cronagent":
 		owner   => root,
 		group   => root,
 		mode    => 440,
 		content => template("atomia/cronagent/settings.cfg.erb"),
-		require => Package["atomia-cronagent"],		
+		require => Package["atomia-cronagent"],
 	}
 	
 	service { "atomia-cronagent":
-			name => atomia-cronagent,
-			enable => true,
-			ensure => running,
-			pattern => ".*/usr/bin/cronagent.*",
-			require => [ Package["atomia-cronagent"], File["/etc/default/cronagent"] ],
-			subscribe => File["/etc/default/cronagent"],
+		name => atomia-cronagent,
+		enable => true,
+		ensure => running,
+		pattern => ".*/usr/bin/cronagent.*",
+		require => [ Package["atomia-cronagent"], File["/etc/default/cronagent"] ],
+		subscribe => File["/etc/default/cronagent"],
 	}
-				
 }

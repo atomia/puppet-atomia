@@ -1,0 +1,21 @@
+# atomiadns.yaml
+# Defines classes and variables needed to
+# deploy an Atomia DNS master server
+---
+classes:
+  - atomia::atomiadns
+
+# Required variables. If you need to customize more the full list of available variables
+# is documented in the module
+
+atomia::atomiadns::agent_user: "atomiadns"
+atomia::atomiadns::agent_password: "@tomiaPa33"
+atomia::atomiadns::nameserver1: "ns1.yourdomain.com"
+atomia::atomiadns::nameservers: "\"[ns1.yourdomain.com,ns2.yourdomain.com]\""
+atomia::atomiadns::registry: "registry.yourdomain.com"
+
+# Add the zones specified in the string. Listed zones are defaults required for atomia to work
+# If you need more zones just append to the string (separated by \n).
+
+atomia::atomiadns::zones_to_add: "preview.yourdomain.com\nmysql.yourdomain.com\nmssql.yourdomain.com\ncloud.yourdomain.com\npostgresql.yourdomain.com"
+atomia::atomiadns::dns_ns_group: "default"

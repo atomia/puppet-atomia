@@ -1,8 +1,13 @@
 # domainreg.yaml
 # Defines classes and variables needed to deploy domainreg
+# Update file with valid values
 ---
 classes:
   - atomia::domainreg
-  - atomia::nagios::client
 
-atomia::domainreg::service_password: "password123"
+atomia::domainreg::service_username: "domainreg"
+atomia::domainreg::service_password: "Doma1nRegPa55"
+atomia::domainreg::service_url: "http://192.168.0.106/domainreg"
+
+atomia::domainreg::opensrs_user: "atomia" 
+atomia::domainreg::opensrs_pass: "83434c9300f6eba65f7f..."

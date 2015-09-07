@@ -1,6 +1,8 @@
+# iis.yaml
+# Defines all classess and variables needed to deploy
+# the iis webserver role
 ---
 classes:
   - atomia::iis
 
-atomia::iis::sharePath: "\\WIN-3QQV4O6N6FV\configuration\iis"
-atomia::windows_base::is_iis: 1
+atomia::iis::sharePath: "\\storage1\configshare\iis"

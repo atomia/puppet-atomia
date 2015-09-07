@@ -1,0 +1,15 @@
+# mailserver.yaml
+# Defines all classess and variables needed to deploy
+# the mailserver node
+---
+classes:
+  - atomia::mailserver
+
+atomia::mailserver::master_ip: "192.168.0.191"
+atomia::mailserver::agent_password: "password123"
+atomia::mailserver::slave_password: "password123"
+atomia::mailserver::provisioning_host: "192.168.0.103"
+
+atomia::mailserver::mail_share_nfs_location: "storage1.atomia.local:/gv2"
+atomia::mailserver::cluster_ip: "1.1.1.3"
+atomia::mailserver::is_master: "1"
