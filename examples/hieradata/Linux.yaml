@@ -4,9 +4,6 @@ classes:
    - atomia::linux_base
 
 atomia::adjoin::base_dn: "cn=Users,dc=atomia,dc=local"
-atomia::adjoin::ldap_uris: "ldap://9.9.9.9 ldap://9.9.9.10"
+atomia::adjoin::ldap_uris: "ldap://192.168.0.101 ldap://192.168.0.102"
 atomia::adjoin::bind_user: "PosixGuest"
-atomia::adjoin::bind_password: "PosixGuestPassword"
-
-# IP Address of your Nagios server
-atomia::nagios::client::nagios_ip: "127.0.0.1"
+atomia::adjoin::bind_password: "@tomiaPa77"

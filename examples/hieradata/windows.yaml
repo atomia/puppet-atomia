@@ -1,36 +1,26 @@
----
-classes:
-  - atomia::nagios::client
-  
 # Windows variables
-
 # Active directory domain name
 atomia::adjoin::domain_name:                                    "atomia.local"
 # Active directory domain short name
-atomia::windows_base::ad_domain:                                "atomia"
-
+atomia::windows_base::ad_domain:                                "ATOMIA"
 # Administrative user in Active Directory
 atomia::adjoin::admin_user:                                     "Administrator"
-atomia::adjoin::admin_password:                                 "adminpassword"
-
+atomia::adjoin::admin_password:                                 "@tomiaPa55"
 # Ip address of the main domain controller
-atomia::adjoin::dc_ip:                                          "8.8.8.8"
-
+atomia::adjoin::dc_ip:                                          "192.168.0.101"
 # Password for the user apppooluser in ActiveDirectory
-atomia::windows_base::app_password:                             "apppoolpassword"
-
+atomia::windows_base::app_password:                             "@tomiaPa66"
 # Ip address of the Atomia database server and mirror (if using mirror)
-atomia::windows_base::database_server:                          "1.1.1.1"
-atomia::windows_base::mirror_database_server:                   "1.1.1.2"
-
+atomia::windows_base::database_server:                          "192.168.0.104"
+atomia::windows_base::mirror_database_server:                   "192.168.0.105"
 # Application domain of the websites for example atomia.com would mean that your admin page would be at admin.atomia.com
-atomia::windows_base::appdomain:                                "atomia.com"
+atomia::windows_base::appdomain:                                "yourdomain.com"
 # Domains to use for all atomia applications
 atomia::windows_base::actiontrail:                              "actiontrail"
 atomia::windows_base::login:                                    "login"
 atomia::windows_base::order:                                    "order"
 atomia::windows_base::store:                                    "store"
-atomia::windows_base::billing:                                  "faktura"
+atomia::windows_base::billing:                                  "billing"
 atomia::windows_base::admin:                                    "admin"
 atomia::windows_base::hcp:                                      "hcp"
 atomia::windows_base::automationserver:                         "automationserver"
@@ -47,22 +37,21 @@ atomia::windows_base::billing_plugin_config:                    "Atomia.Billing.
 atomia::windows_base::send_invoice_email_subject_format:        "Faktura - {0}"
 
 # Ip address of the server that is going to be running actiontrail
-atomia::windows_base::actiontrail_ip:                           "3.3.3.3"
+atomia::windows_base::actiontrail_ip:                           "192.168.0.103"
 
 # Information about the mail relay that is going to be sending email for this environment
-atomia::windows_base::mail_sender_address:                      "noreply@atomia.com"
-atomia::windows_base::mail_server_host:                         "4.4.4.4"
+atomia::windows_base::mail_sender_address:                      "noreply@yourdomain.com"
+atomia::windows_base::mail_server_host:                         "192.168.0.103"
 atomia::windows_base::mail_server_port:                         "25"
 atomia::windows_base::mail_server_username:                     ""
 atomia::windows_base::mail_server_password:                     ""
 atomia::windows_base::mail_server_use_ssl:                      "false"
 atomia::windows_base::mail_bcc_list:                            ""
 atomia::windows_base::mail_reply_to:                            ""
-
 # Hostname of the storage server
-atomia::windows_base::storage_server_hostname:                  "storage.atomia.com"
+atomia::windows_base::storage_server_hostname:                  "storage1.atomia.local"
 
 # Information about domainreg
-atomia::windows_base::domainreg_service_url:                    "http://5.5.5.5/domainreg"
-atomia::windows_base::domainreg_service_username:               "domainregistration"
-atomia::windows_base::domainreg_service_password:               "domainregpassword"
+atomia::windows_base::domainreg_service_url:                    "http://192.168.0.106/domainreg"
+atomia::windows_base::domainreg_service_username:               "domainreg"
+atomia::windows_base::domainreg_service_password:               "Doma1nRegPa55"
