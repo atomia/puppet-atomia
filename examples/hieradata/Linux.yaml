@@ -4,6 +4,6 @@ classes:
    - atomia::linux_base
 
 atomia::adjoin::base_dn: "cn=Users,dc=atomia,dc=local"
-atomia::adjoin::ldap_uris: "ldap://192.168.0.101 ldap://192.168.0.102"
+atomia::adjoin::ldap_uris: "ldap://192.0.2.101 ldap://192.0.2.102"
 atomia::adjoin::bind_user: "PosixGuest"
-atomia::adjoin::bind_password: "@tomiaPa77"
+atomia::adjoin::bind_password: "SeriousPa55"

@@ -9,7 +9,7 @@ classes:
 # is documented in the module
 
 atomia::atomiadns::agent_user: "atomiadns"
-atomia::atomiadns::agent_password: "@tomiaPa33"
+atomia::atomiadns::agent_password: "SeriousPa55"
 atomia::atomiadns::nameserver1: "ns1.yourdomain.com"
 atomia::atomiadns::nameservers: "\"[ns1.yourdomain.com,ns2.yourdomain.com]\""
 atomia::atomiadns::registry: "registry.yourdomain.com"

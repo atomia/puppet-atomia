@@ -4,4 +4,4 @@
 classes:
   - atomia::installatron
 
-atomia::installatron::content_share_nfs_location: "127.0.0.1:/export/content"
+atomia::installatron::content_share_nfs_location: "storage01.atomia.local:/gv0"

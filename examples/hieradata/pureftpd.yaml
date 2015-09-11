@@ -6,12 +6,12 @@ classes:
   - atomia::pureftpd
 
 atomia::pureftpd::agent_user: "pureftpd"
-atomia::pureftpd::agent_password: "agentpass123"
-atomia::pureftpd::master_ip: "192.168.0.171"
-atomia::pureftpd::provisioning_host: "192.168.0.103"
-atomia::pureftpd::pureftpd_password: "mftppass123"
+atomia::pureftpd::agent_password: "SeriousPa55"
+atomia::pureftpd::master_ip: "192.0.2.171"
+atomia::pureftpd::provisioning_host: "192.0.2.103"
+atomia::pureftpd::pureftpd_password: "SeriousPa55"
 atomia::pureftpd::ftp_cluster_ip: "1.1.1.4"
 atomia::pureftpd::is_master: 1
-atomia::pureftpd::pureftpd_slave_password: "sftppass123"
+atomia::pureftpd::pureftpd_slave_password: "SeriousPa55"
 
-atomia::pureftpd::content_share_nfs_location: "storage1.atomia.local:/gv0"
+atomia::pureftpd::content_share_nfs_location: "storage01.atomia.local:/gv0"

@@ -3,16 +3,16 @@
 atomia::adjoin::domain_name:                                    "atomia.local"
 # Active directory domain short name
 atomia::windows_base::ad_domain:                                "ATOMIA"
-# Administrative user in Active Directory
-atomia::adjoin::admin_user:                                     "Administrator"
-atomia::adjoin::admin_password:                                 "@tomiaPa55"
+# Administrative user in Active Directory (WindowsAdmin)
+atomia::adjoin::admin_user:                                     "WindowsAdmin"
+atomia::adjoin::admin_password:                                 "SeriousPa55"
 # Ip address of the main domain controller
-atomia::adjoin::dc_ip:                                          "192.168.0.101"
+atomia::adjoin::dc_ip:                                          "192.0.2.101"
 # Password for the user apppooluser in ActiveDirectory
-atomia::windows_base::app_password:                             "@tomiaPa66"
+atomia::windows_base::app_password:                             "SeriousPa55"
 # Ip address of the Atomia database server and mirror (if using mirror)
-atomia::windows_base::database_server:                          "192.168.0.104"
-atomia::windows_base::mirror_database_server:                   "192.168.0.105"
+atomia::windows_base::database_server:                          "192.0.2.104"
+atomia::windows_base::mirror_database_server:                   "192.0.2.105"
 # Application domain of the websites for example atomia.com would mean that your admin page would be at admin.atomia.com
 atomia::windows_base::appdomain:                                "yourdomain.com"
 # Domains to use for all atomia applications
@@ -37,11 +37,11 @@ atomia::windows_base::billing_plugin_config:                    "Atomia.Billing.
 atomia::windows_base::send_invoice_email_subject_format:        "Faktura - {0}"
 
 # Ip address of the server that is going to be running actiontrail
-atomia::windows_base::actiontrail_ip:                           "192.168.0.103"
+atomia::windows_base::actiontrail_ip:                           "192.0.2.103"
 
 # Information about the mail relay that is going to be sending email for this environment
 atomia::windows_base::mail_sender_address:                      "noreply@yourdomain.com"
-atomia::windows_base::mail_server_host:                         "192.168.0.103"
+atomia::windows_base::mail_server_host:                         "192.0.2.103"
 atomia::windows_base::mail_server_port:                         "25"
 atomia::windows_base::mail_server_username:                     ""
 atomia::windows_base::mail_server_password:                     ""
@@ -49,9 +49,9 @@ atomia::windows_base::mail_server_use_ssl:                      "false"
 atomia::windows_base::mail_bcc_list:                            ""
 atomia::windows_base::mail_reply_to:                            ""
 # Hostname of the storage server
-atomia::windows_base::storage_server_hostname:                  "storage1.atomia.local"
+atomia::windows_base::storage_server_hostname:                  "storage01.atomia.local"
 
 # Information about domainreg
-atomia::windows_base::domainreg_service_url:                    "http://192.168.0.106/domainreg"
+atomia::windows_base::domainreg_service_url:                    "http://192.0.2.106/domainreg"
 atomia::windows_base::domainreg_service_username:               "domainreg"
-atomia::windows_base::domainreg_service_password:               "Doma1nRegPa55"
+atomia::windows_base::domainreg_service_password:               "PassfromDREG"

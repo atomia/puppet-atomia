@@ -9,10 +9,9 @@ mod "mysql",
 mod "ntp",
   :git => "git://github.com/puppetlabs/puppetlabs-ntp.git"
 
-mod "rismoney/chocolatey"
+mod "chocolatey/chocolatey"
 
-mod "dism",
-  :git => "git://github.com/jimmybergman/puppetlabs-dism.git"
+mod "puppetlabs/dism"
   
 mod "openssl",
   :git => "git://github.com/camptocamp/puppet-openssl.git"

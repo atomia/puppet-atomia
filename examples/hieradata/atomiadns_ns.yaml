@@ -7,5 +7,5 @@ classes:
   - atomia::atomiadns_powerdns
 
 atomia::atomiadns_powerdns::agent_user: "atomiadns"
-atomia::atomiadns_powerdns::agent_password: "@tomiaPa33"
-atomia::atomiadns_powerdns::atomia_dns_url: "http://192.168.0.107/atomiadns"
+atomia::atomiadns_powerdns::agent_password: "PassfromMDNS"
+atomia::atomiadns_powerdns::atomia_dns_url: "http://192.0.2.107/atomiadns"

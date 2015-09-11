@@ -5,6 +5,6 @@ classes:
   - atomia::awstats
 
 atomia::awstats::agent_user: "awstats"
-atomia::awstats::agent_password: "password123"
-atomia::awstats::content_share_nfs_location: "storage1.atomia.local:/gv0"
-atomia::awstats::configuration_share_nfs_location: "storage1.atomia.local:/gv1"
+atomia::awstats::agent_password: "SeriousPa55"
+atomia::awstats::content_share_nfs_location: "storage01.atomia.local:/gv0"
+atomia::awstats::configuration_share_nfs_location: "storage01.atomia.local:/gv1"

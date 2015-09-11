@@ -7,10 +7,10 @@ classes:
   - atomia::adjoin
 
 atomia::apache_agent::username: "apacheagent"
-atomia::apache_agent::password: "password123"
+atomia::apache_agent::password: "SeriousPa55"
 atomia::apache_agent::cluster_ip: "1.1.1.1"
 
 # If you are using the nfs test module you can keep this config option
 # else change it to match your nfs exports
-atomia::apache_agent::content_share_nfs_location: "storage1.atomia.local:/gv0"
-atomia::apache_agent::config_share_nfs_location: "storage1.atomia.local:/gv1"
+atomia::apache_agent::content_share_nfs_location: "storage01.atomia.local:/gv0"
+atomia::apache_agent::config_share_nfs_location: "storage01.atomia.local:/gv1"

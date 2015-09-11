@@ -5,4 +5,4 @@
 classes:
   - atomia::iis
 
-atomia::iis::sharePath: "\\storage1\configshare\iis"
+atomia::iis::sharePath: "\\storage01\configshare\iis"

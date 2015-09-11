@@ -8,5 +8,5 @@ classes:
   - atomia::service_files
 
 atomia::fsagent::username: "fsagent"
-atomia::fsagent::password: "password123"
-atomia::fsagent::content_share_nfs_location: "storage1.atomia.local:/gv0"
+atomia::fsagent::password: "SeriousPa55"
+atomia::fsagent::content_share_nfs_location: "storage01.atomia.local:/gv0"

@@ -5,4 +5,4 @@
 classes:
   - atomia::cronagent
 
-atomia::cronagent::global_auth_token: "token123"
+atomia::cronagent::global_auth_token: "SeriousPa55"

@@ -1,4 +1,4 @@
 ---
 classes:
    - atomia::windows_base
-   - atomia::windows_las
+   - atomia::active_directory

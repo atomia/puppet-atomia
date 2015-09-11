@@ -5,4 +5,4 @@
 classes:
   - atomia::daggre
 
-atomia::daggre::global_auth_token: "token123"
+atomia::daggre::global_auth_token: "SeriousPa55"

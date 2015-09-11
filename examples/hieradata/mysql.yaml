@@ -6,5 +6,5 @@ classes:
   - atomia::mysql
 
 atomia::mysql::mysql_username: "mysqladmin"
-atomia::mysql::mysql_password: "password123"
-atomia::mysql::provisioning_host: "192.168.0.103"
+atomia::mysql::mysql_password: "SeriousPa55"
+atomia::mysql::provisioning_host: "192.0.2.103"
