@@ -97,7 +97,7 @@ curl -sSL https://get.rvm.io | bash -s stable
 source "/usr/local/rvm/scripts/rvm"
 /usr/local/rvm/bin/rvm install 2.1.1
 
-echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref => \"stable\"" > Puppetfile
+echo "mod \"atomia\", :git =>\"git://github.com/branislavvukelic/puppet-atomia.git\", :ref => \"master\"" > Puppetfile
 
 service puppetmaster restart
 cd /etc/puppet
@@ -108,7 +108,7 @@ echo "***** To complete the installation please run the following commands: ****
 rvm use 2.1.1
 rvm default 2.1.1
 cd /etc/puppet
-gem install librarian-puppet puppet:3.8.1
+gem install librarian-puppet puppet:3.8.2
 librarian-puppet install
 cp /etc/puppet/modules/atomia/files/default_files/* /etc/puppet/atomia/service_files/
 "
