@@ -11,7 +11,8 @@ mod "ntp",
 
 mod "chocolatey/chocolatey"
 
-mod "puppetlabs/dism"
+mod "dism",
+  :git => "git://github.com/jimmybergman/puppetlabs-dism.git"
   
 mod "openssl",
   :git => "git://github.com/camptocamp/puppet-openssl.git"
