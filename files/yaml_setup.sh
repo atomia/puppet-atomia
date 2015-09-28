@@ -1,0 +1,159 @@
+#!/bin/bash
+# Atomia yaml conf file tuner
+#
+# Author: Branislav Vukelic, branislav@atomia.com
+#
+#
+clear
+
+# Define some colors for readability
+ESC_SEQ="\x1b["
+COL_RESET=$ESC_SEQ"39;49;00m"
+COL_RED=$ESC_SEQ"31;01m"
+COL_GREEN=$ESC_SEQ"32m"
+
+# Declare variables 
+FILES=/etc/puppet/hieradata/
+
+
+
+# Extracting network info from puppetmaster
+# Get netstat information
+[[ -f /tmp/netstat.tmp ]] && rm -f /tmp/netstat.tmp
+/bin/netstat -nar | grep eth0 > /tmp/netstat.tmp
+sed -i '/169.254.0.0/d' /tmp/netstat.tmp
+
+# NS - Get NS addresses 
+[[ -f /tmp/eth0.ns.tmp ]] && rm -f /tmp/eth0.ns.tmp
+ns=$(cat /etc/resolv.conf  | grep -v '^#' | grep nameserver | awk '{print $2}')
+for i in $ns; do 
+  echo $i >> /tmp/eth0.ns.tmp 
+done
+
+# PUBLIC - Get the current IP
+[[ -f /tmp/eth0.ip.tmp ]] && rm -f /tmp/eth0.ip.tmp
+/sbin/ifconfig eth0 | grep "inet addr" | sed 's/.* addr://;s/[ \t]* .*//' > /tmp/eth0.ip.tmp
+
+# NETWORK - Get the network IP
+[[ -f /tmp/eth0.network.tmp ]] && rm -f /tmp/eth0.network.tmp
+cp /tmp/netstat.tmp /tmp/eth0.network.tmp
+sed -i '/UG/d;s/[ \t]* .*//' /tmp/eth0.network.tmp
+
+# GATEWAY - Get the gateway IP
+[[ -f /tmp/eth0.gateway.tmp ]] && rm -f /tmp/eth0.gateway.tmp
+cp /tmp/netstat.tmp /tmp/eth0.gateway.tmp
+sed -i '/[1-9]* .* U .*/d;s/0.0.0.0[ \t]*//;s/[ \t]* .*//' /tmp/eth0.gateway.tmp
+
+# NETMASK - Get the network netmask
+[[ -f /tmp/eth0.netmask.tmp ]] && rm -f /tmp/eth0.netmask.tmp
+/sbin/ifconfig eth0 | grep Mask | sed 's/.* Mask://' > /tmp/eth0.netmask.tmp
+
+# Assign variables from temp files
+NAMESERVERS=`cat /tmp/eth0.ns.tmp`
+PUPPET_ADDRESS=`cat /tmp/eth0.ip.tmp`
+GATEWAY=`cat /tmp/eth0.gateway.tmp`
+NETWORK=`cat /tmp/eth0.network.tmp`
+NETMASK=`cat /tmp/eth0.netmask.tmp`
+
+echo "ADDRESS is $PUPPET_ADDRESS"
+echo "GATEWAY is $GATEWAY"
+echo "NETWORK is $NETWORK"
+echo "NETMASK is $NETMASK"
+echo "NAMESERVERS are $NAMESERVERS"
+
+# Function to populate conf.lan
+populatelan ()
+{
+MANAGEMENTSUBNET=${NETWORK%.*}
+
+sed -i "s/192.0.2/$MANAGEMENTSUBNET/g" /etc/puppet/hieradata/nodes/config.temp
+
+[[ -f /etc/puppet/hieradata/nodes/config.lan ]] && rm -f /etc/puppet/hieradata/nodes/config.lan
+while read -r line ; do
+  [[ $line == * ]] && line+=",$NETWORK,$NETMASK,$GATEWAY,$NAMESERVERS"
+  echo "$line" >> /etc/puppet/hieradata/nodes/config.lan
+done < /etc/puppet/hieradata/nodes/config.temp
+}
+
+# Function to pull default config files from git
+pullyaml ()
+{
+  svn checkout https://github.com/branislavvukelic/puppet-atomia/trunk/examples/hieradata /etc/puppet/hieradata
+}
+
+# Function to go trough all yaml files and populate data
+populateyaml ()
+{
+MANAGEMENTSUBNET=${NETWORK%.*}
+
+# Cycle trough all resources files
+for f in $FILES*
+do
+  # Setup management network subnet
+  sed -i "s/192.0.2/$MANAGEMENTSUBNET/g" $f
+  # Setup public domain
+  sed -i "s/yourdomain.com/$PUBLICDOMAIN/g" $f  
+  # Generate random passwords
+  RANDOMPASS=`tr -cd '[:alnum:]' < /dev/urandom | fold -w25 | head -n1`
+  sed -i "s/SeriousPa55/$RANDOMPASS/g" $f
+  RANDOMPASS2=`tr -cd '[:alnum:]' < /dev/urandom | fold -w25 | head -n1`
+  sed -i "s/SeriousPa66/$RANDOMPASS2/g" $f
+  #echo "$f"
+done
+
+# Copy domainreg service password to windows.yaml
+  DREGPASS=`grep -r domainreg::service_password $FILES | cut -d'"' -f2`
+  echo $DREGPASS
+  sed -i "s/PassfromDREG/$DREGPASS/g" ${FILES}windows.yaml
+# Copy Master DNS password to atomiadns_ns.yaml 
+  MDNSPASS=`grep -r atomiadns::agent_password $FILES | cut -d'"' -f2`
+  echo $MDNSPASS
+  sed -i "s/PassfromMDNS/$MDNSPASS/g" ${FILES}atomiadns_ns.yaml
+# Print result of password generation  
+  grep -r password $FILES | cut -d':' -f4,6,7
+}
+
+# Interactive part
+echo ""
+echo "========================================================"
+echo "This is a helper script for Atomia platform puppetmaster"
+echo "========================================================"
+
+#read -e -p "Enter management network subnet (eg. 192.168.50.0): " MNS
+#MANAGEMENTSUBNET=${MNS%.*}
+#echo $MANAGEMENTSUBNET
+#
+#read -e -p "Enter management network gateway (eg. 192.168.50.1): " MNG
+#MANAGEMENTGATEWAY=${MNG}
+#echo $MANAGEMENTGATEWAY
+
+read -e -p "Enter Atomia platform public domain (eg. example.com): " PDOMAIN
+PUBLICDOMAIN=${PDOMAIN}
+#echo $PUBLICDOMAIN
+
+# Execution
+pullyaml
+if (( $? )); then
+  echo -e "$COL_RED Retrieving template files from GIT failed...  $COL_RESET" >&2
+  exit 1
+else
+  echo -e "$COL_GREEN Template files retrieved !!!  $COL_RESET"
+fi
+
+populatelan
+if (( $? )); then
+  echo "$COL_RED Management network template population failed... $COL_RESET" >&2
+  exit 1
+else
+  echo -e "$COL_GREEN Template file populated !!! $COL_RESET"
+fi
+
+populateyaml
+if (( $? )); then
+  echo "$COL_RED Populate yaml templates failed... $COL_RESET" >&2
+  exit 1
+else
+  echo -e "$COL_GREEN Yaml templates populated !!! $COL_RESET"
+fi
+
+exit 0
