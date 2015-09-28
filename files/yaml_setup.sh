@@ -25,10 +25,7 @@ sed -i '/169.254.0.0/d' /tmp/netstat.tmp
 
 # NS - Get NS addresses 
 [[ -f /tmp/eth0.ns.tmp ]] && rm -f /tmp/eth0.ns.tmp
-ns=$(cat /etc/resolv.conf  | grep -v '^#' | grep nameserver | awk '{print $2}')
-for i in $ns; do 
-  echo $i >> /tmp/eth0.ns.tmp 
-done
+cat /etc/resolv.conf  | grep -v '^#' | grep nameserver | awk '{print $2}' | tr '\n' ' ' > /tmp/eth0.ns.tmp
 
 # PUBLIC - Get the current IP
 [[ -f /tmp/eth0.ip.tmp ]] && rm -f /tmp/eth0.ip.tmp
@@ -87,7 +84,7 @@ populateyaml ()
 MANAGEMENTSUBNET=${NETWORK%.*}
 
 # Cycle trough all resources files
-for f in $FILES*
+for f in `find /etc/puppet/hieradata/* -maxdepth 0 -type f`
 do
   # Setup management network subnet
   sed -i "s/192.0.2/$MANAGEMENTSUBNET/g" $f
@@ -98,26 +95,26 @@ do
   sed -i "s/SeriousPa55/$RANDOMPASS/g" $f
   RANDOMPASS2=`tr -cd '[:alnum:]' < /dev/urandom | fold -w25 | head -n1`
   sed -i "s/SeriousPa66/$RANDOMPASS2/g" $f
-  #echo "$f"
+  echo -e "$f ->$COL_GREEN done ..."  $COL_RESET
 done
 
 # Copy domainreg service password to windows.yaml
-  DREGPASS=`grep -r domainreg::service_password $FILES | cut -d'"' -f2`
-  echo $DREGPASS
-  sed -i "s/PassfromDREG/$DREGPASS/g" ${FILES}windows.yaml
+  DREGPASS=`grep -r domainreg::service_password /etc/puppet/hieradata/domainreg.yaml | cut -d'"' -f2`
+  #echo $DREGPASS
+  sed -i "s/PassfromDREG/$DREGPASS/g" /etc/puppet/hieradata/windows.yaml
 # Copy Master DNS password to atomiadns_ns.yaml 
-  MDNSPASS=`grep -r atomiadns::agent_password $FILES | cut -d'"' -f2`
-  echo $MDNSPASS
-  sed -i "s/PassfromMDNS/$MDNSPASS/g" ${FILES}atomiadns_ns.yaml
+  MDNSPASS=`grep -r atomiadns::agent_password /etc/puppet/hieradata/atomiadns.yaml | cut -d'"' -f2`
+  #echo $MDNSPASS
+  sed -i "s/PassfromMDNS/$MDNSPASS/g" /etc/puppet/hieradata/atomiadns_ns.yaml
 # Print result of password generation  
-  grep -r password $FILES | cut -d':' -f4,6,7
+  #grep -r password $FILES | cut -d':' -f4,6,7
 }
 
 # Interactive part
 echo ""
-echo "========================================================"
-echo "This is a helper script for Atomia platform puppetmaster"
-echo "========================================================"
+echo "=========================================================="
+echo -e $COL_GREEN "This is a helper script for Atomia platform puppetmaster" $COL_RESET
+echo "=========================================================="
 
 #read -e -p "Enter management network subnet (eg. 192.168.50.0): " MNS
 #MANAGEMENTSUBNET=${MNS%.*}
@@ -134,26 +131,26 @@ PUBLICDOMAIN=${PDOMAIN}
 # Execution
 pullyaml
 if (( $? )); then
-  echo -e "$COL_RED Retrieving template files from GIT failed...  $COL_RESET" >&2
+  echo -e $COL_RED "Retrieving template files from GIT failed... " $COL_RESET >&2
   exit 1
 else
-  echo -e "$COL_GREEN Template files retrieved !!!  $COL_RESET"
+  echo -e $COL_GREEN "Template files retrieved !!! " $COL_RESET
 fi
 
 populatelan
 if (( $? )); then
-  echo "$COL_RED Management network template population failed... $COL_RESET" >&2
+  echo -e $COL_RED "Management network template population failed..." $COL_RESET >&2
   exit 1
 else
-  echo -e "$COL_GREEN Template file populated !!! $COL_RESET"
+  echo -e $COL_GREEN "Template file populated !!!" $COL_RESET
 fi
 
 populateyaml
 if (( $? )); then
-  echo "$COL_RED Populate yaml templates failed... $COL_RESET" >&2
+  echo -e $COL_RED "Populate yaml templates failed..." $COL_RESET >&2
   exit 1
 else
-  echo -e "$COL_GREEN Yaml templates populated !!! $COL_RESET"
+  echo -e $COL_GREEN "Yaml templates populated !!!" $COL_RESET
 fi
 
 exit 0
