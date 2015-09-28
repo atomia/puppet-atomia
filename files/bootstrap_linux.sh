@@ -23,10 +23,17 @@ sed -i "/templatedir/d" /etc/puppet/puppet.conf
 echo -e 'path /run\nallow *' >> /etc/puppet/auth.conf
 
 puppet agent --test
-
-echo "Please sign the certificate on the puppetmaster\npuppet cert sign $hostname \npress any key when done..."
+if [ "$?" != "0" ]; then
+        echo "Error: Could not establish communication with Puppet master"
+        exit 1
+fi
 
 service puppet start
+if [ "$?" != "0" ]; then
+        echo "Error: Could not start puppet"
+        exit 1
+fi
+
 
 if [ "$dist" = "debian" ]; then
         puppet agent --enable
@@ -34,5 +41,3 @@ fi
 #Clean up
 rm puppetlabs-release-*.deb
 
-
-exit 1
