@@ -1,5 +1,12 @@
 #!/bin/sh
 
+dist=`cat /etc/*-release | egrep ^DISTRIB_CODENAME= | sed 's/.*=//'`
+
+wget http://apt.puppetlabs.com/puppetlabs-release-$dist.deb
+sudo dpkg -i puppetlabs-release-precise.deb
+
+sudo apt-get update
+
 sed -i "/templatedir/d" /etc/puppet/puppet.conf
 
 cd /etc/puppet

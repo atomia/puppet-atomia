@@ -5,15 +5,10 @@ if [ "$#" -ne 1 ]; then
         exit 1
 fi
 hostname=`hostname`
-dist=`cat /etc/*-release | egrep ^ID= | sed 's/.*=//'`
 
-if [ "$dist" = "ubuntu" ]; then
-        wget http://apt.puppetlabs.com/puppetlabs-release-precise.deb
-        sudo dpkg -i puppetlabs-release-precise.deb
-else
-        wget http://apt.puppetlabs.com/puppetlabs-release-wheezy.deb
-        dpkg -i puppetlabs-release-wheezy.deb
-fi
+dist=`cat /etc/*-release | egrep ^DISTRIB_CODENAME= | sed 's/.*=//'`
+wget http://apt.puppetlabs.com/puppetlabs-release-$dist.deb
+sudo dpkg -i puppetlabs-release-precise.deb
 sudo apt-get update
 apt-get install -y puppet
 
