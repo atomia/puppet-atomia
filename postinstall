@@ -9,11 +9,6 @@ sudo apt-get update
 
 sed -i "/templatedir/d" /etc/puppet/puppet.conf
 
-cd /etc/puppet
-puppet resource package puppetdb ensure=latest
-puppet resource service puppetdb ensure=running enable=true
-puppet resource package puppetdb-terminus ensure=latest
-
 echo -e "
 :backends:
   - yaml
@@ -44,25 +39,6 @@ echo "
 
 mkdir -p /etc/puppet/atomia/service_files
 
-echo "
-[main]
-server = $HOSTNAME
-port = 8081
-" > /etc/puppet/puppetdb.conf
-
-echo "
-storeconfigs = true
-storeconfigs_backend = puppetdb
-" >> /etc/puppet/puppet.conf
-
-echo "
----
-master:
-   facts:
-      terminus: puppetdb
-      cache: yaml
-" >  /etc/puppet/routes.yaml
-
 echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref => \"stable\"" > Puppetfile
 
 service puppetmaster restart
@@ -72,3 +48,5 @@ cd /etc/puppet
 gem install librarian-puppet puppet
 librarian-puppet install
 cp /etc/puppet/modules/atomia/files/default_files/* /etc/puppet/atomia/service_files/
+
+sudo puppet apply -e "class { 'puppetdb': } class { 'puppetdb::master::config': }"
