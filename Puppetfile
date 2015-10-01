@@ -10,7 +10,7 @@ mod "ntp",
   :git => "git://github.com/puppetlabs/puppetlabs-ntp.git"
 
 mod "chocolatey",
-  :git => "git://github.com/chocolatey/puppet-chocolatey"
+  :git => "git://github.com/chocolatey/puppet-chocolatey.git"
 
 mod "dism",
   :git => "git://github.com/jimmybergman/puppetlabs-dism.git"
@@ -39,4 +39,5 @@ mod "download_file",
 mod "postgresql",
   :git => "git://github.com/puppetlabs/puppetlabs-postgresql.git"
 
-mod "puppetlabs/puppetdb"
+mod "puppetdb",
+  :git => "git://github.com/puppetlabs/puppetlabs-puppetdb.git"
