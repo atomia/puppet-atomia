@@ -41,5 +41,3 @@ cd /etc/puppet
 gem install librarian-puppet puppet
 librarian-puppet install
 cp /etc/puppet/modules/atomia/files/default_files/* /etc/puppet/atomia/service_files/
-
-sudo puppet apply -e "class { 'puppetdb': } class { 'puppetdb::master::config': }"

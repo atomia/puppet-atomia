@@ -39,5 +39,3 @@ mod "download_file",
 mod "postgresql",
   :git => "git://github.com/puppetlabs/puppetlabs-postgresql.git"
 
-mod "puppetdb",
-  :git => "git://github.com/puppetlabs/puppetlabs-puppetdb.git"
