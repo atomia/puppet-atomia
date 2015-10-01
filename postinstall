@@ -32,7 +32,7 @@ echo "
 
 mkdir -p /etc/puppet/atomia/service_files
 
-echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref => \"master\"" > Puppetfile
+echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref => \"master\" > Puppetfile
 
 service puppetmaster restart
 
