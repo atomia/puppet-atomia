@@ -8,7 +8,7 @@ hostname=`hostname`
 
 dist=`cat /etc/*-release | egrep ^DISTRIB_CODENAME= | sed 's/.*=//'`
 wget http://apt.puppetlabs.com/puppetlabs-release-$dist.deb
-sudo dpkg -i puppetlabs-release-precise.deb
+sudo dpkg -i puppetlabs-release-$dist.deb
 sudo apt-get update
 apt-get install -y puppet
 
@@ -17,22 +17,17 @@ sed -i "/\[main\]/a server=$1\nlisten=true" /etc/puppet/puppet.conf
 sed -i "/templatedir/d" /etc/puppet/puppet.conf
 echo -e 'path /run\nallow *' >> /etc/puppet/auth.conf
 
-puppet agent --test
-if [ "$?" != "0" ]; then
-        echo "Error: Could not establish communication with Puppet master"
-        exit 1
-fi
-
 service puppet start
 if [ "$?" != "0" ]; then
         echo "Error: Could not start puppet"
         exit 1
 fi
 
+puppet agent --test
 
 if [ "$dist" = "debian" ]; then
         puppet agent --enable
 fi
 #Clean up
 rm puppetlabs-release-*.deb
-
+rm bootstrap_linux.sh
