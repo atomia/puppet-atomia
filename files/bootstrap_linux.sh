@@ -23,8 +23,6 @@ if [ "$?" != "0" ]; then
         exit 1
 fi
 
-puppet agent --test
-
 if [ "$dist" = "debian" ]; then
         puppet agent --enable
 fi
