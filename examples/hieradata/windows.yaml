@@ -9,7 +9,7 @@ atomia::adjoin::admin_password:                                 "SeriousPa55"
 # Ip address of the main domain controller
 atomia::adjoin::dc_ip:                                          "192.0.2.101"
 # Password for the user apppooluser in ActiveDirectory
-atomia::windows_base::app_password:                             "SeriousPa55"
+atomia::windows_base::app_password:                             "SeriousPa66"
 # Ip address of the Atomia database server and mirror (if using mirror)
 atomia::windows_base::database_server:                          "192.0.2.104"
 atomia::windows_base::mirror_database_server:                   "192.0.2.105"

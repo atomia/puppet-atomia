@@ -7,7 +7,7 @@ classes:
 
 atomia::mailserver::master_ip: "192.0.2.191"
 atomia::mailserver::agent_password: "SeriousPa55"
-atomia::mailserver::slave_password: "SeriousPa55"
+atomia::mailserver::slave_password: "SeriousPa66"
 atomia::mailserver::provisioning_host: "192.0.2.103"
 
 atomia::mailserver::mail_share_nfs_location: "storage01.atomia.local:/gv2"
