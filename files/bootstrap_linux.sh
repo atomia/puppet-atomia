@@ -24,9 +24,9 @@ if [ "$?" != "0" ]; then
         exit 1
 fi
 
-if [ "$dist" = "debian" ]; then
-        puppet agent --enable
-fi
+
+puppet agent --enable
+
 #Clean up
 rm puppetlabs-release-*.deb
 rm bootstrap_linux.sh
