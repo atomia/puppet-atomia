@@ -32,29 +32,26 @@ class { 'puppetdb':
 echo "---
 :backends:
   - yaml
-  - http
+  - mysql
 
 :yaml:
   :datadir: /etc/puppet/hieradata
 
-:http:
-  :host: 127.0.0.1
-  :port: 3000
-  :output: json
-  :cache_timeout: 10
-  :failure: graceful
-  :headers:
-    :X-Token: my-token
-  :paths:
-    - /configuration/%{fqdn}
-    - /configuration/%{env}
-    - /configuration/common
+:mysql:
+  :host: localhost
+  :user: root
+  :pass: [password]
+  :database: hiera
+
+  :query: SELECT val FROM configuration WHERE var='%{key}'
+
 
 :hierarchy:
   - bootstrap
-  - \"%{::clientcert}\"
-  - \"%{::custom_location}\"
-  - common
+  - \"%{::atomia_role_1}\"
+  - \"%{::atomia_role_2}\"
+  - \"%{::atomia_role_3}\"
+  - bootstrap
 
 :logger: console
 " > /etc/hiera.yaml

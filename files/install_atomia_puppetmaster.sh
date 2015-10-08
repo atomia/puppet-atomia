@@ -1,6 +1,6 @@
 #!/bin/bash
 # Define some colors for readability
- 
+
 ESC_SEQ="\x1b["
 COL_RESET=$ESC_SEQ"39;49;00m"
 COL_RED=$ESC_SEQ"31;01m"
@@ -95,6 +95,6 @@ echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref
 service puppetmaster restart
 cd /etc/puppet
 
-gem install librarian-puppet puppet
+gem install librarian-puppet puppet mysql
 librarian-puppet install
 cp /etc/puppet/modules/atomia/files/default_files/* /etc/puppet/atomia/service_files/
