@@ -1,43 +1,80 @@
-#!/bin/sh
+apt-get install wget
+wget http://apt.puppetlabs.com/puppetlabs-release-trusty.deb
+sudo dpkg -i puppetlabs-release-trusty.deb
+sudo apt-get update
 
-sed -i "/templatedir/d" /etc/puppet/puppet.conf
+apt-get install -y puppetmaster puppet git
+echo "127.0.0.1 puppet" >> /etc/hosts
 
-echo -e "
+service puppetmaster restart
+
+cd /etc/puppet
+puppet module install puppetlabs-puppetdb
+
+puppet apply -e "
+class { 'puppetdb::globals':
+  version => '2.3.7-1puppetlabs1',
+}
+class { 'puppetdb':
+        # database_username => 'puppetdb',
+        # database_password => 'puppetdb',
+        # database_name     => 'puppetdb',
+        report_ttl        => '7d',
+    }
+
+    # Configure the puppet master to store reports
+    class { 'puppetdb::master::config':
+        manage_report_processor => true,
+        enable_reports          => true
+    }
+"
+
+echo "---
 :backends:
   - yaml
-:hierarchy:
-  - \"nodes/%{::fqdn}\"
-  - \"%{::atomia_role}\"
-  - \"%{::atomia_brand}_common\"
-  - \"%{::kernel}\"
-  - common
+  - http
+
 :yaml:
   :datadir: /etc/puppet/hieradata
-" > /etc/puppet/hiera.yaml
+
+:http:
+  :host: 127.0.0.1
+  :port: 3000
+  :output: json
+  :cache_timeout: 10
+  :failure: graceful
+  :headers:
+    :X-Token: my-token
+  :paths:
+    - /configuration/%{fqdn}
+    - /configuration/%{env}
+    - /configuration/common
+
+:hierarchy:
+  - bootstrap
+  - \"%{::clientcert}\"
+  - \"%{::custom_location}\"
+  - common
+
+:logger: console
+" > /etc/hiera.yaml
+
+sudo apt-get install -y libmysqlclient-dev
+gem install hiera-mysql mysql
+
+mkdir -p /etc/puppet/atomia/service_files
+
+echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref => \"master\" " > Puppetfile
+
+cd /etc/puppet
+
+gem install puppet -v 3.8.3
+gem install librarian-puppet
+librarian-puppet install
+cp /etc/puppet/modules/atomia/files/default_files/* /etc/puppet/atomia/service_files/
 
 echo "
 node default {
         hiera_include('classes')
 }
 " > /etc/puppet/manifests/site.pp
-
-echo "
-[atomiacerts]
-   path /etc/puppet/atomiacerts
-   allow *
-[atomia]
-   path /etc/puppet/atomia
-   allow *
-" >> /etc/puppet/fileserver.conf
-
-mkdir -p /etc/puppet/atomia/service_files
-
-echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref => \"master\" " > Puppetfile
-
-service puppetmaster restart
-
-cd /etc/puppet
-
-gem install librarian-puppet puppet
-librarian-puppet install
-cp /etc/puppet/modules/atomia/files/default_files/* /etc/puppet/atomia/service_files/

@@ -11,6 +11,7 @@ wget http://apt.puppetlabs.com/puppetlabs-release-$dist.deb
 sudo dpkg -i puppetlabs-release-$dist.deb
 sudo apt-get update
 apt-get install -y puppet
+apt-get install -y facter
 
 sed -i 's/START=no/START=yes/' /etc/default/puppet
 sed -i "/\[main\]/a server=$1\nlisten=true" /etc/puppet/puppet.conf
