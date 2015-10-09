@@ -7,7 +7,7 @@ classes:
 
 atomia::domainreg::service_username: "domainreg"
 atomia::domainreg::service_password: "SeriousPa55"
-atomia::domainreg::service_url: "http://192.0.2.106/domainreg"
+atomia::domainreg::service_url: "http://192.0.2.109/domainreg"
 
 atomia::domainreg::opensrs_user: "atomia" 
 atomia::domainreg::opensrs_pass: "83434c9300f6eba65f7f..."

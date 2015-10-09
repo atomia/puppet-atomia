@@ -27,7 +27,7 @@ class atomia::pureftpd (
     }
   }
 
-  if $is_master == "1" {
+  if $hostname == "ftp01" {
     if $skip_mysql == 0 {
       class { 'mysql::server':
         override_options => {

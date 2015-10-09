@@ -2,8 +2,10 @@
 # Defines classes and variables needed to deploy awstats
 ---
 classes:
+  - atomia::adjoin
   - atomia::awstats
 
+atomia::awstats::awstats_ip: "192.0.2.115"
 atomia::awstats::agent_user: "awstats"
 atomia::awstats::agent_password: "SeriousPa55"
 atomia::awstats::content_share_nfs_location: "storage01.atomia.local:/gv0"

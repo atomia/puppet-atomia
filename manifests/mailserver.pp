@@ -111,7 +111,7 @@ class atomia::mailserver (
     $mysql_id = $mysql_server_id
   }
 
-  if $is_master == 1 {
+  if $hostname == "mail01" {
     class { 'mysql::server':
       override_options => {
         'mysqld' => {

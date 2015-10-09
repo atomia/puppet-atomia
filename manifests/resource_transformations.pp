@@ -7,9 +7,9 @@ class atomia::resource_transformations (
   {
 
   
-  file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.Domainreg.xml' :
-       content  => template('atomia/resource_transformations/Resources.Domainreg.erb'),
+    file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.Domainreg.xml' :
        ensure => 'file',
+       content  => template('atomia/resource_transformations/Resources.Domainreg.erb'),
     }
     
 
@@ -77,11 +77,5 @@ class atomia::resource_transformations (
       ensure => 'file',
       content  => template('atomia/resource_transformations/Resources.MSSQL.erb')
     }
-    
-
-
-    
-
-
 
 }

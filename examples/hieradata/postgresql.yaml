@@ -1,0 +1,12 @@
+# postgresql.yaml
+# Defines all classes and variables needed to deploy
+# the postgresql node
+---
+classes:
+  - atomia::postgresql
+
+atomia::postgresql::postgresql_username: "postgreadmin"
+atomia::postgresql::postgresql_password: "SeriousPa55"
+atomia::postgresql::provisioning_host: "192.0.2.103"
+# Public IPs of all MySQL servers separated by , (coma)
+atomia::postgresql::server_ips: "203.0.113.16,203.0.113.17"

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Atomia yaml conf file tuner
 #
-# Author: Branislav Vukelic, branislav@atomia.com
+# Author: Branislav Vukelic <branislav@atomia.com>
 #
 #
 clear
@@ -152,5 +152,7 @@ if (( $? )); then
 else
   echo -e $COL_GREEN "Yaml templates populated !!!" $COL_RESET
 fi
+
+service puppetmaster force-reload
 
 exit 0

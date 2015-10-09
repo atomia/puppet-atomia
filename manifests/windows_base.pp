@@ -183,11 +183,11 @@ class atomia::windows_base (
   exec { 'install-chocolatey':
     command => "iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))",
     provider  => powershell,
-    onlyif  => 'Test-Path C:\Chocolatey'
+    onlyif  => 'Test-Path C:\ProgramData\Chocolatey'
   }
   
   exec { 'set-chocolatey-path':
-    command => 'c:\windows\system32\cmd.exe /c SET PATH=%PATH%;%systemdrive%\chocolatey\bin',
+    command => 'c:\windows\system32\cmd.exe /c SET PATH=%PATH%;%systemdrive%\ProgramData\chocolatey\bin',
     creates => "c:/install/chocolatey_installed.txt",
     require  => Exec['install-chocolatey'],
   }

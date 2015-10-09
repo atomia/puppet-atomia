@@ -1,0 +1,8 @@
+# phpmyadmin.yaml file
+#
+---
+classes:
+   - atomia::phpmyadmin
+   
+atomia::phpmyadmin::mysql_host: "203.0.113.12"
+

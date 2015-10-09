@@ -2,3 +2,4 @@
 classes:
    - atomia::windows_base
    - atomia::active_directory
+   - atomia::resource_transformations

@@ -10,6 +10,7 @@ classes:
 
 atomia::atomiadns::agent_user: "atomiadns"
 atomia::atomiadns::agent_password: "SeriousPa55"
+atomia::atomiadns::atomia_dns_url: "http://192.0.2.110/atomiadns"
 atomia::atomiadns::nameserver1: "ns1.yourdomain.com"
 atomia::atomiadns::nameservers: "\"[ns1.yourdomain.com,ns2.yourdomain.com]\""
 atomia::atomiadns::registry: "registry.yourdomain.com"

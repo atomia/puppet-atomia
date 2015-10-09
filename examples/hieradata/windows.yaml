@@ -11,8 +11,8 @@ atomia::adjoin::dc_ip:                                          "192.0.2.101"
 # Password for the user apppooluser in ActiveDirectory
 atomia::windows_base::app_password:                             "SeriousPa66"
 # Ip address of the Atomia database server and mirror (if using mirror)
-atomia::windows_base::database_server:                          "192.0.2.104"
-atomia::windows_base::mirror_database_server:                   "192.0.2.105"
+atomia::windows_base::database_server:                          "192.0.2.107"
+atomia::windows_base::mirror_database_server:                   "192.0.2.108"
 # Application domain of the websites for example atomia.com would mean that your admin page would be at admin.atomia.com
 atomia::windows_base::appdomain:                                "yourdomain.com"
 # Domains to use for all atomia applications
@@ -52,6 +52,6 @@ atomia::windows_base::mail_reply_to:                            ""
 atomia::windows_base::storage_server_hostname:                  "storage01.atomia.local"
 
 # Information about domainreg
-atomia::windows_base::domainreg_service_url:                    "http://192.0.2.106/domainreg"
+atomia::windows_base::domainreg_service_url:                    "http://192.0.2.109/domainreg"
 atomia::windows_base::domainreg_service_username:               "domainreg"
 atomia::windows_base::domainreg_service_password:               "PassfromDREG"

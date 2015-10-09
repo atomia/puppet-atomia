@@ -1,23 +1,17 @@
 <% require 'yaml' %>
-<% server_ips = YAML::parse(IO.popen("#{@lookup_var} mysql server_ips #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'').to_s) %>
+<% server_ips = YAML::parse(IO.popen("#{@lookup_var} mysql server_ips #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'').split(",").to_s) %>
 <resourceDescription xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
   <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.MySql.MySql'])" xdt:Transform="Replace">
-      <moduleList>
+    <moduleList>
       <module name="Atomia.Provisioning.Modules.MySql.MySql" MaxItems="500" resourceAsignmentPolicy="RoundRobinStickyPerAccountWithMaximum" />
     </moduleList>
-    <resourceList>
-<% server_ips.each do |v| %>
-    <% if defined? v.value  %>
-        <% if v.value != "" %>
+    <resourceList><% server_ips.each do |v| %><% if defined? v.value  %><% if v.value != "" %>
           <resource name="mysql<%= v.value %>">
             <property name="DatabaseServer"><%= v.value %></property>
             <property name="PublicIpAddress"><%= v.value %></property>
             <property name="User"><%= IO.popen("#{@lookup_var} mysql mysql_username #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %></property>
             <property name="Password"><%=  IO.popen("#{@lookup_var} mysql mysql_password #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %></property>
-          </resource>
-        <% end %>
-     <% end %>    
-<% end %>
+          </resource><% end %><% end %><% end %>
     </resourceList>
   </bindings>
 </resourceDescription>

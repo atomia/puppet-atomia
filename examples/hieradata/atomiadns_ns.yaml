@@ -8,4 +8,4 @@ classes:
 
 atomia::atomiadns_powerdns::agent_user: "atomiadns"
 atomia::atomiadns_powerdns::agent_password: "PassfromMDNS"
-atomia::atomiadns_powerdns::atomia_dns_url: "http://192.0.2.107/atomiadns"
+atomia::atomiadns_powerdns::atomia_dns_url: "http://192.0.2.110/atomiadns"

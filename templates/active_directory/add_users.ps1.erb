@@ -1,4 +1,7 @@
-
+# Get passwords from .yaml files
+$apppoolpass = "<%= IO.popen("#{@lookup_var} windows_base app_password #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %>"
+$windowsadminpass = "<%= IO.popen("#{@lookup_var} adjoin admin_password #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %>"
+$posixguestpass = "<%= IO.popen("#{@lookup_var} adjoin bind_password #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %>"
 
 Function AddUserToActiveDirectory($adUser,$password){
     Try{
@@ -124,25 +127,26 @@ Write-Host "Done." -ForegroundColor DarkCyan
 # Add apppooluser
 
 if(! (UserExists "apppooluser")){
-    if(AddUserToActiveDirectory "apppooluser" "<%= IO.popen("#{@lookup_var} windows_base app_password #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %>"){
+    if(AddUserToActiveDirectory "apppooluser" $apppoolpass){
         Add-ADGroupMember "Domain Admins" "apppooluser"
         GrantLogonService "apppooluser"
     }
+} else {
+	Set-ADAccountPassword -Identity "apppooluser" -Reset -NewPassword (ConvertTo-SecureString -AsPlainText $apppoolpass -Force)
 }
 
 # Add PosixGuest
 if(! (UserExists "PosixGuest")){
-    AddUserToActiveDirectory "PosixGuest" "<%= IO.popen("#{@lookup_var} adjoin bind_password #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %>"
+    AddUserToActiveDirectory "PosixGuest" $posixguestpass
+} else {
+	Set-ADAccountPassword -Identity "PosixGuest" -Reset -NewPassword (ConvertTo-SecureString -AsPlainText $posixguestpass -Force)
 }
 
 # Add WindowsAdmin
 if(! (UserExists "WindowsAdmin")){
-    if(AddUserToActiveDirectory "WindowsAdmin" "<%= IO.popen("#{@lookup_var} windows_base admin_password #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %>"){
+    if(AddUserToActiveDirectory "WindowsAdmin" $windowsadminpass){
         Add-ADGroupMember "Domain Admins" "WindowsAdmin"
     }
+} else {
+	Set-ADAccountPassword -Identity "WindowsAdmin" -Reset -NewPassword (ConvertTo-SecureString -AsPlainText $windowsadminpass -Force)
 }
-
-
-
-
-

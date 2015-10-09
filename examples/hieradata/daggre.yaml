@@ -3,6 +3,10 @@
 # deploy daggre
 ---
 classes:
+  - atomia::adjoin
   - atomia::daggre
 
+atomia::daggre::ip_addr: "192.0.2.116"
 atomia::daggre::global_auth_token: "SeriousPa55"
+atomia::daggre::content_share_nfs_location: "storage01.atomia.local:/gv0"
+atomia::daggre::configuration_share_nfs_location: "storage01.atomia.local:/gv1"
