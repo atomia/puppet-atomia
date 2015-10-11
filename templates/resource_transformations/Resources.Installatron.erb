@@ -1,0 +1,11 @@
+<resourceDescription xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+  <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.Installatron.Installatron'])">
+    <resourceList>
+      <resource name="Installatron01" xdt:Transform="Insert">
+        <property name="URL">http://<%= IO.popen("#{@lookup_var} installatron installatron_ip #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'').gsub(/\n/,"").gsub(/\r/,"") %>/installatron/</property>
+        <property name="key"><%= IO.popen("#{@lookup_var} installatron license_key #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %></property>
+        <property name="StoragePath">/storage/content</property>
+      </resource>
+    </resourceList>
+  </bindings>
+</resourceDescription>

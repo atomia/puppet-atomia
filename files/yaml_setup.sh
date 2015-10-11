@@ -78,6 +78,13 @@ pullyaml ()
   svn checkout https://github.com/branislavvukelic/puppet-atomia/trunk/examples/hieradata /etc/puppet/hieradata
 }
 
+# Function to add installuser
+addinstalluser ()
+{
+sudo adduser installuser --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+echo "installuser:password" | sudo chpasswd
+}
+
 # Function to go trough all yaml files and populate data
 populateyaml ()
 {
@@ -154,5 +161,19 @@ else
 fi
 
 service puppetmaster force-reload
+if (( $? )); then
+  echo -e $COL_RED "Puppetmaster couldnt be reloaded..." $COL_RESET >&2
+  exit 1
+else
+  echo -e $COL_GREEN "Puppetmaster reloaded !!!" $COL_RESET
+fi
+
+addinstalluser
+if (( $? )); then
+  echo -e $COL_RED "Add installuser failed ..." $COL_RESET >&2
+  exit 1
+else
+  echo -e $COL_GREEN "installuser added !!!" $COL_RESET
+fi
 
 exit 0

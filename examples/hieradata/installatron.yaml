@@ -4,4 +4,6 @@
 classes:
   - atomia::installatron
 
+atomia::installatron::installatron_ip: "192.0.2.120"
+atomia::installatron::license_key: "installatronpass"
 atomia::installatron::content_share_nfs_location: "storage01.atomia.local:/gv0"

@@ -3,7 +3,7 @@
     <resourceList>
       <resource name="ActiveDirectory" xdt:Transform="Insert">
         <property name="DomainName"><%= IO.popen("#{@lookup_var} adjoin domain_name #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %></property>
-        <property name="ShortDomainName"><%= IO.popen("#{@lookup_var} adjoin short_domain_name #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %></property>
+        <property name="ShortDomainName"><%= IO.popen("#{@lookup_var} windows_base ad_domain #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %></property>
         <property name="Username"><%= IO.popen("#{@lookup_var} adjoin admin_user #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %></property>
         <property name="Password"><%= IO.popen("#{@lookup_var} adjoin admin_password #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %></property>
       </resource>
