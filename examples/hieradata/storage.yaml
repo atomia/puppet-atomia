@@ -1,0 +1,5 @@
+# storage.yaml
+# Connect storage nodes to AD
+---
+classes:
+  - atomia::adjoin

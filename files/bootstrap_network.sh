@@ -42,8 +42,8 @@ GATEWAY=`grep $ATOMIA_HOSTNAME $LIST | cut -d, -f6`
 NAMESERVERS=`grep $ATOMIA_HOSTNAME $LIST | cut -d, -f7`
 SEARCH=`grep $ATOMIA_HOSTNAME $LIST | cut -d, -f2 | cut -d. -f2-`
 
-echo "FQDN is\t"$FQDN""
-echo "Address is\t"$ADDRESS""
+echo -e "FQDN is $COL_GREEN $FQDN" $COL_RESET
+echo -e "Address is $COL_GREEN $ADDRESS" $COL_RESET
 
 /etc/init.d/networking stop
 sleep 1
