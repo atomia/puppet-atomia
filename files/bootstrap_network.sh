@@ -33,14 +33,14 @@ else
 LIST="config.lan"
 
 # Assign variables from temp files
-HOSTNAME=`grep $ATOMIA_HOSTNAME $LIST | cut -d, -f1`
-FQDN=`grep $ATOMIA_HOSTNAME $LIST | cut -d, -f2`
-ADDRESS=`grep $ATOMIA_HOSTNAME $LIST | cut -d, -f3`
-NETWORK=`grep $ATOMIA_HOSTNAME $LIST | cut -d, -f4`
-NETMASK=`grep $ATOMIA_HOSTNAME $LIST | cut -d, -f5`
-GATEWAY=`grep $ATOMIA_HOSTNAME $LIST | cut -d, -f6`
-NAMESERVERS=`grep $ATOMIA_HOSTNAME $LIST | cut -d, -f7`
-SEARCH=`grep $ATOMIA_HOSTNAME $LIST | cut -d, -f2 | cut -d. -f2-`
+HOSTNAME=`egrep "^$ATOMIA_HOSTNAME" $LIST | cut -d, -f1`
+FQDN=`egrep "^$ATOMIA_HOSTNAME" $LIST | cut -d, -f2`
+ADDRESS=`egrep "^$ATOMIA_HOSTNAME" $LIST | cut -d, -f3`
+NETWORK=`egrep "^$ATOMIA_HOSTNAME" $LIST | cut -d, -f4`
+NETMASK=`egrep "^$ATOMIA_HOSTNAME" $LIST | cut -d, -f5`
+GATEWAY=`egrep "^$ATOMIA_HOSTNAME" $LIST | cut -d, -f6`
+NAMESERVERS=`egrep "^$ATOMIA_HOSTNAME" $LIST | cut -d, -f7`
+SEARCH=`egrep "^$ATOMIA_HOSTNAME" $LIST | cut -d, -f2 | cut -d. -f2-`
 
 echo -e "FQDN is $COL_GREEN $FQDN" $COL_RESET
 echo -e "Address is $COL_GREEN $ADDRESS" $COL_RESET

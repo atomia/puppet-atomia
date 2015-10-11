@@ -13,19 +13,44 @@
 
 class atomia::service_files (
   ) {
-    
+
+  exec {"check_presence_public_html":
+    command => '/bin/true',
+    onlyif => '/usr/bin/test -d /storage/content/systemservices/public_html',
+  }
+
+  exec {"check_presence_100000":
+    command => '/bin/true',
+    onlyif => '/usr/bin/test -d /storage/content/00/100000',
+  }
+
+  exec {"check_presence_00":
+    command => '/bin/true',
+    onlyif => '/usr/bin/test -d /storage/content/00',
+  }
+  
+  file { "/storage/content/00/100000":
+    ensure => "directory",
+    owner  => root,
+    group  => root,
+    mode   => 710,
+    require => Exec["check_presence_00"],
+  }
+  
   file { '/storage/content/systemservices/public_html/forward.php':
-  	source		=> "puppet:///atomia/service_files/forward.php",
+    source  => "puppet:///atomia/service_files/forward.php",
     mode    => 0755,
     owner   => root,
     group   => root,
+    require => Exec["check_presence_public_html"],
   }
 
   file { '/storage/content/systemservices/public_html/index.php':
-    source    => "puppet:///atomia/service_files/index.php",
+    source  => "puppet:///atomia/service_files/index.php",
     mode    => 0755,
     owner   => root,
     group   => root,
+    require => Exec["check_presence_public_html"],
   }
 
   file { '/storage/content/systemservices/public_html/suspend.php':
@@ -33,6 +58,7 @@ class atomia::service_files (
     mode    => 0755,
     owner   => root,
     group   => root,
+    require => Exec["check_presence_public_html"],
   }
 
   file { '/storage/content/systemservices/public_html/nostats.html':
@@ -40,6 +66,7 @@ class atomia::service_files (
     mode    => 0444,
     owner   => root,
     group   => root,
+    require => Exec["check_presence_public_html"],
   }
 
   # Under construction
@@ -48,6 +75,7 @@ class atomia::service_files (
     mode    => 0644,
     owner   => 100000,
     group   => 100000,
+    require => Exec["check_presence_100000"],
   }
 
 }

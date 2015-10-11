@@ -10,4 +10,5 @@ classes:
 atomia::fsagent::fsagent_ip: "192.0.2.114"
 atomia::fsagent::username: "fsagent"
 atomia::fsagent::password: "SeriousPa55"
+atomia::fsagent::create_storage_files: "true"
 atomia::fsagent::content_share_nfs_location: "storage01.atomia.local:/gv0"
