@@ -15,7 +15,7 @@ class atomia::daggre (
 
     package { nodejs:
       ensure  => latest,
-      require => [Apt::Ppa['ppa:chris-lea/node.js'], Exec['apt-get-update']]
+      require => [Apt::Ppa['ppa:chris-lea/node.js'], Exec['apt-get-update'], Package['python-software-properties']]
     }
 
     exec { "apt-get-update": command => "/usr/bin/apt-get update" }
@@ -23,6 +23,10 @@ class atomia::daggre (
     package { nodejs: ensure => present, }
   }
 
+  package { python-software-properties:
+    ensure => present,
+  }  
+  
   package { "daggre":
     ensure  => present,
     require => [Package["mongodb-10gen"], Package["nodejs"]],
