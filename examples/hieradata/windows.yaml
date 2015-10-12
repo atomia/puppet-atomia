@@ -21,7 +21,7 @@ atomia::windows_base::app_password:                             "apppoolpassword
 
 # Ip address of the Atomia database server and mirror (if using mirror)
 atomia::windows_base::database_server:                          "1.1.1.1"
-atomia::windows_base::mirror_database_server:                   "1.1.1.2"
+atomia::windows_base::mirror_database_server:                   ""
 
 # Application domain of the websites for example atomia.com would mean that your admin page would be at admin.atomia.com
 atomia::windows_base::appdomain:                                "atomia.com"
