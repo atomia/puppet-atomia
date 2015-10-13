@@ -75,7 +75,8 @@ done < /etc/puppet/hieradata/nodes/config.temp
 # Function to pull default config files from git
 pullyaml ()
 {
-  svn checkout https://github.com/branislavvukelic/puppet-atomia/trunk/examples/hieradata /etc/puppet/hieradata
+  svn checkout https://github.com/atomia/puppet-atomia/branches/stable/examples/hieradata /etc/puppet/hieradata
+  rm -rf /etc/puppet/hieradata/.svn
 }
 
 # Function to add installuser

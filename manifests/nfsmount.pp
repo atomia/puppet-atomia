@@ -3,7 +3,7 @@ define atomia::nfsmount(
 		$mount_point,
 		$nfs_location,
 		$nfs_type = hiera('atomia::nfsmount::nfs_type', 'nfs'),
-		$nfs_options = hiera('atomia::nfsmount::nfs_options', 'rw,noatime'),
+		$nfs_options = hiera('atomia::nfsmount::nfs_options', 'rw,nfsvers=3,noatime'),
 		$ad_domain = "hiera('atomia::adjoin::domain_name', ''),"
 ) {
 	if !defined(Package['nfs-common']) {

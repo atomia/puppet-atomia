@@ -97,7 +97,7 @@ curl -sSL https://get.rvm.io | bash -s stable
 source "/usr/local/rvm/scripts/rvm"
 /usr/local/rvm/bin/rvm install 2.1.1
 
-echo "mod \"atomia\", :git =>\"git://github.com/branislavvukelic/puppet-atomia.git\", :ref => \"master\"" > Puppetfile
+echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref => \"stable\"" > Puppetfile
 
 service puppetmaster restart
 cd /etc/puppet

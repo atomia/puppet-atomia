@@ -6,13 +6,11 @@ class atomia::resource_transformations (
     ) 
   {
 
-  
     file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.Domainreg.xml' :
        ensure => 'file',
        content  => template('atomia/resource_transformations/Resources.Domainreg.erb'),
     }
     
-
     file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.Atomiadns.xml' :
       ensure => 'file',
       content  => template('atomia/resource_transformations/Resources.Atomiadns.erb')
@@ -48,9 +46,9 @@ class atomia::resource_transformations (
       content  => template('atomia/resource_transformations/Resources.FSAgent.erb')
     }
     
-    file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.Webinstaller.xml' :
+    file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.Installatron.xml' :
       ensure => 'file',
-      content  => template('atomia/resource_transformations/Resources.Webinstaller.erb')
+      content  => template('atomia/resource_transformations/Resources.Installatron.erb')
     }
         
     file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.PureFTPD.xml' :
