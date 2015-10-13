@@ -33,7 +33,7 @@ class atomia::domainreg (
 	$domainreg_tld_config_hash	= {}
 ){
 
-	$domainreg_global_config_default = file("atomia/domainreg_global_default.conf")
+	$domainreg_global_config_default = file("atomia/domainreg/domainreg_global_default.conf")
 
 	package { atomiadomainregistration-masterserver:
 		ensure => present,
@@ -50,7 +50,7 @@ class atomia::domainreg (
 		owner   => root,
 		group   => root,
 		mode    => 444,
-		content => template('atomia/domainreg.conf'),
+		content => template('atomia/domainreg/domainreg.conf'),
 		notify => [ Service["atomiadomainregistration-api"], Service["apache2"] ]
 	}
 
