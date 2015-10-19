@@ -39,5 +39,12 @@ $fpm -s dir -t "$package_type" -n atomia-puppetmaster  -v "$1" \
 	--description "Installs and configures a Puppet master for Atomia environments" \
 	-m "Atomia AB <info@atomia.com>" --vendor "Atomia AB" --url http://github.com/atomia/puppet-atomia \
 	--license MIT \
+	-d puppetmaster \
+	-d git \
+	-d apache2-utils \
+	-d curl  \ 
+	-d rubygems-integration \
+	-d build-essential \
+	-d libmysqlclient-dev \
 	--after-install postinstall \
 	examples/=/etc/puppet-atomia/examples
