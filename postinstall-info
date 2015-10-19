@@ -1,0 +1,3 @@
+#!/bin/sh
+
+echo "To complete the installation please run the command: \n setup-puppet-atomia"
