@@ -15,7 +15,8 @@ COL_GREEN=$ESC_SEQ"32m"
 # Declare variables 
 FILES=/etc/puppet/hieradata/
 
-
+# install subversion
+apt-get install -y subversion
 
 # Extracting network info from puppetmaster
 # Get netstat information
@@ -124,17 +125,38 @@ echo "=========================================================="
 echo -e $COL_GREEN "This is a helper script for Atomia platform puppetmaster" $COL_RESET
 echo "=========================================================="
 
-#read -e -p "Enter management network subnet (eg. 192.168.50.0): " MNS
-#MANAGEMENTSUBNET=${MNS%.*}
-#echo $MANAGEMENTSUBNET
-#
-#read -e -p "Enter management network gateway (eg. 192.168.50.1): " MNG
-#MANAGEMENTGATEWAY=${MNG}
-#echo $MANAGEMENTGATEWAY
-
 read -e -p "Enter Atomia platform public domain (eg. example.com): " PDOMAIN
 PUBLICDOMAIN=${PDOMAIN}
-#echo $PUBLICDOMAIN
+
+echo "=========================================================="
+read -e -p "Enter Public IP for APACHE cluster (eg. 203.0.113.2): " APACHE
+echo "=========================================================="
+APACHEIP=${APACHE}
+echo -e "Apache\t IP:\t$COL_GREEN $APACHEIP $COL_RESET" >> IPLIST
+cat IPLIST
+
+echo "=========================================================="
+read -e -p "Enter Public IP for IIS cluster (eg. 203.0.113.3): " IIS
+echo "=========================================================="
+IISIP=${IIS}
+echo -e "IIS\t IP:\t$COL_RED $IISIP $COL_RESET" >> IPLIST
+cat IPLIST
+
+echo "=========================================================="
+read -e -p "Enter Public IP for MAIL cluster (eg. 203.0.113.4): " MAIL
+echo "=========================================================="
+MAILIP=${MAIL}
+echo -e "Mail\t IP:\t$COL_GREEN $MAILIP $COL_RESET" >> IPLIST
+cat IPLIST
+
+echo "=========================================================="
+read -e -p "Enter Public IP for FTP cluster (eg. 203.0.113.4): " FTP
+echo "=========================================================="
+FTPIP=${FTP}
+echo -e "FTP\t IP:\t$COL_RED $FTPIP $COL_RESET" >> IPLIST
+cat IPLIST
+
+rm -rf IPLIST
 
 # Execution
 pullyaml

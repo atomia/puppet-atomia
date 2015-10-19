@@ -18,6 +18,7 @@ RewriteMap frmrs txt:<%= @maps_path %>/frmrs.map
 RewriteMap parks txt:<%= @maps_path %>/parks.map
 RewriteMap redrs txt:<%= @maps_path %>/redrs.map
 RewriteMap sspnd txt:<%= @maps_path %>/sspnd.map
+RewriteMap phpvr txt:<%= @maps_path %>/phpvr.map
 
 # Translate the hostname to username using the
 # map file, and store the username into the REQUSER
@@ -25,6 +26,7 @@ RewriteMap sspnd txt:<%= @maps_path %>/sspnd.map
 RewriteCond ${lowercase:%{SERVER_NAME}|HTTPD} ^(.+)$
 RewriteRule . - [E=REQSITE:${vhost:%1|HTTPD}]
 RewriteRule . - [E=REQUSER:${users:%{ENV:REQSITE}|HTTPD}]
+RewriteRule . - [E=PHPVR:${phpvr:%{ENV:REQSITE}|HTTPD}]
 
 # Suspended websites
 RewriteCond ${lowercase:%{SERVER_NAME}} ^(.+)$
@@ -79,6 +81,7 @@ IdleTimeout 30
 
         AddHandler cgi-script .pl .cgi .py
         AddHandler fcgid-script .php
+        Include conf/phpversions.conf
 </Directory>
 
 <Directory /storage/content/systemservices/public_html>
@@ -89,4 +92,4 @@ IdleTimeout 30
         FCGIWrapper /var/www/cgi-wrappers/php-fcgid-wrapper-no-id-test .php
 </Directory>
 
-Include ssl.d/*.conf
+IncludeOptional ssl.d/*.conf

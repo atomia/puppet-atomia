@@ -11,6 +11,6 @@ atomia::pureftpd::agent_password: "SeriousPa55"
 atomia::pureftpd::provisioning_host: "192.0.2.103"
 atomia::pureftpd::pureftpd_password: "SeriousPa66"
 atomia::pureftpd::pureftpd_slave_password: "SeriousPa77"
-atomia::pureftpd::ftp_cluster_ip: "203.0.113.4"
+atomia::pureftpd::ftp_cluster_ip: "203.0.113.5"
 
 atomia::pureftpd::content_share_nfs_location: "storage01.atomia.local:/gv0"

@@ -58,7 +58,15 @@ class atomia::apache_agent (
   $use_nfs3 = 1,
   $cluster_ip = "",
   $apache_agent_ip = $ipaddress,
-  $maps_path = "/storage/configuration/apache/maps"
+  $maps_path = "/storage/configuration/maps",
+
+if $lsbdistrelease == "14.04" {
+   $pa_conf_path = "/etc/apache2/conf-available"
+   $pa_conf_file = "atomia-pa-apache.conf"
+ } else {
+   $pa_conf_path = "/etc/apache2/conf.d"   
+   $pa_conf_file = "atomia-pa-apache.conf.ubuntu"
+ }
   
   ) {
     
@@ -97,6 +105,7 @@ class atomia::apache_agent (
 
   package { php5-pgsql: ensure => installed }
 
+  # SSL support
   if $ssl_enabled != 0 {
     $ssl_generate_var = "ssl"
 
@@ -144,13 +153,11 @@ class atomia::apache_agent (
     mount_point => '/storage/configuration',
     nfs_location => $config_share_nfs_location
   }
-   
 
-    
   if $atomia_clustered != 0 {
-    exec { "/bin/sed 's/%h/%{X-Forwarded-For}i/' -i /etc/apache2/conf.d/atomia-pa-apache.conf.ubuntu":
-      unless  => "/bin/grep 'X-Forwarded-For' /etc/apache2/conf.d/atomia-pa-apache.conf.ubuntu",
-      require => [Package["atomia-pa-apache"], File["/etc/apache2/conf.d/atomia-pa-apache.conf.ubuntu"]],
+    exec { "/bin/sed 's/%h/%{X-Forwarded-For}i/' -i ${$pa_conf_path}/${$pa_conf_file}":
+      unless  => "/bin/grep 'X-Forwarded-For' ${$pa_conf_path}/${$pa_conf_file}",
+      require => Package["atomia-pa-apache"],
       notify  => Exec["force-reload-apache"],
     }
   }
@@ -165,9 +172,10 @@ class atomia::apache_agent (
     }
   }
 
-  file { "/etc/apache2/conf.d/atomia-pa-apache.conf.ubuntu":
+  file { "${$pa_conf_path}/${$pa_conf_file}":
+      ensure  => present,
       content => template("atomia/apache_agent/atomia-pa-apache.conf.ubuntu.erb"),
-	  require => Package["atomia-pa-apache"],
+      require => [Package["atomia-pa-apache"]],
   }
 
   file { "/etc/statisticscopy.conf":
@@ -178,26 +186,10 @@ class atomia::apache_agent (
     require => Package["atomiastatisticscopy"],
   }
 
-  file { "/var/log/httpd":
-    owner  => root,
-    group  => root,
-    mode   => 600,
-    ensure => directory,
-    before => Service["apache2"],
-  }
-
   file { "/var/www/cgi-wrappers": mode => 755, }
 
   # ensuring we have maps folder and needed files inside
   file { "${$maps_path}":
-    owner  => root,
-    group  => www-data,
-    mode   => 2750,
-    ensure => directory,
-	recurse => true,
-  }
-
-  file { "/storage/configuration/apache":
     owner  => root,
     group  => www-data,
     mode   => 2750,
@@ -277,7 +269,7 @@ class atomia::apache_agent (
     }
   }
 
-  file { "/etc/apache2/conf.d/001-custom-errors":
+  file { "${$pa_conf_path}/001-custom-errors":
     owner   => root,
     group   => root,
     mode    => 444,

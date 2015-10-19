@@ -8,7 +8,7 @@ classes:
 
 atomia::apache_agent::username: "apacheagent"
 atomia::apache_agent::password: "SeriousPa55"
-atomia::apache_agent::cluster_ip: "203.0.113.1"
+atomia::apache_agent::cluster_ip: "203.0.113.2"
 atomia::apache_agent::apache_agent_ip: "192.0.2.151"
 
 # If you are using the nfs test module you can keep this config option

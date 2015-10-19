@@ -11,4 +11,4 @@ atomia::mailserver::slave_password: "SeriousPa66"
 atomia::mailserver::provisioning_host: "192.0.2.103"
 
 atomia::mailserver::mail_share_nfs_location: "storage01.atomia.local:/gv2"
-atomia::mailserver::cluster_ip: "203.0.113.3"
+atomia::mailserver::cluster_ip: "203.0.113.4"

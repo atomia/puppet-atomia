@@ -9,4 +9,4 @@ atomia::mysql::mysql_username: "mysqladmin"
 atomia::mysql::mysql_password: "SeriousPa55"
 atomia::mysql::provisioning_host: "192.0.2.103"
 # Public IPs of all MySQL servers separated by , (coma)
-atomia::mysql::server_ips: "203.0.113.12,203.0.113.13"
+atomia::mysql::server_ips: "203.0.113.12"

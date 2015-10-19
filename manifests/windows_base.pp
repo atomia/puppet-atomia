@@ -31,6 +31,11 @@ class atomia::windows_base (
   $mail_server_use_ssl               = "false",
   $mail_bcc_list    = "",
   $mail_reply_to    = "",
+  $sms_url    = "",
+  $sms_server_username    = "",
+  $sms_server_password    = "",
+  $sms_originatortype     = "",
+  $sms_originator         = "",
   $storage_server_hostname,
   $mail_dispatcher_interval         = "30",
   $is_iis             = 0) 

@@ -48,6 +48,14 @@ atomia::windows_base::mail_server_password:                     ""
 atomia::windows_base::mail_server_use_ssl:                      "false"
 atomia::windows_base::mail_bcc_list:                            ""
 atomia::windows_base::mail_reply_to:                            ""
+
+# Information about the SMS relay that is going to be sending SMS messages for this environment
+atomia::windows_base::sms_url:                                  "https://se-1.cellsynt.net/sms.php"
+atomia::windows_base::sms_server_username:                      ""
+atomia::windows_base::sms_server_password:                      ""
+atomia::windows_base::sms_originatortype:                       "alpha"
+atomia::windows_base::sms_originator:                           "Atomia"
+
 # Hostname of the storage server
 atomia::windows_base::storage_server_hostname:                  "storage01.atomia.local"
 

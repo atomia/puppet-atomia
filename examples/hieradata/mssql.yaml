@@ -4,4 +4,4 @@
 atomia::mssql::mssql_username: "mssqladmin"
 atomia::mssql::mssql_password: "SeriousPa55"
 # Public IPs of all mssql servers separated by , (coma)
-atomia::mssql::server_ips: "203.0.113.14,203.0.113.15"
+atomia::mssql::server_ips: "203.0.113.14"
