@@ -42,7 +42,7 @@ $fpm -s dir -t "$package_type" -n atomia-puppetmaster  -v "$1" \
 	-d puppetmaster \
 	-d git \
 	-d apache2-utils \
-	-d curl  \ 
+	-d curl \
 	-d rubygems-integration \
 	-d build-essential \
 	-d libmysqlclient-dev \
