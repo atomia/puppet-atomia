@@ -3,13 +3,45 @@ wget http://apt.puppetlabs.com/puppetlabs-release-trusty.deb
 sudo dpkg -i puppetlabs-release-trusty.deb
 sudo apt-get update
 
-apt-get install -y puppetmaster puppet git
+apt-get install -y ruby-dev puppetmaster git apache2-utils curl rubygems-integration build-essential
+
+export DEBIAN_FRONTEND=noninteractive
+apt-get -q -y install mysql-server
+
+MYSQL_PASSWORD=`date +%s | sha256sum | base64 | head -c 16 ; echo`
+mysqladmin -u root password $MYSQL_PASSWORD
+
 echo "127.0.0.1 puppet" >> /etc/hosts
 
-service puppetmaster restart
+echo "---
+:backends:
+  - yaml
+  - mysql
+
+:yaml:
+  :datadir: /etc/puppet/hieradata
+
+:mysql:
+  :host: localhost
+  :user: root
+  :pass: $MYSQL_PASSWORD
+  :database: hiera
+
+  :query: SELECT val FROM configuration WHERE var='%{key}'
+
+
+:hierarchy:
+  - "%{::atomia_role_1}"
+  - "%{::atomia_role_2}"
+  - "%{::atomia_role_3}"
+  - bootstrap
+
+
+:logger: console
+" > /etc/puppet/hiera.yaml
 
 cd /etc/puppet
-puppet module install puppetlabs-puppetdb
+puppet module install puppetlabs-puppetdb 
 
 puppet apply -e "
 class { 'puppetdb::globals':
@@ -29,44 +61,17 @@ class { 'puppetdb':
     }
 "
 
-echo "---
-:backends:
-  - yaml
-  - mysql
-
-:yaml:
-  :datadir: /etc/puppet/hieradata
-
-:mysql:
-  :host: localhost
-  :user: root
-  :pass: [password]
-  :database: hiera
-
-  :query: SELECT val FROM configuration WHERE var='%{key}'
-
-
-:hierarchy:
-  - bootstrap
-  - \"%{::atomia_role_1}\"
-  - \"%{::atomia_role_2}\"
-  - \"%{::atomia_role_3}\"
-  - bootstrap
-
-:logger: console
-" > /etc/hiera.yaml
-
 sudo apt-get install -y libmysqlclient-dev
 gem install hiera-mysql mysql
 
 mkdir -p /etc/puppet/atomia/service_files
 
-echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref => \"master\" " > Puppetfile
+echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref => \"master\" " > /etc/puppet/Puppetfile
 
 cd /etc/puppet
 
 gem install puppet -v 3.8.3
-gem install librarian-puppet
+gem install librarian-puppet 
 librarian-puppet install
 cp /etc/puppet/modules/atomia/files/default_files/* /etc/puppet/atomia/service_files/
 

@@ -40,9 +40,4 @@ $fpm -s dir -t "$package_type" -n atomia-puppetmaster  -v "$1" \
 	-m "Atomia AB <info@atomia.com>" --vendor "Atomia AB" --url http://github.com/atomia/puppet-atomia \
 	--license MIT \
 	--after-install postinstall \
-	-d puppetmaster \
-	-d git \
-	-d apache2-utils \
-	-d curl \
-	-d rubygems-integration \
 	examples/=/etc/puppet-atomia/examples
