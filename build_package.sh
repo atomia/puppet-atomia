@@ -46,6 +46,7 @@ $fpm -s dir -t "$package_type" -n atomia-puppetmaster  -v "$1" \
 	-d rubygems-integration \
 	-d build-essential \
 	-d libmysqlclient-dev \
+	-d ruby-dev \
 	--after-install postinstall-info \
 	examples/=/etc/puppet-atomia/examples \
-	setup-puppet-atomia=/usr/local/bin/setup-puppet-atomia
+	setup-puppet-atomia=/bin/setup-puppet-atomia
