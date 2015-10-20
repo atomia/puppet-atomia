@@ -59,17 +59,16 @@ class atomia::apache_agent (
   $cluster_ip = "",
   $apache_agent_ip = $ipaddress,
   $maps_path = "/storage/configuration/maps",
-
-if $lsbdistrelease == "14.04" {
-   $pa_conf_path = "/etc/apache2/conf-available"
-   $pa_conf_file = "atomia-pa-apache.conf"
- } else {
-   $pa_conf_path = "/etc/apache2/conf.d"   
-   $pa_conf_file = "atomia-pa-apache.conf.ubuntu"
- }
-  
   ) {
-    
+
+  if $lsbdistrelease == "14.04" {
+    $pa_conf_path = "/etc/apache2/conf-available"
+    $pa_conf_file = "atomia-pa-apache.conf"
+  } else {
+    $pa_conf_path = "/etc/apache2/conf.d"   
+    $pa_conf_file = "atomia-pa-apache.conf.ubuntu"
+  }
+  
   if $should_have_pa_apache == 1 {
     package { atomia-pa-apache: ensure => present }
   }
@@ -253,21 +252,62 @@ if $lsbdistrelease == "14.04" {
     require => File["${$maps_path}"],
   }
 
-  if !defined(File['/etc/apache2/sites-enabled/000-default']) {
-    file { "/etc/apache2/sites-enabled/000-default":
-      ensure  => absent,
-      require => Package["apache2"],
-      notify  => Service["apache2"],
-    }
+#  if !defined(File['/etc/apache2/sites-enabled/000-default']) {
+#    file { "/etc/apache2/sites-enabled/000-default":
+#      ensure  => absent,
+#      require => Package["apache2"],
+#      notify  => Service["apache2"],
+#    }
+#}
+
+# this will ensure that only files managed by puppet can reside in this folders
+  file { ["/etc/apache2/sites-enabled", "/etc/apache2/sites-available"]:
+    ensure  => directory,
+    purge   => true,
+    require => Package["apache2"],
+    notify  => Service["apache2"],
   }
 
-  if !defined(File['/etc/apache2/sites-available/default']) {
-    file { "/etc/apache2/sites-available/default":
-      ensure  => absent,
-      require => Package["apache2"],
-      notify  => Service["apache2"],
-    }
+  # ensuring we have maps folder and needed files inside
+  file { "/var/www/html":
+    owner  => root,
+    group  => root,
+    mode   => 755,
+    ensure => directory,
   }
+
+  file { "/var/www/html/index.html":
+    owner   => root,
+    group   => root,
+    mode    => 644,
+    content => template("atomia/apache_agent/index.html.erb"),
+    require => [Package["apache2"], File["/var/www/html"]],
+    notify  => Service["apache2"],
+  }
+
+
+  file { "/etc/apache2/sites-available/000-default.conf":
+    owner   => root,
+    group   => root,
+    mode    => 644,
+    content => "puppet:///modules/atomia/apache_agent/000-default.conf",
+    require => Package["apache2"],
+  }
+
+  file { "/etc/apache2/sites-enabled/000-default.conf":
+    ensure  => link,
+    target  => "/etc/apache2/sites-available/000-default.conf",
+    require => File["/etc/apache2/sites-available/000-default.conf"],
+    notify  => Service["apache2"],
+  }
+
+#  if !defined(File['/etc/apache2/sites-available/default']) {
+#    file { "/etc/apache2/sites-available/default":
+#      ensure  => absent,
+#      require => Package["apache2"],
+#      notify  => Service["apache2"],
+#    }
+#  }
 
   file { "${$pa_conf_path}/001-custom-errors":
     owner   => root,
