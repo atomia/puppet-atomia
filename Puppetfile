@@ -14,13 +14,13 @@ mod "chocolatey",
 
 mod "dism",
   :git => "git://github.com/jimmybergman/puppetlabs-dism.git"
-  
+
 mod "openssl",
   :git => "git://github.com/camptocamp/puppet-openssl.git"
 
 mod "nsclient",
-  :git => "git://github.com/stefanmortensen/puppet-nsclient.git"  
-  
+  :git => "git://github.com/stefanmortensen/puppet-nsclient.git"
+
 mod "nfs",
   :git => "git://github.com/stefanmortensen/puppet-nfs.git"
 
@@ -39,3 +39,5 @@ mod "download_file",
 mod "postgresql",
   :git => "git://github.com/puppetlabs/puppetlabs-postgresql.git"
 
+mod "bind"
+  :git => "git://github.com/camptocamp/bind.git"
