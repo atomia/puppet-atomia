@@ -30,7 +30,7 @@ class atomia::service_files (
   }
   
   file { "/storage/content/00/100000":
-    ensure => "directory",
+    ensure => directory,
     owner  => root,
     group  => root,
     mode   => 710,

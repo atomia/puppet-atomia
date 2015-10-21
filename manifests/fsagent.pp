@@ -20,7 +20,9 @@ class atomia::fsagent (
   class { 'apt': }
 
   if $operatingsystem == "Ubuntu" {
-    apt::ppa { 'ppa:chris-lea/node.js': }
+    apt::ppa { 'ppa:chris-lea/node.js': 
+    require => Package["python-software-properties"], 
+    }
 
     package { nodejs:
       ensure  => latest,
