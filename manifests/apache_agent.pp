@@ -163,9 +163,10 @@ class atomia::apache_agent (
     exec { "/bin/sed 's/%h/%{X-Forwarded-For}i/' -i ${$pa_conf_available_path}/${$pa_conf_file}":
       unless  => "/bin/grep 'X-Forwarded-For' ${$pa_conf_available_path}/${$pa_conf_file}",
       require => Package["atomia-pa-apache"],
+      notify  => Exec["force-reload-apache"],
     }
   }
-  
+
   if $should_have_pa_apache == 1 {
     file { "/usr/local/apache-agent/settings.cfg":
       owner   => root,
