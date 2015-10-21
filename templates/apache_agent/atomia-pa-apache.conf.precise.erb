@@ -1,0 +1,95 @@
+ServerName localhost
+
+UserDir .
+
+## get the server name from the Host: header
+UseCanonicalName Off
+
+## splittable logs
+LogFormat "%{Host}i %{X-Forwarded-For}i %l %u %t \"%r\" %s %b" vcommon
+CustomLog "|/usr/bin/cronolog /var/log/apache2/access.%Y%m%d%H.log" vcommon
+RewriteEngine On
+
+## Create a handle to convert upper or mixed-case to lower-case
+RewriteMap lowercase int:tolower
+RewriteMap vhost txt:<%= @maps_path %>/vhost.map
+RewriteMap users txt:<%= @maps_path %>/users.map
+RewriteMap frmrs txt:<%= @maps_path %>/frmrs.map
+RewriteMap parks txt:<%= @maps_path %>/parks.map
+RewriteMap redrs txt:<%= @maps_path %>/redrs.map
+RewriteMap sspnd txt:<%= @maps_path %>/sspnd.map
+RewriteMap phpvr txt:<%= @maps_path %>/phpvr.map
+
+# Translate the hostname to username using the
+# map file, and store the username into the REQUSER
+# environment variable for use later.
+RewriteCond ${lowercase:%{SERVER_NAME}|HTTPD} ^(.+)$
+RewriteRule . - [E=REQSITE:${vhost:%1|HTTPD}]
+RewriteRule . - [E=REQUSER:${users:%{ENV:REQSITE}|HTTPD}]
+RewriteRule . - [E=PHPVR:${phpvr:%{ENV:REQSITE}|HTTPD}]
+
+# Suspended websites
+RewriteCond ${lowercase:%{SERVER_NAME}} ^(.+)$
+RewriteCond ${sspnd:%1|NX} !^NX$
+RewriteRule ^/(.*)$ /storage/content/systemservices/public_html/suspend.php [L]
+
+# Parking Services
+RewriteCond ${lowercase:%{SERVER_NAME}} ^(.+)$
+RewriteCond ${parks:%1|NX} !^NX$
+RewriteRule ^/(.*)$ /storage/content/systemservices/public_html/index.php [L]
+
+# Redirections Services
+RewriteCond ${lowercase:%{SERVER_NAME}} ^(.+)$
+RewriteCond ${redrs:%1|NX} !^NX$
+RewriteCond ${redrs:%1|NX} /$
+RewriteRule ^/(.*)$ ${redrs:${lowercase:%{SERVER_NAME}}}$1 [R=301,NE,L]
+
+RewriteCond ${lowercase:%{SERVER_NAME}} ^(.+)$
+RewriteCond ${redrs:%1|NX} !^NX$
+RewriteRule . ${redrs:%1} [R=301,NE,L]
+
+# Frame redirection Services
+RewriteCond ${lowercase:%{SERVER_NAME}} ^(.+)$
+RewriteCond ${frmrs:%1|NX} !^NX$
+RewriteCond %{REQUEST_URI}?%{QUERY_STRING} ^(.*)$
+RewriteRule ^/(.*)$ /storage/content/systemservices/public_html/forward.php?${frmrs:%{SERVER_NAME}}&browsed_url=%1 [L,B]
+
+# Rewrite script to userdir so we can use suEXEC
+RewriteCond %{REQUEST_URI} !^/~
+RewriteCond %{REQUEST_URI} \.(pl|cgi|py|php)(/|$) [NC]
+RewriteRule ^/(.*)$ /~%{ENV:REQUSER}/%{ENV:REQSITE}/public_html/$1 [PT]
+
+# Map the virtualhost to the documentroot
+RewriteCond %{REQUEST_URI} !^/~
+RewriteCond %{ENV:REQUSER} (..)$
+RewriteRule ^/(.*)$ /storage/content/%1/%{ENV:REQUSER}/%{ENV:REQSITE}/public_html/$1 [L]
+
+# mod_fcgid config
+MaxRequestsPerProcess 500
+FCGIWrapper /var/www/cgi-wrappers/php-fcgid-wrapper .php
+MaxProcessCount 300
+MaxRequestLen 67108864
+DefaultMaxClassProcessCount 3
+DefaultMinClassProcessCount 0
+IdleTimeout 30
+
+<Directory /storage/content/*/*/*/public_html>
+        Options +Includes +ExecCGI -Indexes
+        AllowOverride All
+
+        DirectoryIndex index.php index.html index.htm index.shtml index.wml default.html default.htm
+
+        AddHandler cgi-script .pl .cgi .py
+        AddHandler fcgid-script .php
+        Include conf/phpversions.conf
+</Directory>
+
+<Directory /storage/content/systemservices/public_html>
+        Options +Includes +ExecCGI -Indexes
+        AllowOverride All
+
+        AddHandler fcgid-script .php
+        FCGIWrapper /var/www/cgi-wrappers/php-fcgid-wrapper-no-id-test .php
+</Directory>
+
+Include ssl.d/*.conf
