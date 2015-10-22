@@ -33,6 +33,13 @@ class atomia::domainreg (
 	$domainreg_tld_config_hash	= {}
 ){
 
+	# Support both hash and Json format for domainreg_tld_config_hash
+	if(!is_hash($domainreg_tld_config_hash)) {
+		$config_hash = parsejson($domainreg_tld_config_hash)
+	}
+	else {
+		$config_hash = $domainreg_tld_config_hash
+	}
 	$domainreg_global_config_default = file("atomia/domainreg/domainreg_global_default.conf")
 
 	package { atomiadomainregistration-masterserver:
@@ -81,4 +88,3 @@ class atomia::domainreg (
 		content => "0 0 * * * root lockfile -r0 /var/run/rotate-domainreg-logs && (find /var/log/atomiadomainregistration -mtime +14 -exec rm -f '{}' '+'; rm -f /var/run/rotate-domainreg-logs.lock)",
     }
 }
-
