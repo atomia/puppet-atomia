@@ -1,10 +1,31 @@
+## Nagios Server
+
+### Deploys and configures a Nagios server for monitoring of an Atomia environment
+
+### Variable documentation
+#### username: The URL of the Atomia Domain Registration service.
+#### password: The username to require for accessing the service.
+#### admin_pass: The password to require for accessing the service.
+
+### Validations
+##### username(advanced):^[a-z]+$
+##### password(advanced): %password
+
+
 class atomia::nagios::server(
-  $username   = 'nagiosadmin',
-  $password   = 'nagios',
-  $admin_pass = 'Administrator',
+  $username   = "nagiosadmin",
+  $password   = ""
 ) {
-  $nagios_ip = $ipaddress_eth0
-  $apache_ip  = generate('/etc/puppet/modules/atomia/files/lookup_variable.sh', 'apache_agent', 'cluster_ip')
+
+  # Set ip correctly when on ec2
+  if $ec2_public_ipv4 {
+    $nagios_ip = $ec2_public_ipv4
+  } else {
+    $nagios_ip = $ipaddress_eth0
+  }
+
+  $admin_pass = hiera('atomia::config::atomia_admin_password')
+  #$apache_ip  = generate('/etc/puppet/modules/atomia/files/lookup_variable.sh', 'apache_agent', 'cluster_ip')
 
   package { [
       'build-essential',
@@ -19,7 +40,6 @@ class atomia::nagios::server(
       'nagios-plugins',
       'nagios-nrpe-server',
       'atomia-manager',
-      'rubygems',
       'ruby1.9.1-dev',
       'python-pkg-resources',
       'nagios-nrpe-plugin'
@@ -36,7 +56,7 @@ class atomia::nagios::server(
     package { ['jgrep']:
   		ensure => installed,
   		provider => 'gem',
-  		require	=> [Package['rubygems'],Package['ruby1.9.1-dev']],
+  		require	=> [Package['ruby1.9.1-dev']],
 	 }
 
   group { 'nagios-group':
@@ -103,8 +123,8 @@ class atomia::nagios::server(
   }
 
   exec { 'add-httpasswd-user':
-    command     => "/usr/bin/htpasswd -c -b -c /usr/local/nagios/etc/htpasswd.users ${username} ${password}",
-    refreshonly => true
+    command     => "/usr/bin/htpasswd -c -b -c /etc/nagios3/htpasswd.users ${username} ${password}",
+
   }
 
   # Done installing Nagios
@@ -139,7 +159,8 @@ class atomia::nagios::server(
 
   file_line { 'add-plugin-lib':
     path  => '/usr/local/nagios/etc/resource.cfg',
-    line  => '$USER2$=/usr/lib/nagios/plugins'
+    line  => '$USER2$=/usr/lib/nagios/plugins',
+    require => Exec['install_nagios']
   }
 
   # Mod nagios.cfg, exec cause no Augeas support for Nagios 4 :(
@@ -232,9 +253,9 @@ class atomia::nagios::server(
   ->
   Nagios_service <<| |>>
 
-  host { 'atomia-nagios-test.net':
-		ip	=> $apache_ip,
-	}
+#  host { 'atomia-nagios-test.net':
+#		ip	=> $apache_ip,
+#	}
 
   file { '/etc/atomia.conf':
       owner   => 'root',
@@ -244,18 +265,27 @@ class atomia::nagios::server(
       require => Package["atomia-manager"]
   }
 
-  file { '/root/setup_atomia_account.sh':
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0777',
-    source  => "puppet:///modules/atomia/nagios/setup_atomia_account.sh",
-    require => [Package['jgrep'],Package['atomia-manager'], Package['python-pkg-resources']],
-    notify  => Exec['/root/setup_atomia_account.sh']
-	}
+#  file { '/root/setup_atomia_account.sh':
+#    owner   => 'root',
+#    group   => 'root',
+#    mode    => '0777',
+#    source  => "puppet:///modules/atomia/nagios/setup_atomia_account.sh",
+#    require => [Package['jgrep'],Package['atomia-manager'], Package['python-pkg-resources']],
+#    notify  => Exec['/root/setup_atomia_account.sh']
+#	}
 
-	exec { '/root/setup_atomia_account.sh':
-		require	    => [File['/root/setup_atomia_account.sh'], File['/etc/atomia.conf']],
-    refreshonly => true
-	}
+#	exec { '/root/setup_atomia_account.sh':
+#		require	    => [File['/root/setup_atomia_account.sh'], File['/etc/atomia.conf']],
+#    refreshonly => true
+#	}
+
+@@bind::a { 'Nagios DNS record':
+  ensure    => 'present',
+  zone      => hiera('atomia::internaldns::zone_name'),
+  ptr       => false,
+  hash_data => {
+    'nagios' => { owner => "${nagios_ip}" },
+  },
+}
 
 }
