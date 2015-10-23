@@ -7,7 +7,7 @@ fi
 
 basedir="/usr/share/doc/atomiadns-masterserver"
 if [ -f "$basedir/zones_to_add.txt" ]; then
-	zones_to_add=`cat "$basedir/zones_to_add.txt"`
+	zones_to_add=`tr "," "\n" < "$basedir/zones_to_add.txt"`
 
 	echo "$zones_to_add" | tr -d " " | tr ";" "\n" | grep -v '^[a-zA-Z0-9.-]$' | while read domain; do
 		sudo -u postgres psql zonedata -tA -c "SELECT name FROM zone WHERE name = '$domain'" 2> /dev/null | grep "^$domain"'$' > /dev/null

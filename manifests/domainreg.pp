@@ -14,10 +14,10 @@
 
 ### Validations
 ##### service_url(advanced): %url
-##### service_username(advanced): ^[a-z]+$
+##### service_username(advanced): %username
 ##### service_password(advanced): %password
-##### db_hostname(advanced): ^[a-z0-9_][a-z0-9._-]*$
-##### db_username(advanced): ^[a-z]+$
+##### db_hostname(advanced): %hostname
+##### db_username(advanced): %username
 ##### db_password(advanced): %password
 ##### domainreg_global_config(advanced,default_file=domainreg_global_default.conf): %domainreg_global_config
 ##### domainreg_tld_config_hash: %domainreg_tld_config_hash

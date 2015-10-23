@@ -1,117 +1,102 @@
-#
-# == Class: atomia::atomiadns_powerdns
-#
-# Manifest to install/configure a powerdns nameserver 
-#
-# [password]
-# Define a password for accessing atomiadns
-# (required) 
-#
-# [agent_user]
-# Defines the username for accessing atomiadns
-# (optional) Default: atomiadns
-#
-# [atomia_dns_url]
-# Url of atomiadns endpoint
-# (required)
-#
-# [atomia_dns_ns_group]
-# Nameserver group to subscribe to
-# (optional) Default: default
-#
-# [ssl_enabled]
-# Defines if ssl is enabled
-# (optional) Defaults to false
-#
-#
-# === Examples
-#
-# class {'atomia::atomiadns_powerdns':
-#        agent_password   => 'abc123',
-#        atomia_dns_url   => 'http://127.0.0.1/atomiadns',
-#}
+## Atomia DNS PowerDNS agent
+
+### Deploys and configures a nameserver running the Atomia DNS PowerDNS agent.
+
+### Variable documentation
+#### atomia_dns_url: The URL of the Atomia DNS API service.
+#### agent_user: The username to require for accessing the service.
+#### agent_password: The password to require for accessing the service.
+#### db_hostname: The hostname of the Atomia Domain Registration database.
+#### db_username: The username for the Atomia Domain Registration database.
+#### db_password: The password for the Atomia Domain Registration database.
+#### ns_group: The Atomia DNS nameserver group used for the zones in your environment.
+#### atomia_dns_extra_config: Extra config to append to /etc/atomiadns.conf as-is.
+
+### Validations
+##### atomia_dns_url(advanced): %url
+##### agent_user(advanced): %username
+##### agent_password(advanced): %password
+##### db_hostname(advanced): %hostname
+##### db_username(advanced): %username
+##### db_password(advanced): %password
+##### ns_group(advanced): ^[a-z0-9_-]+$
+##### atomia_dns_extra_config(advanced): .*
 
 class atomia::atomiadns_powerdns (
-  # If ssl should be enabled or not
-  $ssl_enabled = 0,
-  $agent_user = "atomiadns",
-  $agent_password,
-  $atomia_dns_url,
-  $atomia_dns_ns_group = "default") {
-  package { atomiadns-powerdns-database: ensure => present }
+	$atomia_dns_url	= "http://$fqdn/atomiadns",
+	$agent_user	= "atomiadns",
+	$agent_password	= "",
+	$db_hostname	= "127.0.0.1",
+	$db_username	= "powerdns",
+	$db_password	= "",
+	$ns_group	= "default",
+	$atomia_dns_extra_config = ""
+) {
+  
+	if !in_atomia_role("atomiadns") {
+		file { "/etc/atomiadns.conf":
+			owner   => root,
+			group   => root,
+			mode    => 444,
+			content => template("atomia/atomiadns_powerdns/atomiadns.conf.erb"),
+			notify => [ Service["atomiadns-powerdnssync"] ],
+		}
+	}
 
-  package { atomiadns-powerdnssync: ensure => present }
+	if $lsbdistrelease == "14.04" { 
+		$pdns_package = "pdns-server"
 
-  if $lsbdistrelease == "14.04" { 
-	package { pdns-server:
-    ensure  => present,
-    require => [Service["atomiadns-powerdnssync"]]}
-	package { pdns-backend-mysql:
-	ensure => present,
-	require => [Package[pdns-server]]}
-  } else {
-  	package { pdns-static:
-    ensure  => present,
-    require => [Service["atomiadns-powerdnssync"]]}
-  }
+		package { pdns-backend-mysql:
+			ensure => present,
+			require => [ Package[$pdns_package] ]
+		}
+	} else {
+		$pdns_package = "pdns-static"
+	}
 
-  if $operatingsystem == "Ubuntu" {
-    package { dnsutils: ensure => present }
-  } else {
-    package { bind-utils: ensure => present }
-  }
+	package { $pdns_package:
+		ensure  => present
+	}
 
-  service { atomiadns-powerdnssync:
-    name      => atomiadns-powerdnssync,
-    ensure    => running,
-    pattern   => ".*powerdnssync.*",
-    require   => [
-      Package["atomiadns-powerdns-database"],
-      Package["atomiadns-powerdnssync"],
-      File["/etc/atomiadns.conf.powerdnssync"]],
-    #subscribe => [File["/etc/atomiadns.conf.powerdnssync"]],
-  }
+	service { pdns:
+		ensure    => running,
+		require   => [ Package[$pdns_package] ]
+	}
 
-  if $ssl_enabled == '1' {
-    file { "/etc/atomiadns-mastercert.pem":
-      owner  => root,
-      group  => root,
-      mode   => 440,
-      source => "puppet:///modules/atomia/atomiadns_powerdns/atomiadns_cert"
-    }
+	package { atomiadns-powerdns-database:
+		require => [ File["/etc/atomiadns.conf"], Package[$pdns_package] ],
+		notify => [ Service["pdns"] ]
+	}
 
-  }
+	package { atomiadns-powerdnssync:
+  		ensure => present,
+		require => [ Package["atomiadns-powerdns-database"] ]
+	}
 
+	if $operatingsystem == "Ubuntu" {
+		package { dnsutils: ensure => present }
+	} else {
+		package { bind-utils: ensure => present }
+	}
 
+	service { atomiadns-powerdnssync:
+		name      => atomiadns-powerdnssync,
+		ensure    => running,
+		pattern   => ".*powerdnssync.*",
+		require   => [ Package["atomiadns-powerdns-database"], Package["atomiadns-powerdnssync"] ],
+	}
 
-  file { "/etc/atomiadns.conf.powerdnssync":
-    owner   => root,
-    group   => root,
-    mode    => 444,
-    content => template("atomia/atomiadns_powerdns/atomiadns.conf.powerdnssync.erb"),
-    require => [Package["atomiadns-powerdns-database"], Package["atomiadns-powerdnssync"]],
-    #notify  => Exec["atomiadns_config_sync"],
-  }
-
-  if !defined(File["/usr/bin/atomiadns_powerdns_config_sync"]) {
-    file { "/usr/bin/atomiadns_powerdns_config_sync":
-      owner   => root,
-      group   => root,
-      mode    => 500,
-      source  => "puppet:///modules/atomia/atomiadns_powerdns/atomiadns_config_sync",
-      require => [Package["atomiadns-powerdns-database"], Package["atomiadns-powerdnssync"]],
-    }
-  }
-
-  exec { "atomiadns_powerdns_config_sync":
-    require     => [File["/usr/bin/atomiadns_powerdns_config_sync"],File["/etc/atomiadns.conf.powerdnssync"], Package['atomiadns-powerdnssync']],
-    command     => "/usr/bin/atomiadns_powerdns_config_sync $atomia_dns_ns_group",
-  }  
-  ->
-  exec { "add-server":
-    command => "/usr/bin/atomiapowerdnssync add_server $atomia_dns_ns_group && /etc/init.d/atomiadns-powerdnssync stop && /etc/init.d/atomiadns-powerdnssync start && /usr/bin/atomiapowerdnssync full_reload_online",
-    #require => [Package["atomiadns-powerdnssync"],Exec['atomiadns_powerdns_config_sync'],Service['atomiadns-powerdnssync']],
-    unless  => ["/usr/bin/atomiapowerdnssync get_server"],
-  }
+	if !in_atomia_role("atomiadns") {
+		exec { "add-server":
+			command => "/usr/bin/atomiapowerdnssync add_server \"$ns_group\" && /etc/init.d/atomiadns-powerdnssync stop && /etc/init.d/atomiadns-powerdnssync start && /usr/bin/atomiapowerdnssync full_reload_online",
+			require => [ Package["atomiadns-powerdnssync"] ],
+			unless  => ["/usr/bin/atomiapowerdnssync get_server"],
+		}
+	} else {
+		exec { "add-server":
+			command => "/usr/bin/atomiapowerdnssync add_server \"$ns_group\" && /etc/init.d/atomiadns-powerdnssync stop && /etc/init.d/atomiadns-powerdnssync start && /usr/bin/atomiapowerdnssync full_reload_online",
+			require => [ Package["atomiadns-powerdnssync"], Exec["add_nameserver_group"] ],
+			unless  => ["/usr/bin/atomiapowerdnssync get_server"],
+		}
+	}
 }
-
