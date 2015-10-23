@@ -1,5 +1,9 @@
 # Sets up a local nfs server for test purposes with the shares required for atomia
-class atomia::testenvironment::local_nfs_server($hostip='127.0.0.1',$content_share_nfs_location='') {
+class atomia::testenvironment::local_nfs_server(
+	$hostip='127.0.0.1',
+	$content_share_nfs_location=expand_default('[[content_share_nfs_location]]'),
+	$config_share_nfs_location=expand_default('[[config_share_nfs_location]]')
+) {
  
   Package['nfs-kernel-server'] -> Service['nfs-kernel-server']
 
@@ -49,6 +53,12 @@ class atomia::testenvironment::local_nfs_server($hostip='127.0.0.1',$content_sha
     ensure => mounted,
     require => [File['/storage/content'],File['/export/content'], File['/etc/exports']],
   }  
-
- 
+  mount { '/storage/configuration':
+    device => $config_share_nfs_location,
+    fstype => "nfs",
+    remounts => false,
+    options => "rw,noatime",
+    ensure => mounted,
+    require => [File['/storage/configuration'],File['/export/content'], File['/etc/exports']],
+  }  
 }
