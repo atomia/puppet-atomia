@@ -41,3 +41,6 @@ mod "postgresql",
 
 mod "bind"
   :git => "git://github.com/camptocamp/bind.git"
+
+mod "resolv_conf"
+  :git => "git://github.com/saz/puppet-resolv_conf.git"

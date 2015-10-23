@@ -2,26 +2,34 @@ class atomia::nagios::client(
     $username           = "nagios",
     $password           = "nagios",
     $public_ip          = $ipaddress_eth0,
-    $nagios_ip,
     $atomia_account     = "100001",
     $apache_agent_class = "atomia::nagios::client::apache_agent",
     $atomiadns_master_class = "atomia::nagios::client::atomiadns_master",
     $nameserver_class       = "atomia::nagios::client::nameserver",
     $fsagent_class          = "atomia::nagios::client::fsagent",
-    $awstats_class          = "atomia::nagios::client::awstats"
+    $awstats_class          = "atomia::nagios::client::awstats",
+    $domainreg_class        = "atomia::nagios::client::domainreg"
 ) {
+
+  $atomia_domain = hiera('atomia::config::atomia_domain');
+
+  if $ec2_public_ipv4 {
+    $ip_address = $ec2_public_ipv4
+  } else {
+    $ip_address = $public_ip
+  }
 
 	# Deploy on Windows.
 	if $operatingsystem == 'windows' {
 		class { 'nsclient':
-  			allowed_hosts => [$nagios_ip],
+  			allowed_hosts => ["nagios.${atomia_domain}"],
 		}
 
     	@@nagios_host { "${fqdn}-host" :
         	use                 => "generic-host",
         	host_name           => $fqdn,
         	alias               => "${fqdn}",
-        	address             => $public_ip ,
+        	address             => $ip_address ,
         	target              => "/etc/nagios3/conf.d/${hostname}_host.cfg",
         	hostgroups          => "windows-all"
 
@@ -44,7 +52,7 @@ class atomia::nagios::client(
     }
 
     # Define hostgroups based on custom fact
-    case $atomia_role {
+    case $atomia_role_1 {
 
         'apache_agent': {
           $hostgroup = 'linux-customer-webservers,linux-all'
@@ -69,7 +77,10 @@ class atomia::nagios::client(
 
         'cronagent':            { $hostgroup = 'linux-atomia-agents,linux-all'}
         'daggre':               { $hostgroup = 'linux-atomia-agents,linux-all'}
-        'domainreg':            { $hostgroup = 'linux-atomia-agents,linux-all'}
+        'domainreg':            {
+          $hostgroup = 'linux-atomia-agents,linux-all'
+          class { "${domainreg_class}": }
+        }
         'fsagent':              {
           $hostgroup = 'linux-atomia-agents,linux-all'
           class { "${fsagent_class}":
@@ -107,14 +118,14 @@ class atomia::nagios::client(
     @@nagios_host { "${fqdn}-host" :
         use                 => "generic-host",
         host_name           => $fqdn,
-		    alias			          => "${$atomia_role} - ${fqdn}",
-        address             => $public_ip ,
+		    alias			          => "${$atomia_role_1} - ${fqdn}",
+        address             => $ip_address ,
         target              => "/usr/local/nagios/etc/servers/${hostname}_host.cfg",
         hostgroups          => $hostgroup,
         max_check_attempts  => '5'
     }
 
-	if ($atomia_role == "daggre") {
+	if ($atomia_role_1 == "daggre") {
 		@@nagios_service { "${fqdn}-daggre":
 			host_name				=> $fqdn,
 			service_description		=> "Daggre disk space parser",

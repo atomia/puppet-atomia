@@ -25,6 +25,7 @@ class atomia::nagios::server(
   }
 
   $admin_pass = hiera('atomia::config::atomia_admin_password')
+
   #$apache_ip  = generate('/etc/puppet/modules/atomia/files/lookup_variable.sh', 'apache_agent', 'cluster_ip')
 
   package { [
@@ -252,6 +253,11 @@ class atomia::nagios::server(
   Nagios_host <<| |>>
   ->
   Nagios_service <<| |>>
+  ->
+  exec { 'restart-nagios':
+    command => '/etc/init.d/nagios reload',
+  }
+
 
 #  host { 'atomia-nagios-test.net':
 #		ip	=> $apache_ip,
