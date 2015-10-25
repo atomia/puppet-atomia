@@ -1,0 +1,19 @@
+#!/bin/sh
+
+uid=`id -u`
+if [ -z "$uid" ] || [ "$uid" -lt 100000 ]; then
+       echo "$0 launched with uid less than 100000, something is broken - disallowing for security reasons"
+       exit 1
+fi
+
+PHP_FCGI_MAX_REQUESTS=10000
+export PHP_FCGI_MAX_REQUESTS
+
+php_cgi_exec="/opt/phpfarm/inst/bin/php-cgi-<%= @php_version_56 %>"
+
+homedir=`getent passwd "$uid" | cut -d : -f 6`
+if [ ! -z "$homedir" ] && [ -d "$homedir" ] && [ -f "$homedir/custom-php.ini" ]; then
+       php_cgi_exec="/opt/phpfarm/inst/bin/php-cgi-<%= @php_version_56 %> -c $homedir/custom-php.ini"
+fi
+
+exec $php_cgi_exec
