@@ -59,6 +59,12 @@ class atomia::apache_agent (
   $cluster_ip = "",
   $apache_agent_ip = $ipaddress,
   $maps_path = "/storage/configuration/maps",
+  # Set this property to 0 if you don't want to have PHP selector feature
+  $should_have_php_farm = 1,
+  # Set php_version_XX property to desired PHP version
+  $php_version_54 = "5.4.45",
+  $php_version_55 = "5.5.30",
+  $php_version_56 = "5.6.10",
   ) {
 
   if $lsbdistrelease == "14.04" {
@@ -340,6 +346,106 @@ class atomia::apache_agent (
       hasstatus => false,
       pattern   => "python /etc/init.d/apache-agent start",
       subscribe => [Package["atomia-pa-apache"], File["/usr/local/apache-agent/settings.cfg"]],
+    }
+  }
+  if ($should_have_php_farm == 1) and ($lsbdistrelease == "14.04") {
+    exec {"activate_custom_php":
+      command => '/bin/echo -e "<IF \"%{ENV:PHPVR} == \'5.5\'\">\n\tFCGIWrapper /var/www/cgi-wrappers/php-fcgid-wrapper .php\n</IF>\n" >> /etc/apache2/conf/phpversions.conf',
+      unless  => '/bin/grep -F "<IF" /etc/apache2/conf/phpversions.conf',
+      notify  => Service["apache2"],
+    }
+
+    $phpcompilepackages = [ git, libxml2, libxml2-dev, libssl-dev, libcurl4-openssl-dev, pkg-config, libicu-dev, libmcrypt-dev, php5-dev, libgeoip-dev, libmagickwand-dev, libjpeg-dev, libpng12-dev, libmysqlclient-dev ]
+    package { $phpcompilepackages: 
+      ensure => "installed",
+      require => Package["libapache2-mod-fcgid-atomia"],
+    }
+    exec { "clone_phpfarm_repo" :
+      command => "/usr/bin/git clone git://git.code.sf.net/p/phpfarm/code /opt/phpfarm",
+      unless  => "/usr/bin/test -f /opt/phpfarm/src/options.sh",
+      require => [Package["libapache2-mod-fcgid-atomia"], Package["php5-dev"], Package["git"]],
+    }
+    file { "/opt/phpfarm/src/options.sh":
+      owner   => root,
+      group   => root,
+      mode    => 755,
+      source  => "puppet:///modules/atomia/apache_agent/php-options.sh",
+      require => Exec["clone_phpfarm_repo"],
+    }
+    # Compile and activate PHP 5.4
+    exec { "compile_php54" :
+      command => "/opt/phpfarm/src/compile.sh ${$php_version_54}",
+      creates => "/opt/phpfarm/inst/bin/php-${$php_version_54}",
+      timeout => 1800,
+      require => [Package["libapache2-mod-fcgid-atomia"], Package["php5-dev"], File["/opt/phpfarm/src/options.sh"]],
+    }
+    exec {"check_php54_install":
+      command => "/opt/phpfarm/inst/bin/php-${$php_version_54} --version | grep built",
+      onlyif  => "/usr/bin/test -f /opt/phpfarm/inst/bin/php-${$php_version_54}",
+    }
+    file { "/var/www/cgi-wrappers/php-fcgid-wrapper-5.4":
+      owner   => root,
+      group   => root,
+      mode    => 555,
+      content => template("atomia/apache_agent/php-fcgid-wrapper-54.erb"),
+      require => [Exec["compile_php54"], Exec["check_php54_install"]],
+    }
+    exec {"activate_php54":
+      command => '/bin/echo -e "<ELSEIF \"%{ENV:PHPVR} == \'5.4\'\">\n\tFCGIWrapper /var/www/cgi-wrappers/php-fcgid-wrapper-5.4 .php\n</ELSEIF>\n" >> /etc/apache2/conf/phpversions.conf',
+      unless  => "/bin/grep php-fcgid-wrapper-5.4 /etc/apache2/conf/phpversions.conf",
+      require => [File["/var/www/cgi-wrappers/php-fcgid-wrapper-5.4"], Exec["activate_custom_php"]],
+      notify  => Service["apache2"],
+    }
+
+    # Compile and activate PHP 5.5
+    exec { "compile_php55" :
+      command => "/opt/phpfarm/src/compile.sh ${$php_version_55}",
+      creates => "/opt/phpfarm/inst/bin/php-${$php_version_55}",
+      timeout => 1800,
+      require => [Package["libapache2-mod-fcgid-atomia"], Package["php5-dev"], File["/opt/phpfarm/src/options.sh"]],
+    }
+    exec {"check_php55_install":
+      command => "/opt/phpfarm/inst/bin/php-${$php_version_55} --version | grep built",
+      onlyif  => "/usr/bin/test -f /opt/phpfarm/inst/bin/php-${$php_version_55}",
+    }
+    file { "/var/www/cgi-wrappers/php-fcgid-wrapper-5.5":
+      owner   => root,
+      group   => root,
+      mode    => 555,
+      content => template("atomia/apache_agent/php-fcgid-wrapper-55.erb"),
+      require => [Exec["compile_php55"], Exec["check_php55_install"]],
+    }
+    file_line { "activate_php55":
+      path  => "/etc/apache2/conf/phpversions.conf",
+      line  => "\tFCGIWrapper /var/www/cgi-wrappers/php-fcgid-wrapper-5.5 .php",
+      match => "^.*php-fcgid-wrapper \.php",
+      require => [File["/var/www/cgi-wrappers/php-fcgid-wrapper-5.5"], Exec["activate_custom_php"]],
+      notify  => Service["apache2"],
+    }
+
+    # Compile and activate PHP 5.6
+    exec { "compile_php56" :
+      command => "/opt/phpfarm/src/compile.sh ${$php_version_56}",
+      creates => "/opt/phpfarm/inst/bin/php-${$php_version_56}",
+      timeout => 1800,
+      require => [Package["libapache2-mod-fcgid-atomia"], Package["php5-dev"], File["/opt/phpfarm/src/options.sh"]],
+    }
+    exec {"check_php56_install":
+      command => "/opt/phpfarm/inst/bin/php-${$php_version_56} --version | grep built",
+      onlyif  => "/usr/bin/test -f /opt/phpfarm/inst/bin/php-${$php_version_56}",
+    }
+    file { "/var/www/cgi-wrappers/php-fcgid-wrapper-5.6":
+      owner   => root,
+      group   => root,
+      mode    => 555,
+      content => template("atomia/apache_agent/php-fcgid-wrapper-56.erb"),
+      require => [Exec["compile_php56"], Exec["check_php56_install"]],
+    }
+    exec {"activate_php56":
+      command => '/bin/echo -e "<ELSEIF \"%{ENV:PHPVR} == \'5.6\'\">\n\tFCGIWrapper /var/www/cgi-wrappers/php-fcgid-wrapper-5.6 .php\n</ELSEIF>\n" >> /etc/apache2/conf/phpversions.conf',
+      unless  => "/bin/grep php-fcgid-wrapper-5.6 /etc/apache2/conf/phpversions.conf",
+      require => [File["/var/www/cgi-wrappers/php-fcgid-wrapper-5.6"], Exec["activate_custom_php"]],
+      notify  => Service["apache2"],
     }
   }
 
