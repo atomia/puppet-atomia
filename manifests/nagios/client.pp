@@ -8,7 +8,8 @@ class atomia::nagios::client(
     $nameserver_class       = "atomia::nagios::client::nameserver",
     $fsagent_class          = "atomia::nagios::client::fsagent",
     $awstats_class          = "atomia::nagios::client::awstats",
-    $domainreg_class        = "atomia::nagios::client::domainreg"
+    $domainreg_class        = "atomia::nagios::client::domainreg",
+    $internaldns_class      = "atomia::nagios::client::internaldns",
 ) {
 
   $atomia_domain = hiera('atomia::config::atomia_domain');
@@ -53,6 +54,15 @@ class atomia::nagios::client(
 
     # Define hostgroups based on custom fact
     case $atomia_role_1 {
+        'domainreg':            {
+          $hostgroup = 'linux-atomia-agents,linux-all'
+          class { "${domainreg_class}": }
+        }
+
+        'internaldns':            {
+          $hostgroup = 'linux-all'
+          class { "${internaldns_class}": }
+        }
 
         'apache_agent': {
           $hostgroup = 'linux-customer-webservers,linux-all'
@@ -77,10 +87,6 @@ class atomia::nagios::client(
 
         'cronagent':            { $hostgroup = 'linux-atomia-agents,linux-all'}
         'daggre':               { $hostgroup = 'linux-atomia-agents,linux-all'}
-        'domainreg':            {
-          $hostgroup = 'linux-atomia-agents,linux-all'
-          class { "${domainreg_class}": }
-        }
         'fsagent':              {
           $hostgroup = 'linux-atomia-agents,linux-all'
           class { "${fsagent_class}":
@@ -106,14 +112,14 @@ class atomia::nagios::client(
     }
 
     # Configuration files
-    file { '/etc/nagios/nrpe.cfg':
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0644',
-        content => template('atomia/nagios/nrpe.cfg.erb'),
-        require => Package["nagios-nrpe-server"],
-        notify  => Service["nagios-nrpe-server"]
-    }
+    #file { '/etc/nagios/nrpe.cfg':
+    #    owner   => 'root',
+    #    group   => 'root',
+    #    mode    => '0644',
+    #    content => template('atomia/nagios/nrpe.cfg.erb'),
+    #    require => Package["nagios-nrpe-server"],
+    #    notify  => Service["nagios-nrpe-server"]
+    #}
 
     @@nagios_host { "${fqdn}-host" :
         use                 => "generic-host",
