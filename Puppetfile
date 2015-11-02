@@ -44,3 +44,6 @@ mod "bind"
 
 mod "resolv_conf"
   :git => "git://github.com/saz/puppet-resolv_conf.git"
+
+mod "glusterfs"
+  :git => "git://github.com/stefanmortensen/puppet-glusterfs.git"

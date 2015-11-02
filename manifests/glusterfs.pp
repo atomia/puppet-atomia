@@ -1,19 +1,39 @@
+## Atomia GlusterFS
+
+### Deploys and configures a GlusterFS cluster
+
+### Variable documentation
+#### web_content_volume_size: The size of the volume used for website content (customer websites)
+#### configuration_volume_size: The size of the volume used for shared configurations
+#### mail_volume_size: The size of the volume used for the mail cluster
+#### peers: Hostname/IP of all the peers in the cluster
+#### physical_volume: The physical volume on the server to create storage volumes on
+
+
+### Validations
+##### web_content_volume_size: ^[0-9]+G$
+##### configuration_volume_size: ^[0-9]+G$
+##### mail_volume_size: ^[0-9]+G$
+##### peers(advanced): .*
+##### physical_volume: .*
+
+
 class atomia::glusterfs (
 	$web_content_volume_size			= "100G",
 	$configuration_volume_size		=	"10G",
 	$mail_volume_size							= "100G",
-	$peers												= "",
+	$peers												= "$fqdn",
 	$physical_volume							= "/dev/sdb"
 ) {
 
+	$peers_arr = split($peers,',')
+	$peers_size = size($peers_arr)
+
 	package { 'python-software-properties': ensure => present }
 	package { 'xfsprogs': ensure => present }
-	package { 'lvm2: ensure => present }
+	package { 'lvm2': ensure => present }
 	class { 'glusterfs::server':
-  	peers => [ 
-    	'192.168.1.114',
-			'192.168.1.116'
-  	],
+  	peers => $peers_arr,
 	}
 
 	file { [ '/export', '/export/web', '/export/mail', '/export/config' ]:
@@ -23,20 +43,20 @@ class atomia::glusterfs (
 
 	exec { "create-physical-volume":
 		command => "/sbin/pvcreate ${physical_volume}",
-		onlyif 	=> "/sbin/pvdisplay | /bin/grep ${physical_volume} >/dev/null 2>&1"
+		unless 	=> "/sbin/pvdisplay | /bin/grep ${physical_volume} >/dev/null 2>&1",
 		require	=> Package['lvm2']
 	}
 
   exec { "create-volume-group":
     command => "/sbin/vgcreate gluster ${physical_volume}",
-    onlyif  => "/sbin/vgs | /bin/grep gluster  >/dev/null 2>&1"
+    unless  => "/sbin/vgs | /bin/grep gluster  >/dev/null 2>&1",
     require => Exec["create-physical-volume"]
   }
 
 
 	exec { 'create-web-lv':
   	command => "/sbin/lvcreate -L ${web_content_volume_size} -n web gluster",
-		creates = '/dev/gluster/web',
+		creates => '/dev/gluster/web',
   	notify  => Exec['mkfs web'],
 		require	=> Exec["create-volume-group"]
 	}
@@ -57,7 +77,7 @@ class atomia::glusterfs (
 
   exec { 'create-mail-lv':
     command => "/sbin/lvcreate -L ${mail_volume_size} -n mail gluster",
-    creates = '/dev/gluster/mail',
+    creates => '/dev/gluster/mail',
     notify  => Exec['mkfs mail'],
     require => Exec["create-volume-group"]
   }
@@ -77,8 +97,8 @@ class atomia::glusterfs (
   }
 
   exec { 'create-config-lv':
-    command => "/sbin/lvcreate -L ${config_volume_size} -n config gluster",
-    creates = '/dev/gluster/config',
+    command => "/sbin/lvcreate -L ${configuration_volume_size} -n config gluster",
+    creates => '/dev/gluster/config',
     notify  => Exec['mkfs config'],
     require => Exec["create-volume-group"]
   }
@@ -99,54 +119,61 @@ class atomia::glusterfs (
 
 
 	# Create Gluster volumes
-	# TODO: need to be smart about this
-	glusterfs::volume { 'gv0':
-  	create_options => 'replica 2 192.168.0.1:/export/gv0 192.168.0.2:/export/gv0',
-  	require        => Mount['/export/web'],
-	}	
+	file { '/export/web/vol1':
+		ensure => directory,
+		require => Mount["/export/web"]
+	}
 
+	file { '/export/mail/vol1':
+		ensure => directory,
+		require => Mount["/export/mail"]
+	}
+
+	file { '/export/config/vol1':
+		ensure => directory,
+		require => Mount["/export/config"]
+	}
+
+	exec { "gluster volume create /export/web":
+    command => "/usr/sbin/gluster volume create web_volume replica ${peers_size} ${peers_arr[0]}:/export/web/vol1 ${peers_arr[1]}:/export/web/vol1",
+    creates => "/var/lib/glusterd/vols/web_volume",
+    require => [ Class['glusterfs::server'], File['/export/web/vol1'] ],
+		unless	=> "/usr/bin/test `/usr/sbin/gluster peer status | /bin/grep -c Hostname` -eq ${peers_size};",
+		notify	=> Exec['start web volume'],
+  }
+
+	exec { 'start web volume':
+		command => '/usr/sbin/gluster volume start web_volume',
+		refreshonly	=> true
+	}
+
+	exec { "gluster volume create /export/mail":
+    command => "/usr/sbin/gluster volume create mail_volume replica ${peers_size} ${peers_arr[0]}:/export/mail/vol1 ${peers_arr[1]}:/export/mail/vol1",
+    creates => "/var/lib/glusterd/vols/mail_volume",
+    require => [ Class['glusterfs::server'], File['/export/mail/vol1'] ],
+		unless	=> "/usr/bin/test `/usr/sbin/gluster peer status | /bin/grep -c Hostname` -eq ${peers_size};",
+		notify	=> Exec['start mail volume'],
+  }
+
+	exec { 'start mail volume':
+		command => '/usr/sbin/gluster volume start mail_volume',
+		refreshonly	=> true
+	}
+
+	exec { "gluster volume create /export/config":
+    command => "/usr/sbin/gluster volume create config_volume replica ${peers_size} ${peers_arr[0]}:/export/config/vol1 ${peers_arr[1]}:/export/config/vol1",
+    creates => "/var/lib/glusterd/vols/config_volume",
+    require => [ Class['glusterfs::server'], File['/export/config/vol1'] ],
+		unless	=> "/usr/bin/test `/usr/sbin/gluster peer status | /bin/grep -c Hostname` -eq ${peers_size};",
+		notify	=> Exec['start config volume'],
+  }
+
+	exec { 'start config volume':
+		command => '/usr/sbin/gluster volume start config_volume',
+		refreshonly	=> true
+	}
 
 	# Configure Samba + CTDB
 
-#	exec {"add-gluster-repo":
-#		command => "/usr/bin/add-apt-repository ppa:gluster/glusterfs-3.5",
-#		notify => Exec["apt-get-update"]
-# }
 
-#	exec { "apt-get-update": 
-#		command => "/usr/bin/apt-get update", 
-#		refreshonly => true
-#	}
-
-#	package { 'glusterfs-server':
-#		ensure => present,
-#		require => Exec["add-gluster-repo"]
-#	}
-#
-#	package { 'glusterfs-client':
-#		ensure => present,
-#		require => Exec["add-gluster-repo"]
-#	}
-#
-#	package { 'xfsprogs' :
-#		ebsure => present
-#	}
-
-
-# If we are the first node we should probe for our peers
-#if $fqdn = $peers[0] {
-
-#}
-#	$peers.each |$peer| {
-#		if $peer != $fqdn {
-#	
-#			exec { "wait-for-peer":
-#				command =>  "while [ `sleep 5; /usr/sbin/gluster peer probe ${peer} | /usr/bin/awk '{print $4}'` == '0' ]; do echo 'peers missing' ; done",
-#			}
-#		
-#		}
-#	}
-#	exec { "wait-for-peer":
-#		command =>  "while [ `sleep 5; /usr/sbin/gluster peer status | /usr/bin/awk '{print $4}'` == '0' ]; do echo 'peers missing' ; done",
-#	}
 }
