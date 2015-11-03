@@ -83,13 +83,6 @@ describe 'atomia::resource_transformations' do
         .with_content(/name=\"Password\">fsagent_password/) 
      }  
 
-    # Webinstaller
-    it { should contain_file("#{t_path}.Webinstaller.xml")  
-        .with_content(/name=\"URL\">http:\/\/127.0.0.1\/webinstaller/) 
-        .with_content(/name=\"Username\">webinstaller/) 
-        .with_content(/name=\"StoragePath\">\/storage\/content/) 
-     }    
-
     # PureFTPD
     it { should contain_file("#{t_path}.PureFTPD.xml")  
         .with_content(/name=\"DatabaseHost\">127.0.0.1/) 

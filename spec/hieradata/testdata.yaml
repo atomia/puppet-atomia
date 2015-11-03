@@ -24,9 +24,6 @@ atomia::awstats::awstats_ip: "127.0.0.1"
 atomia::fsagent::password: "fsagent_password"
 atomia::fsagent::fsagent_ip: "127.0.0.1"
 
-atomia::webinstaller::agent_password: "webinstaller_password"
-atomia::webinstaller::webinstaller_ip: "127.0.0.1"
-
 atomia::pureftpd::master_ip: "127.0.0.1"
 atomia::pureftpd::agent_password: "pureftpd_password"
 atomia::pureftpd::ftp_cluster_ip: "2.2.2.2"
