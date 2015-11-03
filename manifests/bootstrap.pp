@@ -8,4 +8,9 @@ class atomia::bootstrap
        source => "puppet:///modules/atomia/atomia_role.rb"
      }
   }
+  if $kernel == "windows" {
+    file { "C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role.ps1":
+      content => template('atomia/active_directory/atomia_role.ps1.erb'),
+    }
+  }
 }

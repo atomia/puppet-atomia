@@ -2,22 +2,23 @@
 
 Function AddUserToActiveDirectory($adUser,$password){
     Try{
-        
+
         New-ADUser $adUser
         Set-ADAccountPassword -Identity $adUser -Reset -NewPassword (ConvertTo-SecureString -AsPlainText $password -Force)
         Enable-ADAccount -Identity $adUser
+        Set-ADUser -Identity $adUser -PasswordNeverExpires $true
         return 1
     }
     Catch{
         $error[0]
         "Could not create user"
         return 0
-    }    
+    }
 
 }
 
 Function UserExists($aduser){
-    
+
     $user = Get-ADUser $aduser -Properties Name,DistinguishedName
 
     if($user.Name -eq $nul){
@@ -64,9 +65,9 @@ Write-Host "Account SID: $($sidstr)" -ForegroundColor DarkCyan
 $tmp = [System.IO.Path]::GetTempFileName()
 
 Write-Host "Export current Local Security Policy" -ForegroundColor DarkCyan
-secedit.exe /export /cfg "$($tmp)" 
+secedit.exe /export /cfg "$($tmp)"
 
-$c = Get-Content -Path $tmp 
+$c = Get-Content -Path $tmp
 
 $currentSetting = ""
 
@@ -79,15 +80,15 @@ foreach($s in $c) {
 
 if( $currentSetting -notlike "*$($sidstr)*" ) {
 	Write-Host "Modify Setting ""Logon as a Service""" -ForegroundColor DarkCyan
-	
+
 	if( [string]::IsNullOrEmpty($currentSetting) ) {
 		$currentSetting = "*$($sidstr)"
 	} else {
 		$currentSetting = "*$($sidstr),$($currentSetting)"
 	}
-	
+
 	Write-Host "$currentSetting"
-	
+
 	$outfile = @"
 [Unicode]
 Unicode=yes
@@ -99,18 +100,18 @@ SeServiceLogonRight = $($currentSetting)
 "@
 
 	$tmp2 = [System.IO.Path]::GetTempFileName()
-	
-	
+
+
 	Write-Host "Import new settings to Local Security Policy" -ForegroundColor DarkCyan
 	$outfile | Set-Content -Path $tmp2 -Encoding Unicode -Force
 
 	#notepad.exe $tmp2
 	Push-Location (Split-Path $tmp2)
-	
+
 	try {
-		secedit.exe /configure /db "secedit.sdb" /cfg "$($tmp2)" /areas USER_RIGHTS 
+		secedit.exe /configure /db "secedit.sdb" /cfg "$($tmp2)" /areas USER_RIGHTS
 		#write-host "secedit.exe /configure /db ""secedit.sdb"" /cfg ""$($tmp2)"" /areas USER_RIGHTS "
-	} finally {	
+	} finally {
 		Pop-Location
 	}
 } else {
@@ -124,7 +125,7 @@ Write-Host "Done." -ForegroundColor DarkCyan
 # Add apppooluser
 
 if(! (UserExists "apppooluser")){
-    if(AddUserToActiveDirectory "apppooluser" "<%= IO.popen("#{@lookup_var} windows_base app_password #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %>"){
+    if(AddUserToActiveDirectory "apppooluser" "<%= @app_password %>"){
         Add-ADGroupMember "Domain Admins" "apppooluser"
         GrantLogonService "apppooluser"
     }
@@ -132,17 +133,12 @@ if(! (UserExists "apppooluser")){
 
 # Add PosixGuest
 if(! (UserExists "PosixGuest")){
-    AddUserToActiveDirectory "PosixGuest" "<%= IO.popen("#{@lookup_var} adjoin bind_password #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %>"
+    AddUserToActiveDirectory "PosixGuest" "<%= @bind_password %>"
 }
 
 # Add WindowsAdmin
 if(! (UserExists "WindowsAdmin")){
-    if(AddUserToActiveDirectory "WindowsAdmin" "<%= IO.popen("#{@lookup_var} windows_base admin_password #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %>"){
+    if(AddUserToActiveDirectory "WindowsAdmin" "<%= @windows_admin_password %>"){
         Add-ADGroupMember "Domain Admins" "WindowsAdmin"
     }
 }
-
-
-
-
-

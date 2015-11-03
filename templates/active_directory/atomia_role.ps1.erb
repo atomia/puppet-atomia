@@ -1,0 +1,15 @@
+$ErrorActionPreference = "SilentlyContinue"
+$puppet = cat C:\ProgramData\PuppetLabs\puppet\etc\puppet.conf | Where-Object {$_ -like '*server*'} | %{$_ -replace "server=",""}
+
+$url = "http://" + $puppet +":3000/roles/<%=@fqdn%>/json"
+$r = invoke-RestMethod -Uri $url -Method Get;
+$role = $r.roles;
+
+if (!$role)
+{
+    Write-Host "atomia_role_2="
+}
+else
+{
+    Write-Host "atomia_role_1=$role"
+}
