@@ -4,7 +4,7 @@ class atomia::linux_base {
 
     include '::ntp'
 
-    $internal_dns = hiera('atomia::internaldns::ip_address')
+    $internal_dns = hiera('atomia::internaldns::ip_address', '')
 
     if $internal_dns {
       class { 'resolv_conf':
