@@ -1,0 +1,36 @@
+#!/bin/sh
+
+if [ -z "$1" ]; then
+	echo "usage: $0 master|slave|master_is_done|slave_is_done"
+	exit 1
+fi
+
+mysql="mysql -h 127.0.0.1 -u slave_user -p<%= @pureftpd_slave_password %>"
+
+if ! $mysql -e "SHOW DATABASES" 2> /dev/null | grep pureftpd > /dev/null; then
+	echo "no pureftpd database exists, this indicates a problem in the installation logic"
+	exit 1
+fi
+
+if [ x"$1" = x"master" ]; then
+	if $mysql pureftpd < /etc/pure-ftpd/mysql.schema.sql > /dev/null 2>&1; then
+		echo "provisioned pureftpd schema to the master"
+		touch "/etc/pure-ftpd/master_setup_done.txt"
+	else
+		echo "provisioning pureftpd schema to the master failed"
+		exit 1
+	fi
+elif [ x"$1" = x"master_is_done" ]; then
+	[ -f "/etc/pure-ftpd/master_setup_done.txt" ]
+	exit $?
+elif [ x"$1" = x"slave" ]; then
+	echo should setup slave replicated database here 
+elif [ x"$1" = x"slave_is_done" ]; then
+	[ -f "/etc/pure-ftpd/slave_setup_done.txt" ]
+	exit $?
+else
+	echo "invalid argument: $1"
+	exit 2
+fi
+
+exit 0
