@@ -1,3 +1,0 @@
-#!/bin/sh
-ps axwwj | grep mysqld | awk '$NF == "/usr/bin/mysqld_safe" { safe[$2] = 1 } $NF == "--socket=/var/run/mysqld/mysqld.sock" { mysqld_ppid = $1 } END { for (safepid in safe) if (safepid != mysqld_ppid) print "kill " safepid }' | sh
-

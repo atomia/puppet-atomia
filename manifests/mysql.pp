@@ -1,16 +1,33 @@
+## Atomia customer MySQL resource server
+
+### Deploys and configures a server running MySQL for hosting customer databases.
+
+### Variable documentation
+#### mysql_username: The username of the MySQL user that automation server provisions databases through.
+#### mysql_password: The password for the MySQL user that automation server provisions databases through.
+#### mysql_root_password: The password for the MySQL root user.
+#### provisioning_host: The IP or hostname of the server running automation server, used for the automation server MySQL user to restrict access.
+
+### Validations
+##### mysql_username(advanced): %username
+##### mysql_password(advanced): %password
+##### mysql_root_password(advanced): %password
+##### provisioning_host(advanced): ^[0-9.a-z%-]+$
+
 class atomia::mysql (
-	$mysql_username,
+	$mysql_username = "automationserver",
 	$mysql_password,
-	$provisioning_host
+	$mysql_root_password,
+	$provisioning_host = "%"
 	){
-	$mysql_datadir = "/var/lib/mysql/data"
-	$mysql_command = "/usr/bin/mysql --defaults-file=/etc/mysql/debian.cnf -Ns"
 
-	#package { mysql-server: ensure => installed }
-
+	# TODO: Consider changing % to hostname for automation server in internal zone when this is setup.
 
 	class { '::mysql::server':
-  		override_options => { 'mysqld' => { 'bind_address' => $ipaddress } }
+		restart			=> true,
+		root_password		=> $mysql_root_password,
+		remove_default_accounts	=> true,
+  		override_options	=> { 'mysqld' => { 'bind_address' => $ipaddress } }
 	}	
 
 	mysql_user { "$mysql_username@$provisioning_host":
@@ -25,42 +42,18 @@ class atomia::mysql (
   		table      => '*.*',
   		user       => "$mysql_username@$provisioning_host",
 	}
-       
 
-	exec { "delete-test-db":
-		command => "$mysql_command -e \"DROP DATABASE test;\" ",
-		onlyif => "$mysql_command -e \"SHOW DATABASES;\" | egrep ^test$"
+	limits::conf { "soft-file-limit":
+		domain	=> '*',
+		type	=> 'soft',
+		item	=> 'nofile',
+		value	=> 65535
 	}
 
-	file { "/etc/cron.hourly/ubuntu-mysql-fix":
-                owner   => root,
-                group   => root,
-                mode    => 500,
-                source  => "puppet:///modules/atomia/mysql/ubuntu-fix",
+	limits::conf { "hard-file-limit":
+		domain	=> '*',
+		type	=> 'hard',
+		item	=> 'nofile',
+		value	=> 65535
 	}
-
-	file { "/etc/security/limits.conf":
-		   owner   => root,
-		   group   => root,
-		   mode    => 644,
-		   source  => "puppet:///modules/atomia/mysql/limits.conf",
-	}
-
-
-#	file { "/etc/mysql/my.cnf":
-#		   owner   => root,
-#		   group   => root,
-#		   mode    => 644,
-#		   source  => "puppet:///modules/atomia/mysql/my.cnf",
-#	}
-	
-#	if !defined(File[$mysql_datadir]) {
-#		file { $mysql_datadir:
-#			  ensure => directory,
-#			  owner => "mysql",
-#			  group => "mysql",
-#			  require => Package["mysql-server"],
-#		}
-#	}
 }
-
