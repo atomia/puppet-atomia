@@ -70,14 +70,14 @@ define atomia::nfsmount(
 	  file { 'idmapd.conf' :
 	    path    => "/etc/idmapd.conf",
 	    ensure => 'file',
-	    content  => template('atomia/idmapd.conf'),
+	    content  => template('atomia/nfsmount/idmapd.conf'),
 	  }  
   }
 	if !defined(File['nfs-common']){
 		file { 'nfs-common' :
 	    path    => "/etc/default/nfs-common",
 	    ensure => 'file',
-	    content  => template('atomia/nfs-common'),
+	    content  => template('atomia/nfsmount/nfs-common'),
 		}
 	}
 }
