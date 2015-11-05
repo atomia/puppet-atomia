@@ -7,10 +7,36 @@ class atomia::linux_base {
     $internal_dns = hiera('atomia::internaldns::ip_address', '')
 
     if $internal_dns {
-      class { 'resolv_conf':
-        nameservers => ["${internal_dns}"],
+      if $atomia_role_1 != "glusterfs" {
+        class { 'resolv_conf':
+          nameservers => ["${internal_dns}"],
+        }
       }
-    }    
+      else {
+        class { 'resolv_conf':
+          nameservers => ["${internal_dns}"],
+          domainname => "atomia.local"
+        }
+      }
+
+      Host <<| |>>
+#      class { 'hosts':
+  #  		collect_all => true,
+  #  	}
+
+    }
+}
+
+define atomia::hostname::register ($content="", $order='10') {
+  $factfile = '/etc/hosts'
+
+  @@concat::fragment {"active_directory_${content}":
+      target => $factfile,
+      content => "${content} ",
+      tag => 'hosts_file',
+      order => 3
+    }
+
 }
 
 define limits::conf (

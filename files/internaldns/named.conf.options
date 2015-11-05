@@ -14,15 +14,11 @@ options {
         // Uncomment the following block, and insert the addresses replacing
         // the all-0's placeholder.
 
-         forwarders {
-                8.8.8.8;
-         };
-
         //========================================================================
         // If BIND logs error messages about the root key being expired,
         // you will need to update your keys.  See https://www.isc.org/bind-keys
         //========================================================================
-        dnssec-validation auto;
+        dnssec-validation no;
 
         auth-nxdomain no;    # conform to RFC1035
         listen-on-v6 { any; };

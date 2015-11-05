@@ -1,5 +1,5 @@
 base <%= @base_dn %>
-uri <%= @ldap_uris %>
+uri <%= @ad_servers %>
 ldap_version 3
 binddn cn=<%= @bind_user %>,<%= @base_dn %>
 bindpw <%= @bind_password %>
@@ -21,5 +21,3 @@ nss_map_attribute cn sAMAccountName
 
 pam_filter objectclass=user
 pam_password ad
-
-

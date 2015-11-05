@@ -26,6 +26,12 @@ class atomia::internaldns (
 	  zone_origin  => "${$zone_name}",
 	}
 
+	$ad_domain = hiera('atomia::active_directory::domain_name')
+	bind::zone {"$ad_domain":
+		zone_type		=> 'forward',
+	  zone_ttl     => '604800',
+	  zone_forwarders	=> '52.30.144.80'
+	}
 
 	# Set ip correctly when on ec2
 	if $ec2_public_ipv4 {

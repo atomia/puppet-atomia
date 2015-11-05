@@ -28,6 +28,14 @@ class atomia::active_directory (
 
 ) {
 
+  # Set ip correctly when on ec2
+  if $ec2_public_ipv4 {
+    $public_ip = $ec2_public_ipv4
+  } else {
+    $public_ip = $ipaddress_eth0
+  }
+
+  atomia::adjoin::register{ "${::fqdn}": content => $public_ip}
 
   file { "C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role_ad.ps1":
     content => template('atomia/active_directory/atomia_role_active_directory.ps1.erb'),

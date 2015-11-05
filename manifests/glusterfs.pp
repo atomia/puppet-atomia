@@ -26,12 +26,41 @@ class atomia::glusterfs (
 	$physical_volume							= "/dev/sdb"
 ) {
 
+	# Set ip correctly when on ec2
+  if $ec2_public_ipv4 {
+    $public_ip = $ec2_public_ipv4
+  } else {
+    $public_ip = $ipaddress_eth0
+  }
+
+	$netbios_domain_name = hiera('atomia::active_directory::netbios_domain_name')
+	$domain_name = hiera('atomia::active_directory::domain_name')
+	$zone_name = hiera('atomia::internaldns::zone_name')
+	$ad_password = hiera('atomia::active_directory::windows_admin_password')
+	host { 'domain-member-host':
+		name		=> "${::hostname}.$domain_name",
+		ip	=> "${::ipaddress_eth0}"
+	}
+
+	@@bind::a { "${fqdn}-gluster-dns":
+	  ensure    => 'present',
+	  zone      => hiera('atomia::internaldns::zone_name'),
+	  ptr       => false,
+	  hash_data => {
+	    'gluster' => { owner => "${public_ip}" },
+	  },
+	}
+
+
 	$peers_arr = split($peers,',')
 	$peers_size = size($peers_arr)
 
 	package { 'python-software-properties': ensure => present }
 	package { 'xfsprogs': ensure => present }
 	package { 'lvm2': ensure => present }
+	package { 'samba': ensure => present }
+	package { 'ctdb': ensure => present}
+
 	class { 'glusterfs::server':
   	peers => $peers_arr,
 	}
@@ -173,7 +202,41 @@ class atomia::glusterfs (
 		refreshonly	=> true
 	}
 
-	# Configure Samba + CTDB
+	# Mount Glusetr volumes
+	file { '/storage':
+		ensure	=> directory,
+	}
 
+	class { 'fstab' : }
 
+	fstab::mount { '/storage/content':
+	  ensure  => 'mounted',
+	  device  => 'gluster.atomia.internal:web_volume',
+	  options => 'defaults,_netdev',
+	  fstype  => 'glusterfs',
+	}
+
+	fstab::mount { '/storage/configuration':
+	  ensure  => 'mounted',
+	  device  => 'gluster.atomia.internal:config_volume',
+	  options => 'defaults,_netdev',
+	  fstype  => 'glusterfs',
+	}
+
+	# Configure Samba
+	file { '/etc/samba/smb.conf':
+		content => template('atomia/glusterfs/smb.conf.erb'),
+		require	=> Package['samba']
+	}
+
+	file { '/etc/samba/smbusers':
+		ensure	=> present,
+		content => "root = ${$netbios_domain_name}\\Administrator"
+	}
+
+	exec {'samba-join-domain':
+		command	=> "/usr/bin/net ads join -U WindowsAdmin%${ad_password}",
+		onlyif => "/usr/bin/net ads status -U WindowsAdmin%${ad_password} | /bin/grep 'No machine' >/dev/null 2>&1"
+	}
+#WindowsAdmin
 }
