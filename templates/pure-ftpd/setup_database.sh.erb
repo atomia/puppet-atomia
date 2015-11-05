@@ -5,7 +5,10 @@ if [ -z "$1" ]; then
 	exit 1
 fi
 
-mysql="mysql -h 127.0.0.1 -u slave_user -p<%= @pureftpd_slave_password %>"
+mysql="mysql -u root -p<%= @mysql_root_password %>"
+mysql_master="mysql -h <%= @master_ip %> -u slave_user -p<%= @pureftpd_slave_password %>"
+mysqldump_master="mysqldump -h <%= @master_ip %> -u slave_user -p<%= @pureftpd_slave_password %>"
+master_details="MASTER_HOST='<%= @master_ip %>', MASTER_PORT=3306, MASTER_USER='slave_user', MASTER_PASSWORD='<%= @pureftpd_slave_password %>',"
 
 if ! $mysql -e "SHOW DATABASES" 2> /dev/null | grep pureftpd > /dev/null; then
 	echo "no pureftpd database exists, this indicates a problem in the installation logic"
@@ -24,7 +27,34 @@ elif [ x"$1" = x"master_is_done" ]; then
 	[ -f "/etc/pure-ftpd/master_setup_done.txt" ]
 	exit $?
 elif [ x"$1" = x"slave" ]; then
-	echo should setup slave replicated database here 
+	if ! $mysql_master -e "SHOW DATABASES" 2> /dev/null | grep pureftpd > /dev/null; then
+		echo "ftp master is not up or not working yet, waiting until next puppet run"
+		exit 0
+	fi
+
+	if ! $mysql_master pureftpd -e "SHOW TABLES" 2> /dev/null | grep users > /dev/null; then
+		echo "ftp master database is up but is not yet containing the users table, waiting until next puppet run"
+		exit 0
+	fi
+
+	if ! $mysqldump_master --master-data pureftpd | sed -e 's/\(CHANGE MASTER TO \)/\1'"$master_details"/ | $mysql pureftpd; then
+		echo "error setting up slave through mysqldump, waiting until next puppet run"
+		exit 1
+	fi
+
+	if ! $mysql pureftpd -e "SHOW TABLES" 2> /dev/null | grep users > /dev/null; then
+		echo "database replication was set up but slave is not yet containing the users table, retrying on next puppet run"
+		exit 2
+	fi
+
+	if ! $mysql -e "START SLAVE"; then
+		echo "database replication was set up correctly, but starting slave failed, retrying on next puppet run"
+		exit 3
+	fi
+
+	echo "database replication setup and working"
+	touch "/etc/pure-ftpd/slave_setup_done.txt"
+
 elif [ x"$1" = x"slave_is_done" ]; then
 	[ -f "/etc/pure-ftpd/slave_setup_done.txt" ]
 	exit $?

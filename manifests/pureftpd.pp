@@ -1,13 +1,50 @@
+## Atomia PureFTPD resource server
+
+### Deploys and configures a server running PureFTPD for hosting customer content.
+
+### Variable documentation
+#### agent_user: The username of the MySQL user that automation server provisions FTP users through.
+#### agent_password: The password for the MySQL user that automation server provisions FTP users through.
+#### master_ip: The IP of the master FTP server.
+#### provisioning_host: The IP or hostname of the server running automation server, used for the automation server MySQL user to restrict access.
+#### pureftpd_password: The password for the MySQL user with the name pureftpd that the FTP server connects to the user database as.
+#### cluster_ip: The virtual IP of the FTP cluster.
+#### content_share_nfs_location: The location of the NFS share for customer website content.
+#### is_master: Toggles if we are provisioning the master FTP node (with the main user database) or a slave node (with a replicated database). 
+#### pureftpd_slave_password: The password for the MySQL user with the name slave_user that the user database replication uses.
+#### mysql_root_password: The password for the MySQL root user.
+#### ssl_enabled: Toggles if we are to configure SSL for the FTP service.
+#### skip_mount: Toggles if we are to mount the content share or not.
+#### content_mount_point: The mount point for the customer content.
+#### passive_port_range: The passive port range to use in the FTP server.
+
+### Validations
+##### agent_user(advanced): %username
+##### agent_password(advanced): %password
+##### master_ip(advanced): %ip
+##### provisioning_host(advanced): ^[0-9.a-z%-]+$
+##### pureftpd_password(advanced): %password
+##### cluster_ip(advanced): %ip
+##### content_share_nfs_location(advanced): %nfs_share
+##### is_master(advanced): %int_boolean
+##### pureftpd_slave_password(advanced): %password
+##### mysql_root_password(advanced): %password
+##### ssl_enabled(advanced): %int_boolean
+##### skip_mount(advanced): %int_boolean
+##### content_mount_point(advanced): %path
+##### passive_port_range(advanced): ^[0-9]+ [0-9]+$
+
 class atomia::pureftpd (
 	$agent_user	 		= "automationserver",
 	$agent_password,
-	$master_ip,
+	$master_ip			= $ipaddress,
 	$provisioning_host		= "%",
 	$pureftpd_password,
 	$ftp_cluster_ip,
-	$content_share_nfs_location,
+	$content_share_nfs_location	= expand_default("[[content_share_nfs_location]]"),
 	$is_master			= 0,
 	$pureftpd_slave_password,
+	$mysql_root_password,
 	$ssl_enabled			= 0,
 	$skip_mount			= 0,
 	$content_mount_point		= "/storage/content",
@@ -27,12 +64,15 @@ class atomia::pureftpd (
 
 	if $is_master == "1" {
 		class { 'mysql::server':
+			restart			=> true,
+			root_password		=> $mysql_root_password,
+			remove_default_accounts	=> true,
 			override_options => {
 				mysqld => {
 					'server_id'	=> '1',
 					'log_bin'	=> '/var/log/mysql/mysql-bin.log',
 					'binlog_do_db'	=> 'pureftpd',
-					'bind_address'	=> $master_ip
+					'bind_address'	=> $master_ip,
 				}
 			}
 		}
@@ -92,11 +132,14 @@ class atomia::pureftpd (
 	} else {
 		# Slave config
 		class { 'mysql::server':
-			override_options => {
+			restart			=> true,
+			root_password		=> $mysql_root_password,
+			remove_default_accounts	=> true,
+			override_options	=> {
 				mysqld => {
 					'server_id'	=> '2',
 					'log_bin'	=> '/var/log/mysql/mysql-bin.log',
-					'binlog_do_db'	=> 'pureftpd'
+					'binlog_do_db'	=> 'pureftpd',
 				}
 			}
 		}
@@ -106,7 +149,8 @@ class atomia::pureftpd (
 			require	=> [
 				File["/etc/pure-ftpd/setup_database.sh"],
 				Class[Mysql::Server::Service],
-				Mysql_database['create-pureftpd-database']
+				Mysql_database['create-pureftpd-database'],
+				Mysql_grant['pureftpd@localhost/pureftpd.*'],
 			],
 			unless	=> "/etc/pure-ftpd/setup_database.sh slave_is_done",
 		}
