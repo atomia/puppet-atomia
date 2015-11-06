@@ -22,11 +22,11 @@
 
 class atomia::adjoin (
   # AD domain name
-  $domain_name    = hiera('atomia::active_directory::domain_name'),
+  $domain_name    = hiera('atomia::active_directory::domain_name', ''),
   $admin_user     = "WindowsAdmin",
-  $admin_password = hiera('atomia::active_directory::windows_admin_password'),
+  $admin_password = hiera('atomia::active_directory::windows_admin_password', ''),
   $bind_user      = "PosixGuest",
-  $bind_password  = hiera('atomia::active_directory::bind_password'),
+  $bind_password  = hiera('atomia::active_directory::bind_password', ''),
   $no_nscd        = 1,) {
   if $operatingsystem == 'windows' {
 
