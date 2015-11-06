@@ -42,7 +42,7 @@ class atomia::pureftpd (
 	$pureftpd_password,
 	$ftp_cluster_ip,
 	$content_share_nfs_location	= expand_default("[[content_share_nfs_location]]"),
-	$is_master			= 0,
+	$is_master			= 1,
 	$pureftpd_slave_password,
 	$mysql_root_password,
 	$ssl_enabled			= 0,
