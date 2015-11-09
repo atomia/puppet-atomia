@@ -23,10 +23,10 @@
 class atomia::active_directory (
   $domain_name = "",
   $netbios_domain_name = "",
-  $restore_password,
-  $app_password,
-  $bind_password,
-  $windows_admin_password,
+  $restore_password = "",
+  $app_password = "",
+  $bind_password = "",
+  $windows_admin_password = "",
   $is_master = 1,
 
 ) {
@@ -50,7 +50,7 @@ class atomia::active_directory (
     require => File['c:/install'],
   }
 
-  if($is_master == 1) {
+  if($is_master == 1 && !$::vagrant) {
     atomia::active_directory::store_ip{ "${::fqdn}": content => $public_ip}
     @@host { 'domain-name-host':
     		name		=> "$domain_name",
@@ -74,33 +74,30 @@ class atomia::active_directory (
       require   => Exec["enable-ad-feature"]
     }
 
-    if($::vagrant){
-  	  file { 'c:/install/add_users_vagrant.ps1':
+
+    file { 'c:/install/add_users.ps1':
+      ensure => 'file',
+      content => template('atomia/active_directory/add_users.ps1.erb'),
+      require => Exec['Install AD forest']
+    }
+    exec { 'add-ad-users':
+      command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/add_users.ps1',
+      creates => 'C:\install\installed',
+      require => [File['c:/install/add_users.ps1'], Exec['Install AD forest']],
+    }
+
+  } elsif($::vagrant) {
+      file { 'c:/install/add_users_vagrant.ps1':
   	    ensure => 'file',
   	    content => template('atomia/active_directory/add_users_vagrant.ps1.erb'),
-  	  }
+      }
       exec { 'add-ad-users-vagrant':
         command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/add_users_vagrant.ps1',
         creates => 'C:\install\installed',
         require => File['c:/install/add_users_vagrant.ps1'],
       }
 
-    } else {
-  	  file { 'c:/install/add_users.ps1':
-  	    ensure => 'file',
-  	    content => template('atomia/active_directory/add_users.ps1.erb'),
-        require => Exec['Install AD forest']
-  	  }
-  	  exec { 'add-ad-users':
-  	    command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/add_users.ps1',
-  	    creates => 'C:\install\installed',
-  	    require => [File['c:/install/add_users.ps1'], Exec['Install AD forest']],
-  	  }
-    }
-
-  }
-  else
-  {
+  } else {
     file { 'C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role_ad.ps1':
       content => template('atomia/active_directory/atomia_role_active_directory_replica.ps1.erb'),
     }
