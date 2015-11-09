@@ -50,7 +50,7 @@ class atomia::active_directory (
     require => File['c:/install'],
   }
 
-  if($is_master == 1 && !$::vagrant) {
+  if($is_master == 1 and !$::vagrant) {
     atomia::active_directory::store_ip{ "${::fqdn}": content => $public_ip}
     @@host { 'domain-name-host':
     		name		=> "$domain_name",
