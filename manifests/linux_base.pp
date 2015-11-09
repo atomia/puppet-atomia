@@ -6,7 +6,7 @@ class atomia::linux_base {
 
     $internal_dns = hiera('atomia::internaldns::ip_address', '')
 
-    if $internal_dns {
+    if $internal_dns != '' {
       if $atomia_role_1 != "glusterfs" {
         class { 'resolv_conf':
           nameservers => ["${internal_dns}"],
