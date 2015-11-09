@@ -1,0 +1,67 @@
+#!/bin/sh
+
+if [ -z "$1" ]; then
+	echo "usage: $0 master|slave|master_is_done|slave_is_done"
+	exit 1
+fi
+
+mysql="mysql -u root -p<%= @mysql_root_password %>"
+mysql_master="mysql -h <%= @master_ip %> -u slave_user -p<%= @slave_password %>"
+mysqldump_master="mysqldump -h <%= @master_ip %> -u slave_user -p<%= @slave_password %>"
+master_details="MASTER_HOST='<%= @master_ip %>', MASTER_PORT=3306, MASTER_USER='slave_user', MASTER_PASSWORD='<%= @slave_password %>',"
+db_name="<%= @db_name %>" 
+
+if ! $mysql -e "SHOW DATABASES" 2> /dev/null | grep "$db_name"> /dev/null; then
+	echo "no $db_name database exists, this indicates a problem in the installation logic"
+	exit 1
+fi
+
+if [ x"$1" = x"master" ]; then
+	if $mysql "$db_name" < /etc/postfix/mysql.schema.sql > /dev/null 2>&1; then
+		echo "provisioned $db_name schema to the master"
+		touch "/etc/postfix/master_setup_done.txt"
+	else
+		echo "provisioning $db_name schema to the master failed"
+		exit 1
+	fi
+elif [ x"$1" = x"master_is_done" ]; then
+	[ -f "/etc/postfix/master_setup_done.txt" ]
+	exit $?
+elif [ x"$1" = x"slave" ]; then
+	if ! $mysql_master -e "SHOW DATABASES" 2> /dev/null | grep "$db_name" > /dev/null; then
+		echo "ftp master is not up or not working yet, waiting until next puppet run"
+		exit 0
+	fi
+
+	if ! $mysql_master "$db_name" -e "SHOW TABLES" 2> /dev/null | grep vacation > /dev/null; then
+		echo "postfix master database is up but is not yet containing the vacation table, waiting until next puppet run"
+		exit 0
+	fi
+
+	if ! $mysqldump_master --master-data "$db_name" | sed -e 's/\(CHANGE MASTER TO \)/\1'"$master_details"/ | $mysql "$db_name"; then
+		echo "error setting up slave through mysqldump, waiting until next puppet run"
+		exit 1
+	fi
+
+	if ! $mysql "$db_name" -e "SHOW TABLES" 2> /dev/null | grep vacation > /dev/null; then
+		echo "database replication was set up but slave is not yet containing the users table, retrying on next puppet run"
+		exit 2
+	fi
+
+	if ! $mysql -e "START SLAVE"; then
+		echo "database replication was set up correctly, but starting slave failed, retrying on next puppet run"
+		exit 3
+	fi
+
+	echo "database replication setup and working"
+	touch "/etc/postfix/slave_setup_done.txt"
+
+elif [ x"$1" = x"slave_is_done" ]; then
+	[ -f "/etc/postfix/slave_setup_done.txt" ]
+	exit $?
+else
+	echo "invalid argument: $1"
+	exit 2
+fi
+
+exit 0
