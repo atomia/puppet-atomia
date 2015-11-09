@@ -57,7 +57,7 @@ class atomia::active_directory (
     		ip	=> "${public_ip}"
   	}
 
-    file { "C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role_ad.ps1":
+    file { 'C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role_ad.ps1':
       content => template('atomia/active_directory/atomia_role_active_directory.ps1.erb'),
     }
 
@@ -101,7 +101,7 @@ class atomia::active_directory (
   }
   else
   {
-    file { "C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role_ad.ps1":
+    file { 'C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role_ad.ps1':
       content => template('atomia/active_directory/atomia_role_active_directory_replica.ps1.erb'),
     }
 
