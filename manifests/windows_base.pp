@@ -161,7 +161,9 @@ class atomia::windows_base (
   }
   # End IIS and modules
 
-  file { 'c:/install': ensure => 'directory' }
+  if !defined(File["c:/install"]) {
+    file { 'c:/install': ensure => 'directory' }
+  }
 
   file { 'c:/install/base.ps1':
     ensure => 'file',

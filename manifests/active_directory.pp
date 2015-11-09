@@ -40,8 +40,10 @@ class atomia::active_directory (
 
   atomia::adjoin::register{ "${::fqdn}": content => $public_ip}
 
-  file { 'c:/install':
-    ensure => 'directory',
+  if !defined(File["c:/install"]) {
+    file { 'c:/install':
+      ensure => 'directory',
+    }
   }
 
   file { 'c:/install/sync_time.ps1':
