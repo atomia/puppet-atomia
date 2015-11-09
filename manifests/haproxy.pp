@@ -51,7 +51,7 @@ class atomia::haproxy (
     file { "/etc/atomia-pa-haproxy.conf":
       owner   => root,
       group   => root,
-      mode    => 440,
+      mode    => "440",
       content => $haproxy_agent_conf,
       require => Package["atomia-pa-haproxy"],
       notify  => Service["atomia-pa-haproxy"],
@@ -79,7 +79,7 @@ class atomia::haproxy (
       ensure	=> directory,
       owner	=> root,
       group	=> root,
-      mode	=> 755,
+      mode	=> "755",
       require	=> Package["haproxy"]
     }
 
@@ -91,7 +91,7 @@ class atomia::haproxy (
       ensure	=> file,
       owner	=> root,
       group	=> root,
-      mode	=> 755,
+      mode	=> "755",
       source	=> "puppet:///modules/atomia/haproxy/sync_certificates.sh",
       require	=> [ Package["haproxy"], Package["rsync"] ]
     }
@@ -102,14 +102,14 @@ class atomia::haproxy (
 		ensure	=> directory,
 		owner	=> root,
 		group	=> root,
-		mode	=> 700,
+		mode	=> "700",
 	}
 
 	file { "/root/.ssh/id_rsa":
 		ensure	=> file,
 		owner	=> root,
 		group	=> root,
-		mode	=> 600,
+		mode	=> "600",
 		content => $certificate_sync_ssh_key
 	}
 
@@ -119,7 +119,7 @@ class atomia::haproxy (
 		ensure	=> file,
 		owner	=> root,
 		group	=> root,
-		mode	=> 644,
+		mode	=> "644",
 		content => $sync_certs_cron,
 		require => File["/root/.ssh/id_rsa"]
 
@@ -132,7 +132,7 @@ class atomia::haproxy (
         ensure	=> file,
         owner	=> root,
         group	=> root,
-        mode	=> 755,
+        mode	=> "755",
 	require => File["/etc/haproxy/atomia_certificates"]
       }
     }

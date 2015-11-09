@@ -53,7 +53,7 @@ class atomia::cronagent (
 	file { "/etc/default/cronagent":
 		owner   => root,
 		group   => root,
-		mode    => 440,
+		mode    => "440",
 		content => template("atomia/cronagent/settings.cfg.erb"),
 		require => Package["atomia-cronagent"],		
 	}

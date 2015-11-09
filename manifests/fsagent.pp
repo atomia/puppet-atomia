@@ -95,21 +95,21 @@ class atomia::fsagent (
 		ensure => "directory",
 		owner  => root,
 		group  => root,
-		mode	 => 710,
+		mode	 => "710",
 		require => File["/storage/content"],
 	}
 
 	file { "/etc/default/fsagent":
 		owner		=> root,
 		group		=> root,
-		mode		=> 440,
+		mode		=> "440",
 		content => template("atomia/fsagent/settings.cfg.erb"),
 		require => [Package["atomia-fsagent"], File["/storage/content/backup"]],
 	}
 
 	file { "/storage/configuration":
 		ensure => directory,
-		mode	 => 711,
+		mode	 => "711",
 		require => File["/storage"],
 	}
 
@@ -122,7 +122,7 @@ class atomia::fsagent (
 		file { "/etc/default/fsagent-ssl":
 			owner		=> root,
 			group		=> root,
-			mode		=> 440,
+			mode		=> "440",
 			ensure	=> present,
 			content => template("atomia/fsagent/settings-ssl.cfg.erb"),
 			require => [Package["atomia-fsagent"]],
@@ -131,7 +131,7 @@ class atomia::fsagent (
 		file { "/etc/init.d/atomia-fsagent-ssl":
 			owner		=> root,
 			group		=> root,
-			mode		=> 755,
+			mode		=> "755",
 			ensure	=> present,
 			content => template("atomia/fsagent/atomia-fsagent-ssl.erb"),
 			require => [Package["atomia-fsagent"], File["/etc/default/fsagent-ssl"]],
@@ -185,14 +185,14 @@ class atomia::fsagent (
 			ensure => directory,
 			owner => root,
 			group => root,
-			mode => 700
+			mode => "700"
 		}
 
 		file { '/root/.ssh/authorized_keys2':
 			ensure => file,
 			owner => root,
 			group => root,
-			mode => 600,
+			mode => "600",
 			content => $allow_ssh_key
 		}
 	}

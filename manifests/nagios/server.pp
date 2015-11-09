@@ -76,7 +76,7 @@ class atomia::nagios::server(
     ensure  => 'file',
     source  => 'puppet:///modules/atomia/nagios/install_nagios',
     path    => '/root/install_nagios',
-    mode    => '0744',
+    mode    => ""'0744',
     notify  => Exec['install_nagios'],
     require => [Package['build-essential'], Package['libgd2-xpm-dev'], Package['openssl'], Package['libssl-dev'], Package['apache2'], User['nagios-user']]
   }
@@ -266,7 +266,7 @@ class atomia::nagios::server(
   file { '/etc/atomia.conf':
       owner   => 'root',
       group   => 'root',
-      mode    => '0644',
+      mode    => ""'0644',
       content => template('atomia/nagios/atomia.conf.erb'),
       require => Package["atomia-manager"]
   }
@@ -274,7 +274,7 @@ class atomia::nagios::server(
 #  file { '/root/setup_atomia_account.sh':
 #    owner   => 'root',
 #    group   => 'root',
-#    mode    => '0777',
+#    mode    => ""'0777',
 #    source  => "puppet:///modules/atomia/nagios/setup_atomia_account.sh",
 #    require => [Package['jgrep'],Package['atomia-manager'], Package['python-pkg-resources']],
 #    notify  => Exec['/root/setup_atomia_account.sh']

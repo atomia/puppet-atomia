@@ -12,14 +12,14 @@ class atomia::atomiarepository {
   file { "/etc/apt/sources.list.d/atomia.list":
     owner   => root,
     group   => root,
-    mode    => 440,
+    mode    => "440",
     content => "deb http://apt.atomia.com/${repo}",
   }
 
   file { "/etc/apt/ATOMIA-GPG-KEY.pub":
     owner   => root,
     group   => root,
-    mode    => 440,
+    mode    => "440",
     source  => "puppet:///modules/atomia/repository/ATOMIA-GPG-KEY.pub"
   }
 
@@ -33,7 +33,7 @@ class atomia::atomiarepository {
   file { "/etc/apt/apt.conf.d/80atomiaupdate":
     owner   => root,
     group   => root,
-    mode    => 440,
+    mode    => "440",
     source  => "puppet:///modules/atomia/repository/80atomiaupdate",
   }
 

@@ -75,7 +75,7 @@ class atomia::adjoin (
         ensure => file,
         owner  => root,
         group  => root,
-        mode   => 644,
+        mode   => "644",
         source => "puppet:///modules/atomia/adjoin/common-account",
       }
 
@@ -83,7 +83,7 @@ class atomia::adjoin (
        ensure => file,
        owner  => root,
        group  => root,
-       mode   => 644,
+       mode   => "644",
        source => "puppet:///modules/atomia/adjoin/nsswitch.conf",
      }
 
@@ -91,7 +91,7 @@ class atomia::adjoin (
        ensure  => file,
        owner   => root,
        group   => root,
-       mode    => 644,
+       mode    => "644",
        content => template("atomia/adjoin/ldap.conf.erb"),
      }
 
@@ -100,7 +100,7 @@ class atomia::adjoin (
      ensure => file,
      owner  => root,
      group  => root,
-     mode   => 644,
+     mode   => "644",
      source => "puppet:///modules/atomia/adjoin/common-auth",
    }
 
@@ -108,7 +108,7 @@ class atomia::adjoin (
      ensure => file,
      owner  => root,
      group  => root,
-     mode   => 644,
+     mode   => "644",
      source => "puppet:///modules/atomia/adjoin/common-session",
    }
 

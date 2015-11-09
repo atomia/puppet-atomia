@@ -125,7 +125,7 @@ class atomia::pureftpd (
 		file { "/etc/pure-ftpd/mysql.schema.sql":
 			owner		=> root,
 			group		=> root,
-			mode		=> 400,
+			mode		=> "400",
 			source		=> "puppet:///modules/atomia/pureftpd/mysql.schema.sql",
 			require 	=> Package["pure-ftpd-mysql"],
 		}
@@ -181,7 +181,7 @@ class atomia::pureftpd (
 	file { "/etc/pure-ftpd/setup_database.sh":
 		owner		=> root,
 		group		=> root,
-		mode		=> 500,
+		mode		=> "500",
 		content		=> template("atomia/pure-ftpd/setup_database.sh.erb"),
 		require		=> Package["pure-ftpd-mysql"],
 	}
@@ -189,7 +189,7 @@ class atomia::pureftpd (
 	file { "/etc/pure-ftpd/db/mysql.conf":
 		owner		=> root,
 		group		=> root,
-		mode		=> 400,
+		mode		=> "400",
 		content		=> template("atomia/pure-ftpd/mysqlsettings.cfg.erb"),
 		require		=> Package["pure-ftpd-mysql"],
 		notify		=> Service["pure-ftpd-mysql"],
@@ -198,7 +198,7 @@ class atomia::pureftpd (
 	file { "/etc/pure-ftpd/conf/ChrootEveryone":
 		owner		=> root,
 		group		=> root,
-		mode		=> 444,
+		mode		=> "444",
 		content 	=> "yes",
 		require 	=> Package["pure-ftpd-mysql"],
 		notify		=> Service["pure-ftpd-mysql"],
@@ -207,7 +207,7 @@ class atomia::pureftpd (
 	file { "/etc/pure-ftpd/conf/CreateHomeDir":
 		owner		=> root,
 		group		=> root,
-		mode		=> 444,
+		mode		=> "444",
 		content		=> "yes",
 		require		=> Package["pure-ftpd-mysql"],
 		notify		=> Service["pure-ftpd-mysql"],
@@ -216,7 +216,7 @@ class atomia::pureftpd (
 	file { "/etc/pure-ftpd/conf/DontResolve":
 		owner		=> root,
 		group		=> root,
-		mode		=> 444,
+		mode		=> "444",
 		content 	=> "yes",
 		require 	=> Package["pure-ftpd-mysql"],
 		notify		=> Service["pure-ftpd-mysql"],
@@ -225,7 +225,7 @@ class atomia::pureftpd (
 	file { "/etc/pure-ftpd/conf/MaxClientsNumber":
 		owner		=> root,
 		group		=> root,
-		mode		=> 444,
+		mode		=> "444",
 		content 	=> "150",
 		require 	=> Package["pure-ftpd-mysql"],
 		notify		=> Service["pure-ftpd-mysql"],
@@ -234,7 +234,7 @@ class atomia::pureftpd (
 	file { "/etc/pure-ftpd/conf/DisplayDotFiles":
 		owner		=> root,
 		group		=> root,
-		mode		=> 444,
+		mode		=> "444",
 		content 	=> "yes",
 		require 	=> Package["pure-ftpd-mysql"],
 		notify		=> Service["pure-ftpd-mysql"],
@@ -243,7 +243,7 @@ class atomia::pureftpd (
 	file { "/etc/pure-ftpd/conf/PassivePortRange":
 		owner		=> root,
 		group		=> root,
-		mode		=> 444,
+		mode		=> "444",
 		content 	=> $passive_port_range,
 		require 	=> Package["pure-ftpd-mysql"],
 		notify		=> Service["pure-ftpd-mysql"],
@@ -252,7 +252,7 @@ class atomia::pureftpd (
 	file { "/etc/pure-ftpd/conf/LimitRecursion":
 		owner	=> root,
 		group	=> root,
-		mode	=> 444,
+		mode	=> "444",
 		content	=> "15000 15",
 		require	=> Package["pure-ftpd-mysql"],
 		notify	=> Service["pure-ftpd-mysql"],
@@ -261,7 +261,7 @@ class atomia::pureftpd (
 	file { "/etc/pure-ftpd/conf/ForcePassiveIP":
 		owner	=> root,
 		group	=> root,
-		mode	=> 444,
+		mode	=> "444",
 		content	=> "$ftp_cluster_ip",
 		require	=> Package["pure-ftpd-mysql"],
 		notify	=> Service["pure-ftpd-mysql"],
@@ -287,20 +287,20 @@ class atomia::pureftpd (
 			ensure	=> directory,
 			owner	=> "root",
 			group	=> "root",
-			mode	=> 0600,
+			mode	=> "0600",
 		}
 
 		file { "/etc/ssl/private":
 			ensure	=> directory,
 			owner	=> "root",
 			group	=> "root",
-			mode	=> 0600,
+			mode	=> "0600",
 		}
 
 		file { "/etc/pure-ftpd/conf/TLS":
 			owner	=> root,
 			group	=> root,
-			mode	=> 444,
+			mode	=> "444",
 			content	=> "1",
 			require	=> Package["pure-ftpd-mysql"],
 			notify	=> Service["pure-ftpd-mysql"],
@@ -328,7 +328,7 @@ class atomia::pureftpd (
 	file { "/opt/check_ftp_health":
 		owner	=> nobody,
 		group	=> root,
-		mode	=> 744,
+		mode	=> "744",
 		source	=> "puppet:///modules/atomia/pureftpd/check_ftp_health"
 	}
 

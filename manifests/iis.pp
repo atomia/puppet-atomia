@@ -32,21 +32,21 @@ class atomia::iis(
   file { 'c:/install/IISSharedConfigurationEnabler.exe':
     ensure => 'file',
     source => "puppet:///modules/atomia/iis/IISSharedConfigurationEnabler.exe",
-	mode   => '0777',
+	mode   => ""'0777',
     require => File['c:/install'],
   }
 
   file { 'c:/install/LsaStorePrivateData.exe':
     ensure => 'file',
     source => "puppet:///modules/atomia/iis/LsaStorePrivateData.exe",
-	mode   => '0777',
+	mode   => ""'0777',
     require => File['c:/install'],
   }
 
   file { 'c:/install/RegistryUnlocker.exe':
     ensure => 'file',
     source => "puppet:///modules/atomia/iis/RegistryUnlocker.exe",
-	mode   => '0777',
+	mode   => ""'0777',
     require => File['c:/install'],
   }  
 

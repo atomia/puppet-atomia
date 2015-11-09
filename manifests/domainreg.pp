@@ -56,7 +56,7 @@ class atomia::domainreg (
 		path    => "/etc/domainreg.conf",
 		owner   => root,
 		group   => root,
-		mode    => 444,
+		mode    => "444",
 		content => template('atomia/domainreg/domainreg.conf'),
 		notify => [ Service["atomiadomainregistration-api"], Service["apache2"] ]
 	}

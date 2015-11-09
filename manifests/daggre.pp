@@ -62,7 +62,7 @@ class atomia::daggre (
 	file { "/etc/default/daggre":
 		owner		=> root,
 		group		=> root,
-		mode		=> 440,
+		mode		=> "440",
 		content		=> template("atomia/daggre/settings.cfg.erb"),
 		require		=> Package["daggre"],
 	}
@@ -70,7 +70,7 @@ class atomia::daggre (
 	file { "/etc/daggre_submit.conf":
 		owner		=> root,
 		group		=> root,
-		mode		=> 440,
+		mode		=> "440",
 		content 	=> template("atomia/daggre/daggre_submit.conf.erb"),
 		require 	=> Package["atomia-daggre-reporters-disk", "atomia-daggre-reporters-weblog"],
 	}

@@ -115,7 +115,7 @@ class atomia::nagios::client(
     #file { '/etc/nagios/nrpe.cfg':
     #    owner   => 'root',
     #    group   => 'root',
-    #    mode    => '0644',
+    #    mode    => ""'0644',
     #    content => template('atomia/nagios/nrpe.cfg.erb'),
     #    require => Package["nagios-nrpe-server"],
     #    notify  => Service["nagios-nrpe-server"]

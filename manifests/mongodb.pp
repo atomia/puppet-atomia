@@ -8,7 +8,7 @@ class atomia::mongodb {
   file { "/etc/apt/sources.list.d/10gen.list":
     owner   => root,
     group   => root,
-    mode    => 440,
+    mode    => "440",
     content => $mongorepo
   }
 

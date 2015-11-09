@@ -77,7 +77,7 @@ class atomia::atomiadns (
 	file { "/etc/atomiadns.conf":
 		owner   => root,
 		group   => root,
-		mode    => 444,
+		mode    => "444",
 		content => template("atomia/atomiadns/atomiadns.erb"),
 		notify => Service["apache2"]
 	}
@@ -87,7 +87,7 @@ class atomia::atomiadns (
 		file { "/usr/share/doc/atomiadns-masterserver/zones_to_add.txt":
 			owner   => root,
 			group   => root,
-			mode    => 500,
+			mode    => "500",
 			content => $zones_to_add,
 			require => [ Package["atomiadns-masterserver"], Package["atomiadns-client"] ],
 			notify  => Exec['remove_lock_file'],
@@ -101,7 +101,7 @@ class atomia::atomiadns (
 		file { "/usr/share/doc/atomiadns-masterserver/add_zones.sh":
 			owner   => root,
 			group   => root,
-			mode    => 500,
+			mode    => "500",
 			source  => "puppet:///modules/atomia/atomiadns/add_zones.sh",
 			require => [ Package["atomiadns-masterserver"], Package["atomiadns-client"] ],
 		}

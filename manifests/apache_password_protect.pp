@@ -25,14 +25,14 @@ class atomia::apache_password_protect ($username, $password) {
     ensure => directory,
     owner  => root,
     group  => root,
-    mode   => 755,
+    mode   => "755",
   }
 
   file { "/etc/apache2/conf.d":
     ensure  => directory,
     owner   => root,
     group   => root,
-    mode    => 755,
+    mode    => "755",
     require => File["/etc/apache2"],
   }
 
@@ -46,14 +46,14 @@ class atomia::apache_password_protect ($username, $password) {
   file { "/etc/apache2/htpasswd.conf":
     owner   => root,
     group   => root,
-    mode    => 444,
+    mode    => "444",
     require => File["/etc/apache2"],
   }
   
   file { "/etc/apache2/conf.d/passwordprotect":
     owner   => root,
     group   => root,
-    mode    => 440,
+    mode    => "440",
     source  => "puppet:///modules/atomia/apache_password_protect/passwordprotect",
     require => File["/etc/apache2/conf.d"],
   }

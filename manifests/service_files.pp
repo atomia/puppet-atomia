@@ -32,34 +32,34 @@ class atomia::service_files (
     ensure => directory,
     owner  => root,
     group  => root,
-    mode   => 710,
+    mode   => "710",
     require => Exec["check_presence_00"],
   }
   
   file { '/storage/content/systemservices/public_html/forward.php':
   	source		=> "puppet:///atomia/service_files/forward.php",
-    mode    => 0755,
+    mode    => "0755",
     owner   => root,
     group   => root,
   }
 
   file { '/storage/content/systemservices/public_html/index.php':
     source    => "puppet:///atomia/service_files/index.php",
-    mode    => 0755,
+    mode    => "0755",
     owner   => root,
     group   => root,
   }
 
   file { '/storage/content/systemservices/public_html/suspend.php':
     source    => "puppet:///atomia/service_files/suspend.php",
-    mode    => 0755,
+    mode    => "0755",
     owner   => root,
     group   => root,
   }
 
   file { '/storage/content/systemservices/public_html/nostats.html':
     source    => "puppet:///atomia/service_files/nostats.html",
-    mode    => 0444,
+    mode    => "0444",
     owner   => root,
     group   => root,
   }
@@ -67,7 +67,7 @@ class atomia::service_files (
   # Under construction
   file { '/storage/content/00/100000/index.html.default':
     source    => "puppet:///atomia/service_files/index.html.default",
-    mode    => 0644,
+    mode    => "0644",
     owner   => 100000,
     group   => 100000,
   }

@@ -7,7 +7,7 @@ class atomia::phpmyadmin (
 	 file { "/etc/phpmyadmin/config.inc.php":
                 owner   => root,
                 group   => root,
-                mode    => 444,
+                mode    => "444",
 		content => template('atomia/phpmyadmin/config.inc.php'),
                 require => Package["phpmyadmin"],
         }
@@ -16,7 +16,7 @@ class atomia::phpmyadmin (
         file { "/etc/apache2/sites-available/phpmyadmin-default":
                 owner   => root,
                 group   => root,
-                mode    => 444,
+                mode    => "444",
                 source  => "puppet:///modules/atomia/phpmyadmin/default",
                 require => Package["apache2"],
         }
@@ -25,7 +25,7 @@ class atomia::phpmyadmin (
         file { "/etc/apache2/sites-enabled/phpmyadmin-default":
                 owner   => root,
                 group   => root,
-                mode    => 444,
+                mode    => "444",
                 ensure => link,
                 target => "/etc/apache2/sites-available/phpmyadmin-default",
                 require => [File["/etc/apache2/sites-available/phpmyadmin-default"],
@@ -53,7 +53,7 @@ class atomia::phpmyadmin (
         file { "/etc/php5/apache2/php.ini":
                owner   => root,
                group   => root,
-               mode    => 644,
+               mode    => "644",
 	       source  => "puppet:///modules/atomia/phpmyadmin/php.ini",
                require => Package["apache2"],
                notify  => Service["apache2"],

@@ -23,18 +23,18 @@ class atomia::testenvironment::local_nfs_server(
   file { '/export/configuration':
       ensure  => directory,
       require => File["/export"],
-      mode    => 755
+      mode    => "755"
  }
     
   file { '/export/mail':
     ensure  => directory,
     require => File["/export"],
-    mode    => 755
+    mode    => "755"
   }  
   file { '/export/content':
       ensure  => directory,
       require => File["/export"],
-      mode    => 755
+      mode    => "755"
   }
   ->
   file {'/etc/exports':

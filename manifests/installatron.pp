@@ -68,11 +68,11 @@ class atomia::installatron (
   }
 
   file { '/etc/profile.d/installatron-key.sh':
-  	mode  	=> 0755,
+  	mode  	=> "0755",
   	content => "export KEY=${license_key}",
   }
 
   file { '/usr/local/installatron/http/index.php':
- 	mode 	=> 0644,
+ 	mode 	=> "0644",
   }
 }

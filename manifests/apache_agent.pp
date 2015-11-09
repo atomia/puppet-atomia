@@ -128,7 +128,7 @@ class atomia::apache_agent (
     file { "/usr/local/apache-agent/wildcard.key":
       owner   => root,
       group   => root,
-      mode    => 440,
+      mode    => "440",
       content => "puppet:///modules/atomia/apache_agent/apache-agent-wildcard.key",
       require => Package["atomia-pa-apache"],
       notify  => Service["atomia-pa-apache"],
@@ -137,7 +137,7 @@ class atomia::apache_agent (
     file { "/usr/local/apache-agent/wildcard.crt":
       owner   => root,
       group   => root,
-      mode    => 440,
+      mode    => "440",
       content => "puppet:///modules/atomia/apache_agent/apache-agent-wildcard.crt",
       notify  => Service["atomia-pa-apache"],
       require => [File["/usr/local/apache-agent/wildcard.key"], Package["atomia-pa-apache"]],
@@ -172,7 +172,7 @@ class atomia::apache_agent (
     file { "/usr/local/apache-agent/settings.cfg":
       owner   => root,
       group   => root,
-      mode    => 440,
+      mode    => "440",
       content => template("atomia/apache_agent/settings.erb"),
       require => Package["atomia-pa-apache"],
     }
@@ -187,7 +187,7 @@ class atomia::apache_agent (
   file { "/etc/statisticscopy.conf":
     owner   => root,
     group   => root,
-    mode    => 440,
+    mode    => "440",
     content => template("atomia/apache_agent/statisticscopy.erb"),
     require => Package["atomiastatisticscopy"],
   }
@@ -195,18 +195,18 @@ class atomia::apache_agent (
   file { "/var/log/httpd":
     owner  => root,
     group  => root,
-    mode   => 600,
+    mode   => "600",
     ensure => directory,
     before => Service["apache2"],
   }
 
-  file { "/var/www/cgi-wrappers": mode => 755, }
+  file { "/var/www/cgi-wrappers": mode => "755", }
 
   # ensuring we have maps folder and needed files inside
   file { "${$maps_path}":
     owner  => root,
     group  => www-data,
-    mode   => 2750,
+    mode   => "2750",
     ensure => directory,
 	recurse => true,
   }
@@ -214,7 +214,7 @@ class atomia::apache_agent (
   file { "/storage/configuration/apache":
     owner  => root,
     group  => www-data,
-    mode   => 2750,
+    mode   => "2750",
     ensure => directory,
     recurse => true,
   }
@@ -222,7 +222,7 @@ class atomia::apache_agent (
   file { "${$maps_path}/frmrs.map":
     owner   => root,
     group   => www-data,
-    mode    => 440,
+    mode    => "440",
     ensure  => present,
     require => File["${$maps_path}"],
   }
@@ -230,7 +230,7 @@ class atomia::apache_agent (
   file { "${$maps_path}/parks.map":
     owner   => root,
     group   => www-data,
-    mode    => 440,
+    mode    => "440",
     ensure  => present,
     require => File["${$maps_path}"],
   }
@@ -238,7 +238,7 @@ class atomia::apache_agent (
   file { "${$maps_path}/phpvr.map":
     owner   => root,
     group   => www-data,
-    mode    => 440,
+    mode    => "440",
     ensure  => present,
     require => File["${$maps_path}"],
   }
@@ -246,7 +246,7 @@ class atomia::apache_agent (
   file { "${$maps_path}/redrs.map":
     owner   => root,
     group   => www-data,
-    mode    => 440,
+    mode    => "440",
     ensure  => present,
     require => File["${$maps_path}"],
   }
@@ -254,7 +254,7 @@ class atomia::apache_agent (
   file { "${$maps_path}/sspnd.map":
     owner   => root,
     group   => www-data,
-    mode    => 440,
+    mode    => "440",
     ensure  => present,
     require => File["${$maps_path}"],
   }
@@ -262,7 +262,7 @@ class atomia::apache_agent (
   file { "${$maps_path}/users.map":
     owner   => root,
     group   => www-data,
-    mode    => 440,
+    mode    => "440",
     ensure  => present,
     require => File["${$maps_path}"],
   }
@@ -270,7 +270,7 @@ class atomia::apache_agent (
   file { "${$maps_path}/vhost.map":
     owner   => root,
     group   => www-data,
-    mode    => 440,
+    mode    => "440",
     ensure  => present,
     require => File["${$maps_path}"],
   }
@@ -294,7 +294,7 @@ class atomia::apache_agent (
   file { "${$pa_conf_available_path}/001-custom-errors":
     owner   => root,
     group   => root,
-    mode    => 444,
+    mode    => "444",
     source  => "puppet:///modules/atomia/apache_agent/001-custom-errors",
     require => Package["apache2"],
     notify  => Service["apache2"],
@@ -312,7 +312,7 @@ class atomia::apache_agent (
   file { "/etc/apache2/suexec/www-data":
     owner   => root,
     group   => root,
-    mode    => 444,
+    mode    => "444",
     source  => "puppet:///modules/atomia/apache_agent/suexec-conf",
     require => [Package["apache2"], Package["apache2-suexec-custom-cgroups-atomia"]],
     notify  => Service["apache2"],
@@ -321,7 +321,7 @@ class atomia::apache_agent (
   file { "/etc/cgconfig.conf":
     owner   => root,
     group   => root,
-    mode    => 444,
+    mode    => "444",
     source  => "puppet:///modules/atomia/apache_agent/cgconfig.conf",
     require => [Package["cgroup-bin"]],
   }
@@ -330,7 +330,7 @@ class atomia::apache_agent (
     ensure  => directory,
     owner   => root,
     group   => root,
-    mode    => 1733,
+    mode    => "1733",
     require => Package["php5-cgi"],
   }
 
@@ -340,7 +340,7 @@ class atomia::apache_agent (
     source  => "puppet:///modules/atomia/apache_agent/php.ini",
     owner   => root,
     group   => root,
-    mode    => 644,
+    mode    => "644",
   }
 
   file { "/etc/php5/cgi/php.ini":

@@ -40,7 +40,7 @@ class atomia::awstats (
 			file { "/usr/local/awstats-agent/wildcard.key":
 					owner   => root,
 					group   => root,
-					mode    => 440,
+					mode    => "440",
 				  content => $ssl_cert_key,
 					require => Package["atomia-pa-awstats"]
 			}
@@ -48,7 +48,7 @@ class atomia::awstats (
 			file { "/usr/local/awstats-agent/wildcard.crt":
 					owner   => root,
 					group   => root,
-					mode    => 440,
+					mode    => "440",
 					content => $ssl_cert_file,
 					require => Package["atomia-pa-awstats"]
 			}
@@ -60,7 +60,7 @@ class atomia::awstats (
 	file { "/usr/local/awstats-agent/settings.cfg":
 			owner   => root,
 			group   => root,
-			mode    => 440,
+			mode    => "440",
 			content => template("atomia/awstats/settings.cfg.erb"),
 			require => Package["atomia-pa-awstats"]
 	}
@@ -81,28 +81,28 @@ class atomia::awstats (
 	file { "/etc/statisticsprocess.conf":
 			owner   => root,
 			group   => root,
-			mode    => 400,
+			mode    => "400",
 			source  => "puppet:///modules/atomia/awstats/statisticsprocess.conf",
 	}
 
 	file { "/etc/cron.d/convertlogs":
 			owner   => root,
 			group   => root,
-			mode    => 444,
+			mode    => "444",
 			source  => "puppet:///modules/atomia/awstats/convertlogs",
 	}
 	
 	file { "/storage/content/logs/iis_logs/convert_logs.sh":
 			owner   => root,
 			group   => root,
-			mode    => 544,
+			mode    => "544",
 			source  => "puppet:///modules/atomia/awstats/convert_logs.sh",
 	}
 
 	file { "/etc/apache2/conf.d/awstats.conf":
 			owner   => root,
 			group   => root,
-			mode    => 444,
+			mode    => "444",
 			source  => "puppet:///modules/atomia/awstats/awstats.conf",
 			notify	=> Service["apache2"],
 	}
@@ -110,14 +110,14 @@ class atomia::awstats (
 	file { "/etc/awstats/awstats.conf.local":
 			owner   => root,
 			group   => root,
-			mode    => 444,
+			mode    => "444",
 			source  => "puppet:///modules/atomia/awstats/awstats.conf.local",
 	}
 	
 	file { "/storage/content/systemservices/public_html/nostats.html":
 			owner   => root,
 			group   => root,
-			mode    => 444,
+			mode    => "444",
 			source  => "puppet:///modules/atomia/awstats/nostats.html",
 	}
 

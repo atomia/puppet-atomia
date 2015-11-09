@@ -4,7 +4,7 @@ class atomia::bootstrap
      file { "/usr/lib/ruby/vendor_ruby/facter/atomia_role.rb":
        owner  => root,
        group  => root,
-       mode   => 755,
+       mode   => "755",
        source => "puppet:///modules/atomia/atomia_role.rb"
      }
   }

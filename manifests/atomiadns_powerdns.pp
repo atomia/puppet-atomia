@@ -37,7 +37,7 @@ class atomia::atomiadns_powerdns (
 		file { "/etc/atomiadns.conf":
 			owner   => root,
 			group   => root,
-			mode    => 444,
+			mode    => "444",
 			content => template("atomia/atomiadns_powerdns/atomiadns.conf.erb"),
 			notify => [ Service["atomiadns-powerdnssync"] ],
 		}
