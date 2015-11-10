@@ -31,6 +31,8 @@ class atomia::active_directory (
 
 ) {
 
+  File { source_permissions => ignore }
+
   # Set ip correctly when on ec2
   if $ec2_public_ipv4 {
     $public_ip = $ec2_public_ipv4

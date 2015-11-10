@@ -36,6 +36,9 @@ class atomia::windows_base (
   $is_iis             = 0) 
 
   {
+
+  File { source_permissions => ignore }
+
   if( $is_iis == 0 ){
     
 	  dism { 'NetFx3':
