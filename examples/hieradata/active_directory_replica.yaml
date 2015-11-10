@@ -1,0 +1,5 @@
+---
+classes:
+   - atomia::active_directory
+
+atomia::active_directory::is_master: 0

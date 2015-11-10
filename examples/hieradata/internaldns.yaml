@@ -1,0 +1,4 @@
+---
+classes:
+   - atomia::internaldns
+   - atomia::nagios::client

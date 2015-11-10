@@ -1,6 +1,7 @@
 ---
 classes:
+   - atomia::adjoin
    - atomia::linux_base
    - atomia::atomiarepository
-   - atomia::domainreg
+   - atomia::glusterfs
    - atomia::nagios::client

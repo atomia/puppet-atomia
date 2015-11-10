@@ -1,5 +1,0 @@
-# Deploy nagios server
----
-classes:
-  - atomia::nagios::server
-  

@@ -1,7 +1,0 @@
-# installatron.yaml
-# Deploy and configure Installatron
----
-classes:
-  - atomia::installatron
-
-atomia::installatron::content_share_nfs_location: "127.0.0.1:/export/content"

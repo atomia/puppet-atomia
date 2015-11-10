@@ -2,5 +2,4 @@
 classes:
    - atomia::linux_base
    - atomia::atomiarepository
-   - atomia::domainreg
-   - atomia::nagios::client
+   - atomia::nagios::server
