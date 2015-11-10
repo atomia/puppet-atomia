@@ -1,65 +1,67 @@
+## Atomia IIS cluster node
+
+### Deploys and configures a IIS cluster node for hosting customer websites.
+
+### Variable documentation
+#### sharePath: The path to the IIS shared configuration folder.
+
+### Validations
+##### sharePath(advanced): ^[a-z0-9.:_\\-]+$
+
 class atomia::iis(
-	$adminUser = hiera('atomia::adjoin::admin_user', 'Administrator'),
-	$adminPassword = hiera('atomia::adjoin::admin_password', 'Administrator'),
-	$apppoolUser =  "apppooluser",
-	$apppoolUserPassword = hiera('atomia::windows_base::app_password', ''),	
-	$sharePath,
-	$adDomain = hiera('atomia::windows_base::ad_domain', ''),
+	$sharePath = '\\storage\configshare\iis',
 ){
 
-	dism { 'NetFx3': ensure => present, all => true }
-	dism { 'IIS-WebServerRole': ensure => present, all => true  }
-	dism { 'IIS-WebServer': ensure => present, all => true  }
-	dism { 'IIS-CommonHttpFeatures': ensure => present, all => true  }
-	dism { 'IIS-Security': ensure => present, all => true  }
-	dism { 'IIS-RequestFiltering': ensure => present, all => true  }
-	dism { 'IIS-StaticContent': ensure => present, all => true  }
-	dism { 'IIS-DefaultDocument': ensure => present, all => true  }
-	dism { 'IIS-ApplicationDevelopment': ensure => present, all => true  }
-	dism { 'IIS-NetFxExtensibility': ensure => present, all => true  }
-	dism { 'IIS-ASPNET': ensure => present, all => true }
-	dism { 'IIS-ASP': ensure => present, all => true  }
-	dism { 'IIS-CGI': ensure => present, all => true  }
-	dism { 'IIS-ServerSideIncludes': ensure => present, all => true  }
-	dism { 'IIS-CustomLogging': ensure => present, all => true  }
-	dism { 'IIS-BasicAuthentication': ensure => present, all => true  }
-	dism { 'IIS-WebServerManagementTools': ensure => present, all => true  }
-	dism { 'IIS-ManagementConsole': ensure => present, all => true  }
+	$adminUser = "WindowsAdmin"
+	$adminPassword = hiera('atomia::active_directory::windows_admin_password', '')
+	$apppoolUser =	"apppooluser"
+	$apppoolUserPassword = hiera('atomia::windows_base::app_password', '')
+	$adDomain = hiera('atomia::windows_base::ad_domain', '')
 
-	# Deploy installation folder 
-	file { 'c:/install': ensure => 'directory' }
+	$dism_features_to_enable = [
+		'NetFx3', 'IIS-WebServerRole', 'IIS-WebServer', 'IIS-CommonHttpFeatures', 'IIS-Security', 'IIS-RequestFiltering',
+		'IIS-StaticContent', 'IIS-DefaultDocument', 'IIS-ApplicationDevelopment', 'IIS-NetFxExtensibility', 'IIS-ASPNET',
+		'IIS-ASP', 'IIS-CGI', 'IIS-ServerSideIncludes', 'IIS-CustomLogging', 'IIS-BasicAuthentication', 'IIS-WebServerManagementTools',
+		'IIS-ManagementConsole',
+	]
 
-  file { 'c:/install/IISSharedConfigurationEnabler.exe':
-    ensure => 'file',
-    source => "puppet:///modules/atomia/iis/IISSharedConfigurationEnabler.exe",
-	mode   => ""'0777',
-    require => File['c:/install'],
-  }
+	dism { $dism_features_to_enable: ensure => present, all => true }
 
-  file { 'c:/install/LsaStorePrivateData.exe':
-    ensure => 'file',
-    source => "puppet:///modules/atomia/iis/LsaStorePrivateData.exe",
-	mode   => ""'0777',
-    require => File['c:/install'],
-  }
+	if !defined(File['c:/install']) {
+		file { 'c:/install': ensure => 'directory' }
+	}
 
-  file { 'c:/install/RegistryUnlocker.exe':
-    ensure => 'file',
-    source => "puppet:///modules/atomia/iis/RegistryUnlocker.exe",
-	mode   => ""'0777',
-    require => File['c:/install'],
-  }  
+	file { 'c:/install/IISSharedConfigurationEnabler.exe':
+		ensure => 'file',
+		source => "puppet:///modules/atomia/iis/IISSharedConfigurationEnabler.exe",
+	mode	 => "0777",
+		require => File['c:/install'],
+	}
 
-  file { 'c:/install/setup_iis.ps1':
-    ensure => 'file',
-    source => "puppet:///modules/atomia/iis/setup_iis.ps1",
-    require => File['c:/install'],
-  }  
+	file { 'c:/install/LsaStorePrivateData.exe':
+		ensure => 'file',
+		source => "puppet:///modules/atomia/iis/LsaStorePrivateData.exe",
+	mode	 => "0777",
+		require => File['c:/install'],
+	}
 
- exec { 'setup_iis':
-	command => "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/setup_iis.ps1 -adminUser ${adDomain}\\${adminUser} -adminPassword $adminPassword -apppoolUser ${adDomain}\\${apppoolUser} -apppoolUserPassword $apppoolUserPassword -sharePath $sharePath",
-  	require => [File["c:/install/setup_iis.ps1"], File["c:/install/IISSharedConfigurationEnabler.exe"], File["c:/install/LsaStorePrivateData.exe"], File["c:/install/RegistryUnlocker.exe"]],
-  	creates => 'c:\windows\install\installed'
-  }
+	file { 'c:/install/RegistryUnlocker.exe':
+		ensure => 'file',
+		source => "puppet:///modules/atomia/iis/RegistryUnlocker.exe",
+	mode	 => "0777",
+		require => File['c:/install'],
+	} 
 
+	file { 'c:/install/setup_iis.ps1':
+		ensure => 'file',
+		source => "puppet:///modules/atomia/iis/setup_iis.ps1",
+		require => File['c:/install'],
+	}
+
+	exec { 'setup_iis':
+		provider => powershell,
+		command => "c:/install/setup_iis.ps1 -adminUser \"${adDomain}\\${adminUser}\" -adminPassword \"$adminPassword\" -apppoolUser \"${adDomain}\\${apppoolUser}\" -apppoolUserPassword \"$apppoolUserPassword\" -sharePath \"$sharePath\"",
+		require => [File["c:/install/setup_iis.ps1"], File["c:/install/IISSharedConfigurationEnabler.exe"], File["c:/install/LsaStorePrivateData.exe"], File["c:/install/RegistryUnlocker.exe"]],
+		creates => 'c:\windows\install\installed'
+	}
 }
