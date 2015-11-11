@@ -44,7 +44,7 @@ class atomia::adjoin (
     # Join AD on Linux
 
       $dc=regsubst($domain_name, '\.', ',dc=', 'G')
-      $base_dn = "cn=Users,${$dc}"
+      $base_dn = "cn=Users,dc=${$dc}"
 
 
       # Set ad_servers fact
