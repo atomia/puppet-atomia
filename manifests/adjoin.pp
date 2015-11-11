@@ -48,26 +48,32 @@ class atomia::adjoin (
 
 
       # Set ad_servers fact
-      $factfile = '/etc/facter/facts.d/ad_servers.txt'
 
-      file { '/etc/facter':
-        ensure => directory,
+      if $::vagrant {
+        $ad_servers = "ldap://192.168.33.10"
+      } else {
+        $factfile = '/etc/facter/facts.d/ad_servers.txt'
+
+        file { '/etc/facter':
+          ensure => directory,
+        }
+        file { '/etc/facter/facts.d':
+          ensure => directory,
+          require => File['/etc/facter']
+        }
+
+        concat { $factfile:
+          ensure => present,
+          require => File['/etc/facter/facts.d']
+        }
+        concat::fragment {"active_directory_${content}":
+            target => $factfile,
+            content => "ad_servers=",
+            tag => 'ad_servers',
+            order => 3
+          } ->
+        Concat::Fragment <<| tag == 'ad_servers' |>>
       }
-      file { '/etc/facter/facts.d':
-        ensure => directory,
-        require => File['/etc/facter']
-      }
-      concat { $factfile:
-        ensure => present,
-        require => File['/etc/facter/facts.d']
-      }
-      concat::fragment {"active_directory_${content}":
-          target => $factfile,
-          content => "ad_servers=",
-          tag => 'ad_servers',
-          order => 3
-        } ->
-      Concat::Fragment <<| tag == 'ad_servers' |>>
 
       package { libpam-ldap: ensure => present }
 
