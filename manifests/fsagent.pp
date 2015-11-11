@@ -49,7 +49,7 @@ class atomia::fsagent (
 
 	if $operatingsystem == "Ubuntu" {
 		apt::ppa { 'ppa:chris-lea/node.js': 
-		require => Package["python-software-properties"], 
+			require => Package["python-software-properties"], 
 		}
 
 		package { nodejs:
@@ -62,7 +62,7 @@ class atomia::fsagent (
 		package { nodejs: ensure => present, }
 	}
 
-	package { atomia-fsagent: ensure => present }
+	package { atomia-fsagent: ensure => present, require => Package["nodejs"] }
 
 	if !$skip_mount {
 		atomia::nfsmount { 'mount_content':
