@@ -1,308 +1,390 @@
+## Atomia Windows base
+
+### Deploys all pre requirements for installing Atomia Applications
+
+### Variable documentation
+#### appdomain: The domain name to use for all your Atomia applications, atomia.com would mean your applications would get the url hcp.atomia.com, login.atomia.com etc
+#### actiontrail_host: The subdomain to use for Atomia Actiontrail
+#### login_host: The subdomain to use for Atomia Identity
+#### store_host: The subdomain to use for Atomia Store
+#### billing_host: The subdomain to use for Atomia Billing Customer Panel
+#### admin_host: The subdomain to use for Atomia Admin Panel
+#### hcp_host: The subdomain to use for Atomia Hosting Control Panel
+#### automationserver_host: The subdomain to use for Atomia Automationserver
+#### mail_sender_address: The sender email address to use for outgoing email
+#### mail_server_host: The mailserver hostname to use for sending email
+#### mail_server_port: The port of the mailserver to use for sending email
+#### mail_server_username: The mailserver username
+#### mail_server_password: The mailserver password
+#### mail_server_use_ssl: Does the mailserver use ssl or not
+#### mail_reply_to: The Reply to email address for all outgoing email
+#### storage_server_hostname: The hostname of the storage server
+#### mail_dispatcher_interval: The interval to send email at
+
+#### automationserver_encryption_cert_thumb: The thumbprint for the automation server certificate. This should be prefilled by pressing the generate new certificates button.
+#### billing_encryption_cert_thumb: The thumbprint for the billing certificate. This should be prefilled by pressing the generate new certificates button.
+#### root_cert_thumb: The thumbprint for the root certificate. This should be prefilled by pressing the generate new certificates button.
+#### signing_cert_thumb: The thumbprint for the signing certificate. This should be prefilled by pressing the generate new certificates button.
+
+
+### Validations
+##### appdomain: ^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$
+##### actiontrail_host: ^[a-zA-Z0-9]+
+##### login_host: ^[a-zA-Z0-9]+
+##### store_host: ^[a-zA-Z0-9]+
+##### billing_host: ^[a-zA-Z0-9]+
+##### admin_host: ^[a-zA-Z0-9]+
+##### hcp_host: ^[a-zA-Z0-9]+
+##### automationserver_host: ^[a-zA-Z0-9]+
+##### mail_sender_address: ^\S+@\S+\.\S+$
+##### mail_server_host(advanced): ^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z0-9]{1,6}$
+##### mail_server_port(advanced): [0-9]{1,3}
+##### mail_server_username(advanced): ^[a-zA-Z0-9]+
+##### mail_server_password(advanced): .*
+##### mail_server_use_ssl(advanced): ^(true|false)+
+##### mail_reply_to: ^\S+@\S+\.\S+$
+##### storage_server_hostname(advanced): ^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z0-9]{1,6}$
+##### mail_dispatcher_interval(advanced): [0-9]{1,5}
+
+##### is_iis(advanced): %hide
+##### automationserver_encryption_cert_thumb(advanced): .*
+##### billing_encryption_cert_thumb(advanced): .*
+##### root_cert_thumb(advanced): .*
+##### signing_cert_thumb(advanced): .*
+
+
 
 class atomia::windows_base (
-  $app_password,
-  $ad_domain,
-  $database_server,
-  $mirror_database_server            = "",
-  $appdomain,
-  $actiontrail      = "actiontrail",
-  $login            = "login",
-  $order            = "order",
-  $store	    = "store",
-  $billing          = "billing",
-  $admin            = "admin",
-  $hcp              = "hcp",
-  $automationserver = "automationserver",
-  $automationserver_encryption_cert_thumb,
-  $billing_encryption_cert_thumb,
-  $billing_plugin_config             = "",
-  $send_invoice_email_subject_format = "",
-  $domainreg_service_url,
-  $domainreg_service_username,
-  $domainreg_service_password,
-  $actiontrail_ip,
-  $root_cert_thumb,
-  $signing_cert_thumb,
-  $mail_sender_address               = "",
-  $mail_server_host = "",
-  $mail_server_port = "25",
-  $mail_server_username              = "",
-  $mail_server_password              = "",
-  $mail_server_use_ssl               = "false",
-  $mail_bcc_list    = "",
+  $appdomain        = "",
+  $actiontrail_host = "actiontrail",
+  $login_host       = "login",
+  $store_host	     	= "store",
+  $billing_host     = "billing",
+  $admin_host       = "admin",
+  $hcp_host         = "hcp",
+  $automationserver_host = "automationserver",
+  $mail_sender_address  = "",
+  $mail_server_host     = "",
+  $mail_server_port     = "25",
+  $mail_server_username = "",
+  $mail_server_password = "",
+  $mail_server_use_ssl  = "false",
   $mail_reply_to    = "",
   $storage_server_hostname,
-  $mail_dispatcher_interval         = "30",
-  $is_iis             = 0) 
+  $mail_dispatcher_interval = "30",
+  $automationserver_encryption_cert_thumb,
+  $billing_encryption_cert_thumb,
+  $root_cert_thumb,
+  $signing_cert_thumb,
+  $is_iis             = 0,
+  ){
 
-  {
+    File { source_permissions => ignore }
 
-  File { source_permissions => ignore }
+    $app_password = hiera('atomia::active_directory::app_password','')
+    $ad_domain  = hiera('atomia::active_directory::domain_name','')
+    $domainreg_service_url = hiera('atomia::domainreg::service_url','')
+    $domainreg_service_username = hiera('atomia::domainreg::service_username','')
+    $domainreg_service_password = hiera('atomia::domainreg::service_password','')
+    $order = "order"
 
-  if( $is_iis == 0 ){
-    
-	  dism { 'NetFx3':
-	  	ensure 	=> present,
-		all	=> true,
-	  }
-	
-	  # 6.1 is 2008 R2, so this matches 2012 and forward
-	  # see http://msdn.microsoft.com/en-us/library/windows/desktop/ms724832(v=vs.85).aspx
-	  if versioncmp($kernelmajversion, "6.1") > 0 {
-	    dism { 'NetFx4Extended-ASPNET45':
-	      ensure => present,
-	      all    => true,
-	    }
-	
-	    dism { 'IIS-NetFxExtensibility45':
-	      ensure => present,
-	      all    => true,
-	    }
-	
-	    dism { 'IIS-ASPNET45':
-	      ensure => present,
-	      all    => true,
-	    }
-	
-	    dism { 'MSMQ-Services':
-	      ensure => present,
-	      all    => true,
-	    }
-	
-	    dism { 'MSMQ':
-	      ensure => present,
-	      all    => true,
-	    }
-	
-	    dism { 'windows-identity-foundation':
-	      ensure => present,
-	      all    => true,
-	    }
-	
-	    dism { 'WCF-HTTP-Activation':
-	      ensure => present,
-	      all    => true,
-	    }
-	
-	    dism { 'WCF-HTTP-Activation45':
-	      ensure => present,
-	      all    => true,
-	    }
-	
-	    file { 'c:/install/app-pool-settings.ps1':
-	        ensure => 'file',
-	        source => "puppet:///modules/atomia/windows_base/app-pool-settings.ps1"
-	    }
-	    
-	    exec { 'app-pool-settings':
-	        command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/app-pool-settings.ps1',
-	        require => File["c:/install/app-pool-settings.ps1"]
-	      }
-	    
-	  }
-	
-	  dism { 'MSMQ-Server':
-	      ensure => present,
-	      all    => true,
-	    }
-	
-	  # Install IIS and modules
-	  dism { 'IIS-WebServerRole':
-	      ensure => present,
-	      all    => true,
-	    }
-	
-	  dism { 'IIS-ISAPIFilter':
-	      ensure => present,
-	      all    => true,
-	    }
-	
-	  dism { 'IIS-ISAPIExtensions':
-	      ensure => present,
-	      all    => true,
-	    }
-	
-	  dism { 'IIS-NetFxExtensibility':
-	      ensure => present,
-	      all    => true,
-	    }
-	
-	  dism { 'IIS-ASPNET':
-	      ensure => present,
-	      all    => true,
-	    }
-	
-	  dism { 'IIS-CommonHttpFeatures':
-	      ensure => present,
-	      all    => true,
-	    }
-	
-	  dism { 'IIS-StaticContent':
-	      ensure => present,
-	      all    => true,
-	    }
-	
-	  dism { 'IIS-DefaultDocument':
-	      ensure => present,
-	      all    => true,
-	    }
-	
-	  dism { 'IIS-ManagementConsole':
-	      ensure => present,
-	      all    => true,
-	    }
-	
-	  dism { 'IIS-ManagementService':
-	      ensure => present,
-	      all    => true,
-	    }
-	
-	  dism { 'IIS-HttpRedirect':
-	      ensure => present,
-	      all    => true,
-	    }
-  }
-  # End IIS and modules
+    if( $is_iis == 0 ){
 
-  if !defined(File["c:/install"]) {
-    file { 'c:/install': ensure => 'directory' }
-  }
+      if($::vagrant) {
+        $actiontrail_ip = $ipaddress
+        $database_server = 'WINMASTER\SQLEXPRESS'
+        $mirror_database_server = ""
+      }
+      else
+      {
+        $factfile = 'C:\ProgramData\PuppetLabs\facter\facts.d\actiontrail_ip.txt'
 
-  file { 'c:/install/base.ps1':
-    ensure => 'file',
-    source => "puppet:///modules/atomia/windows_base/baseinstall.ps"
-  }
+		concat { $factfile:
+	      ensure => present,
+	    }
 
-  file { 'c:/install/disableweakssl.reg':
-    ensure => 'file',
-    source => "puppet:///modules/atomia/windows_base/disableweakssl.reg"
-  }
+        Concat::Fragment <<| tag == 'actiontrail_ip' |>>
 
-  file { 'c:/install/Windows6.1-KB2554746-x64.msu':
-    ensure => 'file',
-    source => "puppet:///modules/atomia/windows_base/Windows6.1-KB2554746-x64.msu"
-  }
-  
-  
-  # Install Packages with Chocolatey
-  exec { 'install-chocolatey':
-    command => "iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))",
-    provider  => powershell,
-    onlyif  => 'Test-Path C:\ProgramData\Chocolatey'
-  }
-  
-  exec { 'set-chocolatey-path':
-    command => 'c:\windows\system32\cmd.exe /c SET PATH=%PATH%;%systemdrive%\ProgramData\chocolatey\bin',
-    creates => 'c:/install/chocolatey_installed.txt',
-    require  => Exec['install-chocolatey'],
-  }
-  
-  package { 'GoogleChrome': 
-    ensure  => installed,
-    provider  => 'chocolatey',
-    require  => Exec['set-chocolatey-path'],
-  }  
-  
-  package { 'notepadplusplus': 
-    ensure  => installed,
-    provider  => 'chocolatey',
-    require  => Exec['set-chocolatey-path'],
-  }  
+	
+        # TODO: Get these from hiera
+        $database_server = ""
+        $mirror_database_server = ""
+      }
 
-  package { 'vcredist2008': 
-    ensure  => installed,
-    provider  => 'chocolatey',
-    require  => Exec['set-chocolatey-path'],
-  }  
-  
-  if versioncmp($kernelmajversion, "6.1") == 0 {
-    # Install .net40 
-	  file { 'c:/install/install_net40.ps1':
-	    ensure => 'file',
-	    source => "puppet:///modules/atomia/windows_base/install_net40.ps1",
-	  }
-	      
-	  exec { 'Install-NET40':
-	    command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file C:\install\install_net40.ps1',
-	    creates => 'C:\install\installed_net40.txt',
-      require => File['c:/install/install_net40.ps1'],
-	  }    
-  }
-  
-  # Install certificates
-  file { 'C:\install\install_certificates.ps1':
-    ensure => 'file',
-    source => "puppet:///modules/atomia/windows_base/install_certificates.ps1",
-    require => File['c:/install/certificates'],
-  }
-  exec { 'install-certificates':
-    command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file C:\install\install_certificates.ps1',
-    creates => 'C:\install\install_certificates.txt',
-    require => File['C:\install\install_certificates.ps1'],
-    }  
-  
-  # Install Atomia Installer
-  file { 'C:\install\install_atomia_installer.ps1':
-    ensure => 'file',
-    source => "puppet:///modules/atomia/windows_base/install_atomia_installer.ps1",
-  }
+  	  dism { 'NetFx3':
+  	  	ensure 	=> present,
+  		all	=> true,
+  	  }
 
-  exec { 'install-atomia-installer':
-    command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file C:\install\install_atomia_installer.ps1',
-    creates => 'C:\install\install_atomia_installer.txt',
-  }    
+  	  # 6.1 is 2008 R2, so this matches 2012 and forward
+  	  # see http://msdn.microsoft.com/en-us/library/windows/desktop/ms724832(v=vs.85).aspx
+  	  if versioncmp($kernelmajversion, "6.1") > 0 {
+  	    dism { 'NetFx4Extended-ASPNET45':
+  	      ensure => present,
+  	      all    => true,
+  	    }
 
-  file { 'C:\ProgramData\Atomia Installer\appupdater.ini':
-    ensure => 'file',
-    source => "puppet:///modules/atomia/windows_base/appupdater.ini",
-    require => Exec['install-atomia-installer']
-  }  
-  
-  # Install other requirements
-  exec { 'base-install':
-    command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file C:\install\base.ps1',
-    creates => 'C:\install\install_base.txt',
-  }  
+  	    dism { 'IIS-NetFxExtensibility45':
+  	      ensure => present,
+  	      all    => true,
+  	    }
 
+  	    dism { 'IIS-ASPNET45':
+  	      ensure => present,
+  	      all    => true,
+  	    }
 
-  file { 'C:\Program Files (x86)\Atomia': ensure => 'directory' }
+  	    dism { 'MSMQ-Services':
+  	      ensure => present,
+  	      all    => true,
+  	    }
 
-  file { 'C:\Program Files (x86)\Atomia\Common': ensure => 'directory' }
+  	    dism { 'MSMQ':
+  	      ensure => present,
+  	      all    => true,
+  	    }
 
-  file { "unattended.ini":
-    path    => 'C:\Program Files (x86)\Atomia\Common\unattended.ini',
-    ensure  => file,
-    content => template('atomia/windows_base/ini_template.erb'),
-  }
+  	    dism { 'windows-identity-foundation':
+  	      ensure => present,
+  	      all    => true,
+  	    }
 
-  file { 'C:\Program Files (x86)\Atomia\Common\atomia.ini.location': content => 'C:\Program Files (x86)\Atomia\Common', }
+  	    dism { 'WCF-HTTP-Activation':
+  	      ensure => present,
+  	      all    => true,
+  	    }
 
-  file { 'C:\install\recreate_all_config_files.ps1':
-    ensure => 'file',
-    source => "puppet:///modules/atomia/windows_base/recreate_all_config_files.ps1"
-  }
+  	    dism { 'WCF-HTTP-Activation45':
+  	      ensure => present,
+  	      all    => true,
+  	    }
 
+  	    file { 'c:/install/app-pool-settings.ps1':
+  	        ensure => 'file',
+  	        source => "puppet:///modules/atomia/windows_base/app-pool-settings.ps1"
+  	    }
 
-  if($::vagrant){
-    file { 'c:/install/certificates':
-      source  => 'puppet:///modules/atomiacerts/certificates',
-      recurse => true
+  	    exec { 'app-pool-settings':
+  	        command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/app-pool-settings.ps1',
+  	        require => File["c:/install/app-pool-settings.ps1"]
+  	      }
+
+  	  }
+
+  	  dism { 'MSMQ-Server':
+  	      ensure => present,
+  	      all    => true,
+  	    }
+
+  	  # Install IIS and modules
+  	  dism { 'IIS-WebServerRole':
+  	      ensure => present,
+  	      all    => true,
+  	    }
+
+  	  dism { 'IIS-ISAPIFilter':
+  	      ensure => present,
+  	      all    => true,
+  	    }
+
+  	  dism { 'IIS-ISAPIExtensions':
+  	      ensure => present,
+  	      all    => true,
+  	    }
+
+  	  dism { 'IIS-NetFxExtensibility':
+  	      ensure => present,
+  	      all    => true,
+  	    }
+
+  	  dism { 'IIS-ASPNET':
+  	      ensure => present,
+  	      all    => true,
+  	    }
+
+  	  dism { 'IIS-CommonHttpFeatures':
+  	      ensure => present,
+  	      all    => true,
+  	    }
+
+  	  dism { 'IIS-StaticContent':
+  	      ensure => present,
+  	      all    => true,
+  	    }
+
+  	  dism { 'IIS-DefaultDocument':
+  	      ensure => present,
+  	      all    => true,
+  	    }
+
+  	  dism { 'IIS-ManagementConsole':
+  	      ensure => present,
+  	      all    => true,
+  	    }
+
+  	  dism { 'IIS-ManagementService':
+  	      ensure => present,
+  	      all    => true,
+  	    }
+
+  	  dism { 'IIS-HttpRedirect':
+  	      ensure => present,
+  	      all    => true,
+  	    }
     }
-  
-    file { 'C:\inetpub\wwwroot\empty.crl':
+    # End IIS and modules
+
+    if !defined(File["c:/install"]) {
+      file { 'c:/install': ensure => 'directory' }
+    }
+
+    file { 'c:/install/base.ps1':
       ensure => 'file',
-      source  => 'puppet:///modules/atomiacerts/empty.crl',
-    }    
-  }
-  else {
-    file { 'c:/install/certificates':
-      source  => 'puppet:///atomiacerts/certificates',
-      recurse => true
+      source => "puppet:///modules/atomia/windows_base/baseinstall.ps"
     }
-  
-    file { 'C:\inetpub\wwwroot\empty.crl':
+
+    file { 'c:/install/disableweakssl.reg':
       ensure => 'file',
-      source => "puppet:///atomiacerts/empty.crl"
+      source => "puppet:///modules/atomia/windows_base/disableweakssl.reg"
     }
-  }
+
+    file { 'c:/install/Windows6.1-KB2554746-x64.msu':
+      ensure => 'file',
+      source => "puppet:///modules/atomia/windows_base/Windows6.1-KB2554746-x64.msu"
+    }
+
+
+    # Install Packages with Chocolatey
+    exec { 'install-chocolatey':
+      command => "iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))",
+      provider  => powershell,
+      onlyif  => 'Test-Path C:\ProgramData\Chocolatey'
+    }
+
+    exec { 'set-chocolatey-path':
+      command => 'c:\windows\system32\cmd.exe /c SET PATH=%PATH%;%systemdrive%\ProgramData\chocolatey\bin',
+      creates => 'c:/install/chocolatey_installed.txt',
+      require  => Exec['install-chocolatey'],
+    }
+
+    package { 'GoogleChrome':
+      ensure  => installed,
+      provider  => 'chocolatey',
+      require  => Exec['set-chocolatey-path'],
+    }
+
+    package { 'notepadplusplus':
+      ensure  => installed,
+      provider  => 'chocolatey',
+      require  => Exec['set-chocolatey-path'],
+    }
+
+    package { 'vcredist2008':
+      ensure  => installed,
+      provider  => 'chocolatey',
+      require  => Exec['set-chocolatey-path'],
+    }
+
+    if versioncmp($kernelmajversion, "6.1") == 0 {
+      # Install .net40
+  	  file { 'c:/install/install_net40.ps1':
+  	    ensure => 'file',
+  	    source => "puppet:///modules/atomia/windows_base/install_net40.ps1",
+  	  }
+
+  	  exec { 'Install-NET40':
+  	    command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file C:\install\install_net40.ps1',
+  	    creates => 'C:\install\installed_net40.txt',
+        require => File['c:/install/install_net40.ps1'],
+  	  }
+    }
+
+    # Install certificates
+    file { 'C:\install\install_certificates.ps1':
+      ensure => 'file',
+      source => "puppet:///modules/atomia/windows_base/install_certificates.ps1",
+      require => File['c:/install/certificates'],
+    }
+    exec { 'install-certificates':
+      command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file C:\install\install_certificates.ps1',
+      creates => 'C:\install\install_certificates.txt',
+      require => File['C:\install\install_certificates.ps1'],
+      }
+
+    # Install Atomia Installer
+    file { 'C:\install\install_atomia_installer.ps1':
+      ensure => 'file',
+      source => "puppet:///modules/atomia/windows_base/install_atomia_installer.ps1",
+    }
+
+    exec { 'install-atomia-installer':
+      command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file C:\install\install_atomia_installer.ps1',
+      creates => 'C:\install\install_atomia_installer.txt',
+    }
+
+    file { 'C:\ProgramData\Atomia Installer\appupdater.ini':
+      ensure => 'file',
+      source => "puppet:///modules/atomia/windows_base/appupdater.ini",
+      require => Exec['install-atomia-installer']
+    }
+
+    # Install other requirements
+    exec { 'base-install':
+      command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file C:\install\base.ps1',
+      creates => 'C:\install\install_base.txt',
+    }
+
+
+    file { 'C:\Program Files (x86)\Atomia': ensure => 'directory' }
+
+    file { 'C:\Program Files (x86)\Atomia\Common': ensure => 'directory' }
+
+    file { "unattended.ini":
+      path    => 'C:\Program Files (x86)\Atomia\Common\unattended.ini',
+      ensure  => file,
+      content => template('atomia/windows_base/ini_template.erb'),
+    }
+
+    file { 'C:\Program Files (x86)\Atomia\Common\atomia.ini.location': content => 'C:\Program Files (x86)\Atomia\Common', }
+
+    file { 'C:\install\recreate_all_config_files.ps1':
+      ensure => 'file',
+      source => "puppet:///modules/atomia/windows_base/recreate_all_config_files.ps1"
+    }
+
+
+    file { 'c:/install/install_atomia_application.ps1':
+      ensure  => 'file',
+      source  => 'puppet:///modules/atomia/windows_base/install_atomia_application.ps1',
+      require => File['c:/install'],
+      mode    => '0777'
+  	}
+
+    exec { 'install-setuptools':
+  		command => "c:/windows/system32/cmd.exe /c c:/install/AtomiaInstallerCommandLine.exe install ${repository} 'Atomia Setup Tools'",
+  		require => [File['c:/install/install_atomia_application.ps1'],File['unattended.ini'],File['C:\Program Files (x86)\Atomia']]
+  	}
+
+    if($::vagrant){
+      file { 'c:/install/certificates':
+        source  => 'puppet:///modules/atomiacerts/certificates',
+        recurse => true
+      }
+
+      file { 'C:\inetpub\wwwroot\empty.crl':
+        ensure => 'file',
+        source  => 'puppet:///modules/atomiacerts/empty.crl',
+      }
+    }
+    else {
+      file { 'c:/install/certificates':
+        source  => 'puppet:///atomiacerts/certificates',
+        recurse => true
+      }
+
+      file { 'C:\inetpub\wwwroot\empty.crl':
+        ensure => 'file',
+        source => "puppet:///atomiacerts/empty.crl"
+      }
+    }
 }

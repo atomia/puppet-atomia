@@ -11,15 +11,15 @@ FailoverSqlServer = <%= @mirror_database_server %>
 PublicHost = <%= @appdomain %>
 
 [ActionTrail]
-Host = <%= @actiontrail %>.<%= @appdomain %>
+Host = <%= @actiontrail_host %>.<%= @appdomain %>
 
 [Identity]
 Host = sts.<%= @appdomain %>
-GuiHost = <%= @login %>.<%= @appdomain %>
+GuiHost = <%= @login_hos %>.<%= @appdomain %>
 
 [Provisioning]
-Host = <%= @automationserver %>.<%= @appdomain %>
-CertName = <%= @automationserver %>.<%= @appdomain %>
+Host = <%= @automationserver_hos %>.<%= @appdomain %>
+CertName = <%= @automationserver_host %>.<%= @appdomain %>
 EncCertThumb = <%= @automationserver_encryption_cert_thumb %>
 
 [UserApi]
@@ -38,42 +38,40 @@ CertName = orderapi.<%= @appdomain %>
 Host = billingapi.<%= @appdomain %>
 CertName = billingapi.<%= @appdomain %>
 EncrCertThumbprint = <%= @billing_encryption_cert_thumb %>
-PluginConfig = <%= @billing_plugin_config %>
 PdfPrintLocation = c:\Program Files (x86)\Atomia\Atomia Billing Api\pdf\
 DefaultPrintTemplate = InvoiceTemplate
 FullGraphicsTemplate = InvoiceTemplate
 NoBackgroundTemplate = InvoiceTemplate
-SendInvoiceEmailSubjectFormat = <%= @send_invoice_email_subject_format %>
 
 [Order]
-Host = <%= @order %>.<%= @appdomain %>
+Host = <%= @order_host %>.<%= @appdomain %>
 
 [Store]
-Host = <%= @store %>.<%= @appdomain %>
+Host = <%= @store_host %>.<%= @appdomain %>
 DotNetVersion = 4.0
 
 [Billing]
-Host = <%= @billing %>.<%= @appdomain %>
-CertName = <%= @billing %>.<%= @appdomain %>
+Host = <%= @billing_host %>.<%= @appdomain %>
+CertName = <%= @billing_host %>.<%= @appdomain %>
 
 [Admin]
-Host = <%= @admin %>.<%= @appdomain %>
+Host = <%= @admin_host %>.<%= @appdomain %>
 UploadBgMaxFilePath = c:\Program Files (x86)\Atomia\AdminPanel\App_Data
-CertName = <%= @admin %>.<%= @appdomain %>
+CertName = <%= @admin_host %>.<%= @appdomain %>
 
 [HCP]
-Host = <%= @hcp %>.<%= @appdomain %>
+Host = <%= @hcp_host %>.<%= @appdomain %>
 cookieEncryptionCertificateFindValue = *.<%= @appdomain %>
-CertName = <%= @hcp %>.<%= @appdomain %>
+CertName = <%= @hcp_host %>.<%= @appdomain %>
 
 [BillingApi]
-PdfPrintUrlRoot = https://<%= @admin %>.<%= @appdomain %>/pdf/
+PdfPrintUrlRoot = https://<%= @admin_host %>.<%= @appdomain %>/pdf/
 DomainServiceClient = <%= @domainreg_service_url %>
 DomainServiceUser = <%= @domainreg_service_username %>
 DomainServicePassword = <%= @domainreg_service_password %>
 
 [GUI]
-SharedAtomiaGuiCert = guicert.<%= @appdomain %> 
+SharedAtomiaGuiCert = guicert.<%= @appdomain %>
 
 [ActionTrail]
 CertName = actiontrail.<%= @appdomain %>
@@ -97,7 +95,6 @@ Port = <%= @mail_server_port %>
 Username = <%= @mail_server_username %>
 Password = <%= @mail_server_password %>
 SSL = <%= @mail_server_use_ssl %>
-BccEmailAddressesList = <%= @mail_bcc_list %>
 ReplyToAddress = <%= @mail_reply_to %>
 
 [ProvDesc]
@@ -112,22 +109,20 @@ Storage+ = <%= @storage_server_hostname.gsub('.','\.') %>
 Interval = <%= @mail_dispatcher_interval %>
 
 [PayEx]
-AccountNumber = 
-EncryptionKey = 
+AccountNumber =
+EncryptionKey =
 Test = test-
 
 [PayPal]
-Host = 
-PEndpointUrl = 
-ApiUsername = 
-ApiPassword = 
-ApiSignature = 
+Host =
+PEndpointUrl =
+ApiUsername =
+ApiPassword =
+ApiSignature =
 
 [Sms]
-Url = 
-Username = 
-Password = 
-OriginatorType = 
-Originator = 
-
-
+Url =
+Username =
+Password =
+OriginatorType =
+Originator =
