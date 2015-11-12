@@ -1,0 +1,14 @@
+# Uncomment and modify this section to enable support for multiple PHP versions
+# For each PHP version you which to support point the FCGIWrapper to a wrapper file
+# that forwards to the correct PHP binary. See /var/www/cgi-wrappers/php-fcgid-wrapper
+# for an example.
+
+<IF "%{ENV:PHPVR} == '5.5'">
+        FCGIWrapper /var/www/cgi-wrappers/php-fcgid-wrapper-<%= @php_versions[1] %> .php
+</IF>
+<ELSEIF "%{ENV:PHPVR} == '5.6'">
+        FCGIWrapper /var/www/cgi-wrappers/php-fcgid-wrapper-<%= @php_versions[2] %> .php
+</ELSEIF>
+<ELSEIF "%{ENV:PHPVR} == '5.4'">
+        FCGIWrapper /var/www/cgi-wrappers/php-fcgid-wrapper-<%= @php_versions[0] %> .php
+</ELSEIF>
