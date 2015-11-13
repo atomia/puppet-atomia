@@ -1,6 +1,8 @@
-# Expected parameters:
-# -repository PublicRepository
-# -application Atomia Setup Tools
+param(
+	[string]$repository,
+	[string]$application
+)
+
 
 $destination="c:\install\installer.msi"
 

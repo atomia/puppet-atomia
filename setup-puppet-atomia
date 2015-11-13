@@ -16,7 +16,7 @@ echo "---
 :mysql:
   :host: localhost
   :user: root
-  :pass: password 
+  :pass: password
   :database: hiera
 
   :query: SELECT val FROM configuration WHERE var='%{key}'
@@ -28,6 +28,15 @@ echo "---
 
 :logger: console
 " > /etc/puppet/hiera.yaml
+
+echo "
+[atomiacerts]
+   path /etc/puppet/atomiacerts
+   allow *
+[atomia]
+   path /etc/puppet/atomia
+   allow *
+" >> /etc/puppet/fileserver.conf
 
 cd /etc/puppet
 puppet module install puppetlabs-puppetdb
@@ -68,4 +77,3 @@ node default {
         hiera_include('classes')
 }
 " > /etc/puppet/manifests/site.pp
-

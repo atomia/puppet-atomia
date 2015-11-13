@@ -30,16 +30,27 @@ class atomia::adjoin (
   $no_nscd        = 1,) {
   if $operatingsystem == 'windows' {
 
-    #exec { 'set-dns':
-    #  command  => "\$wmi = Get-WmiObject win32_networkadapterconfiguration -filter \"ipenabled = 'true'\"; \$wmi.SetDNSServerSearchOrder(\"$dc_ip\") ",
-    #  provider => powershell
-    #}
+	$ad_factfile = 'C:/ProgramData/PuppetLabs/facter/facts.d/domain_controller.txt'
+    concat { $ad_factfile:
+      ensure => present,
+    }
 
+    Concat::Fragment <<| tag == 'dc_ip' |>>
+
+    exec { 'set-dns':
+      command => "Set-DNSClientServerAddress -interfaceIndex 12 -ServerAddresses (\"$active_directory_ip\")",
+      provider => powershell,
+      unless => 'if(Get-DnsClientServerAddress -InterfaceIndex 12 | Where-Object {$_.ServerAddresses -like "*${active_directory_ip}*"}) { exit 1 }',
+    }
+    ->
+    Host <<| |>>
+	->
     exec { 'join-domain':
       command  => "netdom join $hostname /Domain:$domain_name  /UserD:$admin_user /PasswordD:$admin_password /REBoot:5",
       unless   => "if((gwmi WIN32_ComputerSystem).Domain -ne \"$domain_name\") { exit 1 }",
       provider => powershell
     }
+
   } else {
     # Join AD on Linux
 
@@ -73,6 +84,7 @@ class atomia::adjoin (
             order => 3
           } ->
         Concat::Fragment <<| tag == 'ad_servers' |>>
+
       }
 
       package { libpam-ldap: ensure => present }

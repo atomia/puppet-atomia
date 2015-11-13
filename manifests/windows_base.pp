@@ -97,18 +97,12 @@ class atomia::windows_base (
       }
       else
       {
-        $factfile = 'C:\ProgramData\PuppetLabs\facter\facts.d\actiontrail_ip.txt'
+        $factfile = 'C:/ProgramData/PuppetLabs/facter/facts.d/actiontrail_ip.txt'
 
-		concat { $factfile:
-	      ensure => present,
-	    }
-
-        Concat::Fragment <<| tag == 'actiontrail_ip' |>>
-
-	
         # TODO: Get these from hiera
         $database_server = ""
         $mirror_database_server = ""
+		$actiontrail_ip = ""
       }
 
   	  dism { 'NetFx3':
@@ -353,38 +347,38 @@ class atomia::windows_base (
     }
 
 
-    file { 'c:/install/install_atomia_application.ps1':
-      ensure  => 'file',
-      source  => 'puppet:///modules/atomia/windows_base/install_atomia_application.ps1',
-      require => File['c:/install'],
-      mode    => '0777'
-  	}
-
-    exec { 'install-setuptools':
-  		command => "c:/windows/system32/cmd.exe /c c:/install/AtomiaInstallerCommandLine.exe install ${repository} 'Atomia Setup Tools'",
-  		require => [File['c:/install/install_atomia_application.ps1'],File['unattended.ini'],File['C:\Program Files (x86)\Atomia']]
-  	}
-
     if($::vagrant){
-      file { 'c:/install/certificates':
-        source  => 'puppet:///modules/atomiacerts/certificates',
-        recurse => true
-      }
+		file { 'c:/install/certificates':
+			source  => 'puppet:///modules/atomiacerts/certificates',
+			recurse => true
+		}
 
-      file { 'C:\inetpub\wwwroot\empty.crl':
-        ensure => 'file',
-        source  => 'puppet:///modules/atomiacerts/empty.crl',
-      }
+		file { 'C:\inetpub\wwwroot\empty.crl':
+			ensure => 'file',
+			source  => 'puppet:///modules/atomiacerts/empty.crl',
+		}
     }
     else {
-      file { 'c:/install/certificates':
-        source  => 'puppet:///atomiacerts/certificates',
-        recurse => true
-      }
+		file { 'c:/install/certificates':
+			source  => 'puppet:///atomiacerts/certificates',
+			recurse => true
+		}
 
-      file { 'C:\inetpub\wwwroot\empty.crl':
-        ensure => 'file',
-        source => "puppet:///atomiacerts/empty.crl"
-      }
+		file { 'C:\inetpub\wwwroot\empty.crl':
+			ensure => 'file',
+			source => "puppet:///atomiacerts/empty.crl"
+		}
+
+		file { 'c:/install/install_atomia_application.ps1':
+			ensure  => 'file',
+			source  => 'puppet:///modules/atomia/windows_base/install_atomia_application.ps1',
+			require => File['c:/install']
+		}
+
+		exec {'install-setuptools':
+			command	=> 'C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Executionpolicy Unrestricted -File c:/install/install_atomia_application.ps1 -repository PublicRepository -application "Atomia Setup Tools"',
+			require => [File['c:/install/install_atomia_application.ps1'], File['unattended.ini']],
+			creates => 'C:\Program Files (x86)\Atomia\Common\ADDT',
+		}
     }
 }

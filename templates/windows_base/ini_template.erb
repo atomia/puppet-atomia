@@ -15,10 +15,10 @@ Host = <%= @actiontrail_host %>.<%= @appdomain %>
 
 [Identity]
 Host = sts.<%= @appdomain %>
-GuiHost = <%= @login_hos %>.<%= @appdomain %>
+GuiHost = <%= @login_host %>.<%= @appdomain %>
 
 [Provisioning]
-Host = <%= @automationserver_hos %>.<%= @appdomain %>
+Host = <%= @automationserver_host %>.<%= @appdomain %>
 CertName = <%= @automationserver_host %>.<%= @appdomain %>
 EncCertThumb = <%= @automationserver_encryption_cert_thumb %>
 
@@ -44,7 +44,7 @@ FullGraphicsTemplate = InvoiceTemplate
 NoBackgroundTemplate = InvoiceTemplate
 
 [Order]
-Host = <%= @order_host %>.<%= @appdomain %>
+Host = <%= @order_hostt %>.<%= @appdomain %>
 
 [Store]
 Host = <%= @store_host %>.<%= @appdomain %>
