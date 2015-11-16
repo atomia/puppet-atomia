@@ -1,5 +1,5 @@
-wget https://apt.puppetlabs.com/puppetlabs-release-pc1-trusty.deb
-sudo dpkg -i puppetlabs-release-pc1-trusty.deb
+wget https://apt.puppetlabs.com/puppetlabs-release-trusty.deb
+sudo dpkg -i puppetlabs-release-trusty.deb
 sudo apt-get update
 
 apt-get install -y puppetmaster puppet git apache2-utils curl rubygems-integration build-essential libmysqlclient-dev ruby-dev
@@ -11,7 +11,6 @@ gem install hiera-mysql hiera-mysql-backend mysql mysql2
 cd /etc/puppet
 
 puppet module install puppetlabs-mysql
-puppet module install puppetlabs-postgresql
 
 ## Setup MYSQL and add hiera user and database
 MYSQL_ROOT_PASSWORD=`date +%s | sha256sum | base64 | head -c 16 ; echo`
@@ -32,8 +31,9 @@ mysql::db { 'hiera':
 "
 
 ## Setup PuppetDB
-POSTGRE_USER_PASSWORD=`date +%s | sha256sum | base64 | head -c 16 ; echo`
+
 sudo puppet resource package puppetdb ensure=latest
+#gem install puppet -v 3.4.3
 sudo puppet resource service puppetdb ensure=running enable=true
 
 mkdir -p /etc/puppet/atomia/service_files
@@ -42,11 +42,11 @@ echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref
 
 cd /etc/puppet
 
-gem install puppet -v 3.8.3
 gem install librarian-puppet
 librarian-puppet install
 cp /etc/puppet/modules/atomia/files/default_files/* /etc/puppet/atomia/service_files/
 
+mkdir -p /etc/puppet/manifests/
 echo "
 node default {
         hiera_include('classes')
