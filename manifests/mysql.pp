@@ -27,7 +27,7 @@ class atomia::mysql (
 		restart			=> true,
 		root_password		=> $mysql_root_password,
 		remove_default_accounts	=> true,
-  		override_options	=> { 'mysqld' => { 'bind_address' => $ipaddress } }
+  		override_options	=> { 'mysqld' => { 'bind_address' => '*' } }
 	}	
 
 	mysql_user { "$mysql_username@$provisioning_host":
