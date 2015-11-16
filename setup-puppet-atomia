@@ -10,30 +10,16 @@ puppet agent --test
 gem install hiera-mysql hiera-mysql-backend mysql mysql2
 cd /etc/puppet
 
-puppet module install puppetlabs-mysql
-
 ## Setup MYSQL and add hiera user and database
 MYSQL_ROOT_PASSWORD=`date +%s | sha256sum | base64 | head -c 16 ; echo`
 HIERA_USER_PASSWORD=`date +%s | sha256sum | base64 | head -c 16 ; echo`
 SERVER_FQDN=`facter fqdn`
-puppet apply -e "
-class { '::mysql::server':
-  root_password           => '${MYSQL_ROOT_PASSWORD}',
-  remove_default_accounts => true
-}
 
-mysql::db { 'hiera':
-  user     => 'hierauser',
-  password => '${HIERA_USER_PASSWORD}',
-  host     => 'localhost',
-  grant    => ['SELECT'],
-}
-"
+mysql --defaults-file=/etc/mysql/debian.cnf -e "CREATE USER 'hierauser'@'localhost' IDENTIFIED BY '${HIERA_USER_PASSWORD}'; GRANT ALL PRIVILEGES ON hiera.* TO 'hierauser'@'localhost';"
 
 ## Setup PuppetDB
 
 sudo puppet resource package puppetdb ensure=latest
-#gem install puppet -v 3.4.3
 sudo puppet resource service puppetdb ensure=running enable=true
 
 mkdir -p /etc/puppet/atomia/service_files
@@ -85,3 +71,7 @@ echo "
    path /etc/puppet/atomia
    allow *
 " >> /etc/puppet/fileserver.conf
+
+mv modules/atomia/examples/hieradata/ /etc/puppet/hieradata/
+
+echo "ALL DONE!"
