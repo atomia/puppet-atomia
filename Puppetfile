@@ -28,7 +28,7 @@ mod "httpauth",
   :git => "git://github.com/jamtur01/puppet-httpauth.git"
 
 mod "htpasswd",
-  :git => "git@github.com:jimmybergman/puppet-htpasswd.git"
+  :git => "git://github.com/jimmybergman/puppet-htpasswd.git"
 
 mod "powershell",
   :git => "git://github.com/puppetlabs/puppetlabs-powershell.git"
