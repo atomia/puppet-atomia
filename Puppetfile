@@ -54,4 +54,4 @@ mod "concat",
 mod "hosts",
   :git => "git://github.com/ghoneycutt/puppet-module-hosts.git"
 
-mod "ceh/fstab", :latest
+mod "ceh/fstab",

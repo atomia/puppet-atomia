@@ -1,9 +1,57 @@
-apt-get install wget
-wget http://apt.puppetlabs.com/puppetlabs-release-trusty.deb
-sudo dpkg -i puppetlabs-release-trusty.deb
+wget https://apt.puppetlabs.com/puppetlabs-release-pc1-trusty.deb
+sudo dpkg -i puppetlabs-release-pc1-trusty.deb
 sudo apt-get update
 
+apt-get install -y puppetmaster puppet git apache2-utils curl rubygems-integration build-essential libmysqlclient-dev ruby-dev
 echo "127.0.0.1 puppet" >> /etc/hosts
+puppet agent --enable
+puppet agent --test
+
+gem install hiera-mysql hiera-mysql-backend mysql mysql2
+cd /etc/puppet
+
+puppet module install puppetlabs-mysql
+puppet module install puppetlabs-postgresql
+
+## Setup MYSQL and add hiera user and database
+MYSQL_ROOT_PASSWORD=`date +%s | sha256sum | base64 | head -c 16 ; echo`
+HIERA_USER_PASSWORD=`date +%s | sha256sum | base64 | head -c 16 ; echo`
+SERVER_FQDN=`facter fqdn`
+puppet apply -e "
+class { '::mysql::server':
+  root_password           => '${MYSQL_ROOT_PASSWORD}',
+  remove_default_accounts => true
+}
+
+mysql::db { 'hiera':
+  user     => 'hierauser',
+  password => '${HIERA_USER_PASSWORD}',
+  host     => 'localhost',
+  grant    => ['SELECT'],
+}
+"
+
+## Setup PuppetDB
+POSTGRE_USER_PASSWORD=`date +%s | sha256sum | base64 | head -c 16 ; echo`
+sudo puppet resource package puppetdb ensure=latest
+sudo puppet resource service puppetdb ensure=running enable=true
+
+mkdir -p /etc/puppet/atomia/service_files
+
+echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref => \"master\" " > /etc/puppet/Puppetfile
+
+cd /etc/puppet
+
+gem install puppet -v 3.8.3
+gem install librarian-puppet
+librarian-puppet install
+cp /etc/puppet/modules/atomia/files/default_files/* /etc/puppet/atomia/service_files/
+
+echo "
+node default {
+        hiera_include('classes')
+}
+" > /etc/puppet/manifests/site.pp
 
 echo "---
 :backends:
@@ -15,8 +63,8 @@ echo "---
 
 :mysql:
   :host: localhost
-  :user: root
-  :pass: password
+  :user: hierauser
+  :pass: ${HIERA_USER_PASSWORD}
   :database: hiera
 
   :query: SELECT val FROM configuration WHERE var='%{key}'
@@ -37,43 +85,3 @@ echo "
    path /etc/puppet/atomia
    allow *
 " >> /etc/puppet/fileserver.conf
-
-cd /etc/puppet
-puppet module install puppetlabs-puppetdb
-
-puppet apply -e "
-class { 'puppetdb::globals':
-  version => '2.3.7-1puppetlabs1',
-}
-class { 'puppetdb':
-        # database_username => 'puppetdb',
-        # database_password => 'puppetdb',
-        # database_name     => 'puppetdb',
-        report_ttl        => '7d',
-    }
-
-    # Configure the puppet master to store reports
-    class { 'puppetdb::master::config':
-        manage_report_processor => true,
-        enable_reports          => true
-    }
-"
-
-gem install hiera-mysql mysql mysql2
-
-mkdir -p /etc/puppet/atomia/service_files
-
-echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref => \"master\" " > /etc/puppet/Puppetfile
-
-cd /etc/puppet
-
-gem install puppet -v 3.8.3
-gem install librarian-puppet
-librarian-puppet install
-cp /etc/puppet/modules/atomia/files/default_files/* /etc/puppet/atomia/service_files/
-
-echo "
-node default {
-        hiera_include('classes')
-}
-" > /etc/puppet/manifests/site.pp
