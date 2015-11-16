@@ -39,19 +39,19 @@ mod "download_file",
 mod "postgresql",
   :git => "git://github.com/puppetlabs/puppetlabs-postgresql.git"
 
-mod "bind"
+mod "bind",
   :git => "git://github.com/camptocamp/bind.git"
 
-mod "resolv_conf"
+mod "resolv_conf",
   :git => "git://github.com/saz/puppet-resolv_conf.git"
 
-mod "glusterfs"
+mod "glusterfs",
   :git => "git://github.com/stefanmortensen/puppet-glusterfs.git"
 
-mod "concat"
+mod "concat",
   :git => "git://github.com/puppetlabs/puppetlabs-concat.git"
 
-mod "hosts"
+mod "hosts",
   :git => "git://github.com/ghoneycutt/puppet-module-hosts.git"
 
-mod "ceh/fstab", :latest 
+mod "ceh/fstab", :latest
