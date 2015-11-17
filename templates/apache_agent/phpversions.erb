@@ -3,12 +3,15 @@
 # that forwards to the correct PHP binary. See /var/www/cgi-wrappers/php-fcgid-wrapper
 # for an example.
 
-<IF "%{ENV:PHPVR} == '5.5'">
-        FCGIWrapper /var/www/cgi-wrappers/php-fcgid-wrapper-<%= @php_versions[1] %> .php
+<% if @php_versions_array and @php_versions_array.length > 0 %>
+<IF "%{ENV:PHPVR} == '<%= @php_branches_array[0] %>'">
+        FCGIWrapper /var/www/cgi-wrappers/php-fcgid-wrapper-<%= @php_versions_array[0] %> .php
 </IF>
-<ELSEIF "%{ENV:PHPVR} == '5.6'">
-        FCGIWrapper /var/www/cgi-wrappers/php-fcgid-wrapper-<%= @php_versions[2] %> .php
+<% end
+if @php_versions_array and @php_versions_array[1..-1].length > 0
+	@php_versions_array[1..-1].each_with_index do |version, idx| %>
+<ELSEIF "%{ENV:PHPVR} == '<%= @php_branches_array[idx + 1] %>'">
+        FCGIWrapper /var/www/cgi-wrappers/php-fcgid-wrapper-<%= version %> .php
 </ELSEIF>
-<ELSEIF "%{ENV:PHPVR} == '5.4'">
-        FCGIWrapper /var/www/cgi-wrappers/php-fcgid-wrapper-<%= @php_versions[0] %> .php
-</ELSEIF>
+<% 	end %>
+<% end %>

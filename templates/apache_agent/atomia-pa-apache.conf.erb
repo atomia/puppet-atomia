@@ -6,7 +6,11 @@ UserDir .
 UseCanonicalName Off
 
 ## splittable logs
+<% if @atomia_clustered != 0 %>
 LogFormat "%{Host}i %{X-Forwarded-For}i %l %u %t \"%r\" %s %b" vcommon
+<% else %>
+LogFormat "%{Host}i %h %l %u %t \"%r\" %s %b" vcommon
+<% end %>
 CustomLog "|/usr/bin/cronolog /var/log/apache2/access.%Y%m%d%H.log" vcommon
 RewriteEngine On
 
@@ -92,4 +96,8 @@ IdleTimeout 30
         FCGIWrapper /var/www/cgi-wrappers/php-fcgid-wrapper-no-id-test .php
 </Directory>
 
+<% if @lsbdistrelease == "14.04" # TODO: Should instead check apache version %>
+IncludeOptional ssl.d/*.conf
+<% else %>
 Include ssl.d/*.conf
+<% end %>

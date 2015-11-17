@@ -19,8 +19,8 @@ class atomia::linux_base {
         }
       }
 
-    }
       Host <<| |>>
+    }
 }
 
 define atomia::hostname::register ($content="", $order='10') {
