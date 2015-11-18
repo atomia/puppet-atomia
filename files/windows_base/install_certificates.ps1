@@ -40,4 +40,22 @@ ImportPfxCertificate "C:\install\certificates\userapi.pfx" "My"
 ImportPfxCertificate "C:\install\certificates\admin.pfx" "My"
 ImportPfxCertificate "C:\install\certificates\login.pfx" "My"
 
+Import-Module WebAdministration
+
+$defaultSSLBinding = Get-WebBinding -Name "Default Web Site" -Port 443 -Protocol https
+if ($defaultSSLBinding -eq $null -or $defaultSSLBinding -eq "")
+{
+	$wildcardCert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2 "C:\install\certificates\wildcard.crt"
+	$wildcardThumbprint = $wildcardCert.Thumbprint
+
+	New-WebBinding -Name "Default Web Site" -Port 443 -Protocol https
+
+	$location = Get-Location
+	Set-Location -Path IIS:\SslBindings
+	Get-Item Cert:\LocalMachine\my\$wildcardThumbprint | New-Item !443!
+	Set-Location -Path $location
+
+	Write-Host ("Added SSL binding for *:443 using " + $wildcardCert.Subject)
+}
+
 new-item C:\install\install_certificates.txt -itemtype file
