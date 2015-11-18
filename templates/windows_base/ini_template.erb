@@ -44,7 +44,7 @@ FullGraphicsTemplate = InvoiceTemplate
 NoBackgroundTemplate = InvoiceTemplate
 
 [Order]
-Host = <%= @order_hostt %>.<%= @appdomain %>
+Host = <%= @order_host %>.<%= @appdomain %>
 
 [Store]
 Host = <%= @store_host %>.<%= @appdomain %>
@@ -109,20 +109,20 @@ Storage+ = <%= @storage_server_hostname.gsub('.','\.') %>
 Interval = <%= @mail_dispatcher_interval %>
 
 [PayEx]
-AccountNumber =
-EncryptionKey =
+AccountNumber = 
+EncryptionKey = 
 Test = test-
 
 [PayPal]
-Host =
-PEndpointUrl =
-ApiUsername =
-ApiPassword =
-ApiSignature =
+Host = 
+PEndpointUrl = 
+ApiUsername = 
+ApiPassword = 
+ApiSignature = 
 
 [Sms]
-Url =
-Username =
-Password =
-OriginatorType =
-Originator =
+Url = 
+Username = 
+Password = 
+OriginatorType = 
+Originator = 
