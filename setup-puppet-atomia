@@ -72,6 +72,10 @@ echo "
    allow *
 " >> /etc/puppet/fileserver.conf
 
+echo "autosign = true" >> /etc/puppet/puppet.conf
+
 mv modules/atomia/examples/hieradata/ /etc/puppet/hieradata/
+
+/etc/init.d/puppetmaster restart
 
 echo "ALL DONE!"
