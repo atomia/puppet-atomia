@@ -159,7 +159,7 @@ class atomia::windows_base (
   	    }
 
   	    exec { 'app-pool-settings':
-  	        command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/app-pool-settings.ps1',
+  	        command => 'C:\Windows\sysnative\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/app-pool-settings.ps1',
   	        require => File["c:/install/app-pool-settings.ps1"]
   	      }
 
@@ -300,7 +300,7 @@ class atomia::windows_base (
       require => File['c:/install/certificates'],
     }
     exec { 'install-certificates':
-      command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file C:\install\install_certificates.ps1',
+      command => 'C:\Windows\sysnative\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file C:\install\install_certificates.ps1',
       creates => 'C:\install\install_certificates.txt',
       require => File['C:\install\install_certificates.ps1'],
       }
