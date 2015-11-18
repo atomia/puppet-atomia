@@ -86,7 +86,7 @@ class atomia::windows_base (
     $domainreg_service_url = hiera('atomia::domainreg::service_url','')
     $domainreg_service_username = hiera('atomia::domainreg::service_username','')
     $domainreg_service_password = hiera('atomia::domainreg::service_password','')
-    $order = "order"
+    $order_host = "order"
 
     if( $is_iis == 0 ){
 
