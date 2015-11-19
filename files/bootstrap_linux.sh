@@ -23,7 +23,8 @@ sed -i "/templatedir/d" /etc/puppet/puppet.conf
 echo -e 'path /run\nallow *' >> /etc/puppet/auth.conf
 
 service puppet start
-if [ "$?" != "0" ]; then
+PUPPET_RUNNING=`/etc/init.d/puppet status | grep "is running" | wc -l`
+if [ $PUPPET_RUNNING -ne 1 ]; then
         echo "Error: Could not start puppet"
         exit 1
 fi
