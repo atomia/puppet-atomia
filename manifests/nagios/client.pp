@@ -12,7 +12,7 @@ class atomia::nagios::client(
     $internaldns_class      = "atomia::nagios::client::internaldns",
 ) {
 
-  $atomia_domain = hiera('atomia::config::atomia_domain');
+  $atomia_domain = hiera('atomia::config::atomia_domain')
 
   if $ec2_public_ipv4 {
     $ip_address = $ec2_public_ipv4

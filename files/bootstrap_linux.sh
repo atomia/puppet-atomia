@@ -25,16 +25,9 @@ if [ $SERVER_CONF -eq 0 ]; then
 fi
 sed -i "/templatedir/d" /etc/puppet/puppet.conf
 echo -e 'path /run\nallow *' >> /etc/puppet/auth.conf
-
-service puppet start
-PUPPET_RUNNING=`/etc/init.d/puppet status | grep "is running" | wc -l`
-if [ $PUPPET_RUNNING -ne 1 ]; then
-        echo "Error: Could not start puppet"
-        exit 1
-fi
-
-
 puppet agent --enable
+service puppet stop
+
 
 #Clean up
 rm puppetlabs-release-*.deb
