@@ -48,16 +48,24 @@ class atomia::fsagent (
 	class { 'apt': }
 
 	if $operatingsystem == "Ubuntu" {
-		apt::ppa { 'ppa:chris-lea/node.js': 
-			require => Package["python-software-properties"], 
+		apt::source { 'nodesource_0.12':
+			location	=> 'https://deb.nodesource.com/node_0.12',
+			release		=> $codename,
+			repos		=> 'main',
+			key		=> {
+				id	=> "9FD3B784BC1C6FC31A8A0A1C1655A0AB68576280",
+				source	=> 'https://deb.nodesource.com/gpgkey/nodesource.gpg.key'
+  			},
+			include		=> {
+				'src' => true,
+				'deb' => true,
+			},
 		}
 
 		package { nodejs:
 			ensure	=> latest,
-			require => [Apt::Ppa['ppa:chris-lea/node.js'], Exec['apt-get-update']]
+			require => [ Apt::Source['nodesource_0.12'] ]
 		}
-
-		exec { "apt-get-update": command => "/usr/bin/apt-get update" }
 	} else {
 		package { nodejs: ensure => present, }
 	}
@@ -147,12 +155,12 @@ class atomia::fsagent (
 	}
 
 	service { atomia-fsagent:
-		name			=> atomia-fsagent,
+		name		=> atomia-fsagent,
 		enable		=> true,
 		ensure		=> running,
-		hasstatus => false,
-		pattern		=> "/usr/bin/nodejs /usr/lib/atomia-fsagent/main.js",
-		subscribe => [Package["atomia-fsagent"], File["/etc/default/fsagent"]],
+		hasstatus	=> false,
+		pattern		=> "nodejs.*atomia-fsagent",
+		subscribe	=> [Package["atomia-fsagent"], File["/etc/default/fsagent"]],
 	}
 
 	if $create_storage_files {
