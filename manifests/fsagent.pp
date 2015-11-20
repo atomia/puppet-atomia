@@ -158,8 +158,6 @@ class atomia::fsagent (
 		name		=> atomia-fsagent,
 		enable		=> true,
 		ensure		=> running,
-		hasstatus	=> false,
-		pattern		=> "nodejs.*atomia-fsagent",
 		subscribe	=> [Package["atomia-fsagent"], File["/etc/default/fsagent"]],
 	}
 
