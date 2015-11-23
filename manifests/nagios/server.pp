@@ -28,8 +28,7 @@ class atomia::nagios::server(
 
   #$apache_ip  = generate('/etc/puppet/modules/atomia/files/lookup_variable.sh', 'apache_agent', 'cluster_ip')
 
-  package { [
-      'build-essential',
+  package { ['build-essential',
       'libgd2-xpm-dev',
       'openssl',
       'libssl-dev',
@@ -43,8 +42,7 @@ class atomia::nagios::server(
       'atomia-manager',
       'ruby1.9.1-dev',
       'python-pkg-resources',
-      'nagios-nrpe-plugin'
-    ]:
+      'nagios-nrpe-plugin']:
       ensure => installed,
     }
 
@@ -124,10 +122,8 @@ class atomia::nagios::server(
   }
 
   exec { 'add-httpasswd-user':
-    command     => "/usr/bin/htpasswd -c -b -c /etc/nagios3/htpasswd.users ${username} ${password}",
-
+    command     => "/usr/bin/htpasswd -c -b -c /usr/local/nagios/etc/htpasswd.users  ${username} \"${password}\"",
   }
-
   # Done installing Nagios
 
   file { '/usr/local/nagios/etc/objects/atomia-commands.cfg':

@@ -1,5 +1,5 @@
 class atomia::atomiarepository {
-  
+
   # Workaround for Debian Jessie
   if $operatingsystem == "Debian" {
     # Currently only supports Wheezy

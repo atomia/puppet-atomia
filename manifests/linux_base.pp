@@ -1,6 +1,6 @@
 class atomia::linux_base {
 
-    package { sudo: ensure => present }
+    package { 'sudo': ensure => present }
 
     include '::ntp'
 
@@ -57,7 +57,7 @@ define limits::conf (
 		 onlyif  => "match $path_exact size != 1",
 		 changes => [
 			 # remove all matching to the $domain, $type, $item, for any $value
-			 "rm $path_list", 
+			 "rm $path_list",
 			 # insert new node at the end of tree
 			 "set domain[last()+1] $domain",
 			 # assign values to the new node
@@ -66,4 +66,4 @@ define limits::conf (
 			 "set domain[last()]/value $value",
 		 ],
 	 }
-} 
+}
