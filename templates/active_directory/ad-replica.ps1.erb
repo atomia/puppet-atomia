@@ -1,0 +1,10 @@
+    
+$netbios_domain_name = '<%=@netbios_domain_name%>'
+$domain_name = '<%=@domain_name%>'
+$restore_password = '<%=@restore_password%>'
+$secpasswd = ConvertTo-SecureString '<%=@windows_admin_password%>' -AsPlainText -Force;
+
+$credentials = New-Object System.Management.Automation.PSCredential ('<%=@netbios_domain_name%>\WindowsAdmin', $secpasswd);Import-Module ADDSDeployment;
+ 
+Import-Module ADDSDeployment; 
+Install-ADDSDomainController -DomainName $domain_name  -InstallDns -Force -Credential:$credentials -SiteName 'Default-First-Site-Name' -SafeModeAdministratorPassword (convertto-securestring $restore_password -asplaintext -Force) -CreateDnsDelegation:$false

@@ -28,8 +28,8 @@ class atomia::nagios::client(
 
     	@@nagios_host { "${fqdn}-host" :
         	use                 => "generic-host",
-        	host_name           => $fqdn,
-        	alias               => "${fqdn}",
+        	host_name           => $ip_address,
+        	alias               => "${atomia_role_1}",
         	address             => $ip_address ,
         	target              => "/etc/nagios3/conf.d/${hostname}_host.cfg",
         	hostgroups          => "windows-all"
@@ -112,20 +112,20 @@ class atomia::nagios::client(
     }
 
     # Configuration files
-    #file { '/etc/nagios/nrpe.cfg':
-    #    owner   => 'root',
-    #    group   => 'root',
-    #    mode    => "0644",
-    #    content => template('atomia/nagios/nrpe.cfg.erb'),
-    #    require => Package["nagios-nrpe-server"],
-    #    notify  => Service["nagios-nrpe-server"]
-    #}
+    file { '/etc/nagios/nrpe.cfg':
+        owner   => 'root',
+        group   => 'root',
+        mode    => "0644",
+        content => template('atomia/nagios/nrpe.cfg.erb'),
+        require => Package["nagios-nrpe-server"],
+        notify  => Service["nagios-nrpe-server"]
+    }
 
     @@nagios_host { "${fqdn}-host" :
         use                 => "generic-host",
         host_name           => $fqdn,
-		    alias			          => "${$atomia_role_1} - ${fqdn}",
-        address             => $ip_address ,
+	    alias			    => "${atomia_role_1} - ${fqdn}",
+        address             => $ip_address,
         target              => "/usr/local/nagios/etc/servers/${hostname}_host.cfg",
         hostgroups          => $hostgroup,
         max_check_attempts  => '5'

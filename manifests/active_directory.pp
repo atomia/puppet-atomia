@@ -3,8 +3,8 @@
 ### Deploys and configures Active Directory
 
 ### Variable documentation
-#### domain_name: The Active Directory domain name for your environment (example:atomia.local)
-#### netbios_domain_name: Short version of the domain name (example: ATOMIA)
+#### domain_name: The Active Directory domain name for your environment. Ex: atomia.local
+#### netbios_domain_name: Short version of the domain name. Ex: ATOMIA
 #### restore_password: Password used for Active Directory restore
 #### app_password: Password for the Atomia apppooluser
 #### bind_password: Password for the Atomia posixuser
@@ -12,7 +12,7 @@
 #### is_master: Specify if the server is master or slave
 
 ### Validations
-##### domain_name: ^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$
+##### domain_name: %hostname
 ##### netbios_domain_name: ^[a-zA-Z0-9]+$
 ##### restore_password(advanced): %password
 ##### app_password(advanced): %password
@@ -90,6 +90,16 @@ class atomia::active_directory (
       require => [File['c:/install/add_users.ps1'], Exec['Install AD forest']],
     }
 
+	$internal_zone = hiera('atomia::internaldns::zone_name')
+	$internal_ip = hiera('atomia::internaldns::ip_address')
+
+	exec { 'add-conditional-forwarder-internaldns':
+		command		=> "Add-DnsServerConditionalForwarderZone -Name ${internal_zone} -MasterServers ${internal_ip}",
+		provider	=> powershell,
+		require		=> Exec['Install AD forest'],
+		onlyif		=> "if((Get-DnsServerZone -Name atomia.internal).ZoneName -Match '${internal_zone}') {exit 1}",
+	}
+
   } elsif($::vagrant) {
       file { 'c:/install/add_users_vagrant.ps1':
   	    ensure => 'file',
@@ -105,12 +115,13 @@ class atomia::active_directory (
     file { 'C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role_ad.ps1':
       content => template('atomia/active_directory/atomia_role_active_directory_replica.ps1.erb'),
     }
-
-    $ad_factfile = 'C:/ProgramData/PuppetLabs/facter/facts.d/domain_controller.txt'
-    concat { $ad_factfile:
+    
+    $factfile = 'C:/ProgramData/PuppetLabs/facter/facts.d/domain_controller.txt'
+   
+    concat { $factfile:
       ensure => present,
-    }
-
+    }    
+    
     Concat::Fragment <<| tag == 'dc_ip' |>>
 
     exec { 'set-dns':
@@ -129,10 +140,10 @@ class atomia::active_directory (
 
     #$secpasswd = ConvertTo-SecureString '${windows_admin_password}' -AsPlainText -Force;$credentials = New-Object System.Management.Automation.PSCredential ('${netbios_domain_name\\WindowsAdmin}', $secpasswd);Import-Module ADDSDeployment;
     exec { 'Install AD replica':
-      command     => "Import-Module ADDSDeployment; Install-ADDSDomainController -DomainName ${domain_name}  -InstallDns -Force -SiteName 'Default-First-Site-Name' -SafeModeAdministratorPassword (convertto-securestring '${restore_password}' -asplaintext -Force) -CreateDnsDelegation:\$false",
-      provider    => powershell,
+      command   => template('atomia/active_directory/ad-replica.ps1.erb'), 
       unless   => "if((gwmi WIN32_ComputerSystem).Domain -ne \"$domain_name\") { exit 1 }",
-      require   => Exec['enable-ad-feature']
+      require   => Exec['enable-ad-feature'],
+      provider  => powershell,
     }
   }
 

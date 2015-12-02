@@ -18,6 +18,13 @@ class atomia::linux_base {
           domainname => "atomia.local"
         }
       }
+	  
+	  # Add Puppetmaster to local hosts file
+	  host { 'puppetmaster-host':
+	  	name 	=> hiera('atomia::config::puppet_hostname'),
+		ensure 	=> present,
+		ip 		=> hiera('atomia::config::puppet_ip'),
+	  }
 
       Host <<| |>>
     }
