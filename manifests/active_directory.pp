@@ -40,7 +40,7 @@ class atomia::active_directory (
     $public_ip = $ipaddress_eth0
   }
 
-  atomia::adjoin::register{ "${::fqdn}": content => $public_ip}
+  atomia::adjoin::register{ "${::fqdn}": content => $ipaddress}
 
   if !defined(File["c:/install"]) {
     file { 'c:/install':
@@ -55,10 +55,10 @@ class atomia::active_directory (
   }
 
   if($is_master == 1 and !$::vagrant) {
-    atomia::active_directory::store_ip{ "${::fqdn}": content => $public_ip}
+    atomia::active_directory::store_ip{ "${::fqdn}": content => $ipaddress}
     @@host { 'domain-name-host':
     		name		=> "$domain_name",
-    		ip	=> "${public_ip}"
+    		ip	=> "${ipaddress}"
   	}
 
     file { 'C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role_ad.ps1':
@@ -157,11 +157,20 @@ class atomia::active_directory (
 define atomia::active_directory::store_ip ($content="", $order='10') {
   $factfile = 'C:/ProgramData/PuppetLabs/facter/facts.d/domain_controller.txt'
 
-  @@concat::fragment {"active_directory_ip_${content}":
+  @@concat::fragment {"active_directory_ip_${hostname}":
       target => $factfile,
       content => "active_directory_ip=${content} ",
       tag => 'dc_ip',
       order => 3
     }
+    
+  $factfile_linux= '/etc/facter/facts.d/ad_server.txt'
+
+  @@concat::fragment {"active_directory_ip__linux_${hostname}":
+      target => $factfile_linux,
+      content => "ad_server=${content}",
+      tag => 'dc_ip_linux',
+      order => 3
+    }    
 
 }

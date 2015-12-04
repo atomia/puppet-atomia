@@ -6,16 +6,25 @@ class atomia::linux_base {
 
     $internal_dns = hiera('atomia::internaldns::ip_address', '')
 
+    $factfile = '/etc/facter/facts.d/ad_server.txt'
+   
+    concat { $factfile:
+      ensure => present,
+    }    
+    
+    Concat::Fragment <<| tag == 'dc_ip_linux' |>>
+	
     if $internal_dns != '' {
-      if $atomia_role_1 != "glusterfs" {
+      if ($atomia_role_1 != "glusterfs") and ($atomia_role_1 != "glusterfs_replica") {
         class { 'resolv_conf':
           nameservers => ["${internal_dns}"],
         }
       }
       else {
-        class { 'resolv_conf':
-          nameservers => ["${internal_dns}"],
-          domainname => "atomia.local"
+        if($ad_server){
+          class { 'resolv_conf':
+            nameservers => ["${ad_server}"],
+          }
         }
       }
 	  
@@ -33,7 +42,7 @@ class atomia::linux_base {
 define atomia::hostname::register ($content="", $order='10') {
   $factfile = '/etc/hosts'
 
-  @@concat::fragment {"active_directory_${content}":
+  @@concat::fragment {"hostnames_${content}":
       target => $factfile,
       content => "${content} ",
       tag => 'hosts_file',

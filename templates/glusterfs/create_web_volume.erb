@@ -1,0 +1,5 @@
+<% 
+p_str = ""
+@peers_arr.each do |p| 
+	p_str = p_str + p + ':/export/web/vol1 '
+end %>/usr/sbin/gluster volume create web_volume replica <%=@peers_size%> <%=p_str%>
