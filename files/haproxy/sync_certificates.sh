@@ -39,7 +39,7 @@ find "$synced_dir" -type f -path "*/keys/*" | while read key; do
 		# or if this bundle was created previously
 		old_cert_bundle_to_remove=""
 		cert_subject=`openssl x509 -noout -subject -in "$cert" |\
-			awk -F 'CN=' '{ print $2 }' | cut -d " " -f 1`
+			awk -F 'CN=' '{ print $2 }' | tr "/" " " | cut -d " " -f 1`
 		cert_end_date=`date +%s \
 			-d "$(openssl x509 -noout -enddate -in "$cert" | cut -d "=" -f 2- | sed 's/^[[:space:]]*//')"`
 		echo "$cert_subject"_"$cert_end_date" >> "$certs_on_storage"
@@ -93,7 +93,7 @@ cert_diff=`mktemp`
 # Synchronize public certificates folder with active ones
 find "$haproxy_cert_dir" -type f -not -name 'default.pem' | while read active_cert; do
 	# or if this bundle was created previously
-	active_cert_subject=`openssl x509 -noout -subject -in "$active_cert" | awk -F 'CN=' '{ print $2 }' | cut -d " " -f 1`
+	active_cert_subject=`openssl x509 -noout -subject -in "$active_cert" | awk -F 'CN=' '{ print $2 }' | tr "/" " " | cut -d " " -f 1`
 	active_cert_end_date=`date +%s \
 		-d "$(openssl x509 -noout -enddate -in "$active_cert" | cut -d "=" -f 2- | sed 's/^[[:space:]]*//')"`
 	echo "$active_cert_subject"_"$active_cert_end_date" >> "$active_certs"
