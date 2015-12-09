@@ -41,7 +41,7 @@ class atomia::pureftpd (
 	$provisioning_host		= "%",
 	$pureftpd_password,
 	$ftp_cluster_ip,
-	$content_share_nfs_location	= expand_default("[[content_share_nfs_location]]"),
+	$content_share_nfs_location	= ''
 	$is_master			= 1,
 	$pureftpd_slave_password,
 	$mysql_root_password,
@@ -55,10 +55,32 @@ class atomia::pureftpd (
 	package { xinetd: ensure => installed }
 
 	if $skip_mount == 0 {
-		atomia::nfsmount { 'mount_content':
-			use_nfs3	=> 1,
-			mount_point	=> '/storage/content',
-			nfs_location	=> $content_share_nfs_location
+				
+		if $content_share_nfs_location == '' {
+			$internal_zone = hiera('atomia::internaldns::zone_name','')
+			package { 'glusterfs-client': ensure => present, }
+			
+			if !defined(File["/storage"]) {
+				file { "/storage":
+				ensure => directory,
+				}
+			}
+			
+			fstab::mount { '/storage/content':
+				ensure  => 'mounted',
+				device  => "gluster.${internal_zone}:/web_volume",
+				options => 'defaults,_netdev',
+				fstype  => 'glusterfs',
+				require => [Package['glusterfs-client'],File["/storage"]],
+			}			
+    	}
+		else
+		{
+			atomia::nfsmount { 'mount_content':
+				use_nfs3		 => 1,
+				mount_point  => '/storage/content',
+				nfs_location => $content_share_nfs_location
+			}
 		}
 	}
 

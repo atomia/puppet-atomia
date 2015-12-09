@@ -12,8 +12,10 @@
 #### mail_pass: The password to authenticate with when connecting to the SMTP server used for sending mails.
 #### mail_from: The sender email to set for the mails sent by the cron service.
 #### base_url: The base URL for the cron agent API.
+#### mail_ssl: Use SSL for email
 
 ### Validations
+##### mail_from: %email
 ##### global_auth_token(advanced): %password
 ##### min_part(advanced): ^([0-9]{1,3}|1000)$
 ##### max_part(advanced): ^([0-9]{1,3}|1000)$
@@ -22,6 +24,7 @@
 ##### mail_user(advanced): ^[^[[:space:]]]+$
 ##### mail_pass(advanced): %password
 ##### base_url(advanced): %url
+##### mail_ssl(advanced): [0-1]
 
 class atomia::cronagent (
 	$global_auth_token, 

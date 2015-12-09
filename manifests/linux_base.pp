@@ -8,8 +8,22 @@ class atomia::linux_base {
 
     $factfile = '/etc/facter/facts.d/ad_server.txt'
    
+    if !defined(File['/etc/facter']){
+      file { '/etc/facter':
+        ensure  => directory,
+      }
+    }
+    
+    if !defined(File['/etc/facter/facts.d']){
+      file { '/etc/facter/facts.d':
+        ensure  => directory,
+        require => File['/etc/facter'],
+      }
+    }
+        
     concat { $factfile:
       ensure => present,
+      require => File['/etc/facter/facts.d'],
     }    
     
     Concat::Fragment <<| tag == 'dc_ip_linux' |>>

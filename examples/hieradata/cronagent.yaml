@@ -1,0 +1,6 @@
+---
+classes:
+   - atomia::linux_base
+   - atomia::atomiarepository
+   - atomia::cronagent
+   - atomia::nagios::client

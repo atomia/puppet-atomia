@@ -1,0 +1,10 @@
+---
+classes:
+   - atomia::linux_base
+   - atomia::atomiarepository
+   - atomia::adjoin
+   - atomia::mailserver
+   - atomia::nagios::client
+   
+ atomia::mailserver::is_master: 1
+

@@ -1,0 +1,5 @@
+---
+classes:
+   - atomia::linux_base
+   - atomia::postgresql
+   - atomia::nagios::client

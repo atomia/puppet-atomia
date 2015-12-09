@@ -39,8 +39,8 @@ class atomia::apache_agent (
 	$password,
 	$atomia_clustered		= 1,
 	$should_have_pa_apache		= 1,
-	$content_share_nfs_location	= expand_default("[[content_share_nfs_location]]"),
-	$config_share_nfs_location	= expand_default("[[config_share_nfs_location]]"),
+	$content_share_nfs_location	= '',
+	$config_share_nfs_location	= '',
 	$use_nfs3			= 1,
 	$cluster_ip,
 	$apache_agent_ip		= $fqdn,
@@ -83,17 +83,46 @@ class atomia::apache_agent (
 
 	$php_package_array = split($php_extension_packages, ',')
 	package { $php_package_array: ensure => installed }
-
-	atomia::nfsmount { 'mount_content':
-		use_nfs3 => $use_nfs3,
-		mount_point => '/storage/content',
-		nfs_location => $content_share_nfs_location
+	
+	if $content_share_nfs_location == '' {
+		$internal_zone = hiera('atomia::internaldns::zone_name','')
+		
+		package { 'glusterfs-client': ensure => present, }
+		
+		if !defined(File["/storage"]) {
+			file { "/storage":
+			ensure => directory,
+			}
+		}
+		
+		fstab::mount { '/storage/content':
+			ensure  => 'mounted',
+			device  => "gluster.${internal_zone}:/web_volume",
+			options => 'defaults,_netdev',
+			fstype  => 'glusterfs',
+			require => [Package['glusterfs-client'],File["/storage"]],
+		}	
+		fstab::mount { '/storage/configuration':
+			ensure  => 'mounted',
+			device  => "gluster.${internal_zone}:/config_volume",
+			options => 'defaults,_netdev',
+			fstype  => 'glusterfs',
+			require => [ Package['glusterfs-client'],File["/storage"]],
+		}			
 	}
+	else
+	{
+		atomia::nfsmount { 'mount_content':
+			use_nfs3		 => 1,
+			mount_point  => '/storage/content',
+			nfs_location => $content_share_nfs_location
+		}
 
-	atomia::nfsmount { 'mount_config':
-		use_nfs3 => $use_nfs3,
-		mount_point => '/storage/configuration',
-		nfs_location => $config_share_nfs_location
+		atomia::nfsmount { 'mount_configuration':
+			use_nfs3		 => 1,
+			mount_point  => '/storage/configuration',
+			nfs_location => $config_share_nfs_location
+		}
 	}
 	 
 	if $should_have_pa_apache == 1 {

@@ -1,0 +1,4 @@
+---
+classes:
+   - atomia::mssql
+   - atomia::nagios::client

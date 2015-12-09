@@ -1,0 +1,5 @@
+---
+classes:
+   - atomia::linux_base
+   - atomia::installatron
+   - atomia::nagios::client

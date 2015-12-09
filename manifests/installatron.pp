@@ -5,7 +5,7 @@
 ### Variable documentation
 #### license_key: The license key needed to use Installatron server.
 #### use_nfs3: Toggles if we are to use NFSv3 for the NFS mount.
-#### content_share_nfs_location: The location of the NFS share for customer website content.
+#### content_share_nfs_location: The location of the NFS share for customer website content. Leave blank if using the default GlusterFS setup, otherwise fill it in.
 
 ### Validations
 ##### license_key: ^.+$
@@ -15,7 +15,7 @@
 class atomia::installatron (
 		$license_key,
 		$use_nfs3 = 1,
-		$content_share_nfs_location = expand_default("[[content_share_nfs_location]]")
+		$content_share_nfs_location = "",
 	) {
 		
 	package { [
@@ -28,10 +28,36 @@ class atomia::installatron (
 		'php5-sqlite'
 	]: ensure => installed }
 
-	atomia::nfsmount { 'mount_content':
-		use_nfs3 => $use_nfs3,
-		mount_point => '/storage/content',
-		nfs_location => $content_share_nfs_location
+	if !defined(File["/storage"]) {
+		file { "/storage":
+			ensure => directory,
+		}
+	}
+
+	if !defined(File["/storage/content"]) {
+		file { "/storage/content":
+			ensure => directory,
+			require => File["/storage"],
+		}
+	}
+	
+	if $content_share_nfs_location == "" {
+		package { 'gluster-client': ensure => present, }
+		
+		fstab::mount { '/storage/content':
+			ensure  => 'mounted',
+			device  => "gluster.${internal_zone}:/content_volume",
+			options => 'defaults,_netdev',
+			fstype  => 'glusterfs',
+			require => [File['/storage/content'], Package['gluster-client']],
+		}			
+	}
+	else {
+		atomia::nfsmount { 'mount_content':
+			use_nfs3 => $use_nfs3,
+			mount_point => '/storage/content',
+			nfs_location => $content_share_nfs_location
+		}
 	}
 		
 

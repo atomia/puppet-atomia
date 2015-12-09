@@ -6,7 +6,8 @@
 #### username: The username to require when accessing the filesystem agent.
 #### password: The password to require when accessing the filesystem agent.
 #### fsagent_ip: The IP or hostname used to connect to the filesystem agent from the rest of the platform.
-#### content_share_nfs_location: The location of the NFS share for customer website content.
+#### content_share_nfs_location: The location of the NFS share for customer website content. If using the default setup with GlusterFS leave blank otherwise you need to fill it in.
+#### config_share_nfs_location: The location of the NFS share for shared configuration. If using the default setup with GlusterFS leave blank otherwise you need to fill it in.
 #### skip_mount: Toggles if we are to mount the content share or not.
 #### enable_config_agent: If set then we also setup a separate fsagent instance for accessing the web cluster configuration share.
 #### create_storage_files: Toggles if we are to create initial storage directory structure if missing.
@@ -27,13 +28,15 @@ class atomia::fsagent (
 	$username			= "fsagent",
 	$password,
 	$fsagent_ip			= $fqdn,
-	$content_share_nfs_location	= expand_default("[[content_share_nfs_location]]"),
-	$config_share_nfs_location	= expand_default("[[config_share_nfs_location]]"),
+	$content_share_nfs_location	= "",
+	$config_share_nfs_location	= "",
 	$skip_mount			= false,
 	$enable_config_agent		= false,
 	$create_storage_files		= true,
-	$allow_ssh_key			= ""
+	$allow_ssh_key			= "",
 ) {
+	
+
 
 	package { python-software-properties: ensure => present }
 
@@ -73,16 +76,46 @@ class atomia::fsagent (
 	package { atomia-fsagent: ensure => present, require => Package["nodejs"] }
 
 	if !$skip_mount {
-		atomia::nfsmount { 'mount_content':
-			use_nfs3		 => 1,
-			mount_point  => '/storage/content',
-			nfs_location => $content_share_nfs_location
-		}
-
-		atomia::nfsmount { 'mount_configuration':
-			use_nfs3		 => 1,
-			mount_point  => '/storage/configuration',
-			nfs_location => $config_share_nfs_location
+		
+		$internal_zone = hiera('atomia::internaldns::zone_name','')
+		
+		if $content_share_nfs_location == '' {
+			package { 'glusterfs-client': ensure => present, }
+			
+			if !defined(File["/storage"]) {
+				file { "/storage":
+				ensure => directory,
+				}
+			}
+			
+			fstab::mount { '/storage/content':
+				ensure  => 'mounted',
+				device  => "gluster.${internal_zone}:/web_volume",
+				options => 'defaults,_netdev',
+				fstype  => 'glusterfs',
+				require => [Package['glusterfs-client'],File["/storage"]],
+			}	
+			fstab::mount { '/storage/configuration':
+				ensure  => 'mounted',
+				device  => "gluster.${internal_zone}:/config_volume",
+				options => 'defaults,_netdev',
+				fstype  => 'glusterfs',
+				require => [ Package['glusterfs-client'],File["/storage"]],
+			}			
+    	}
+		else
+		{
+			atomia::nfsmount { 'mount_content':
+				use_nfs3		 => 1,
+				mount_point  => '/storage/content',
+				nfs_location => $content_share_nfs_location
+			}
+	
+			atomia::nfsmount { 'mount_configuration':
+				use_nfs3		 => 1,
+				mount_point  => '/storage/configuration',
+				nfs_location => $config_share_nfs_location
+			}
 		}
 	}
 

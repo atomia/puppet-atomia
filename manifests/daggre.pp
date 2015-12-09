@@ -4,12 +4,13 @@
 
 ### Variable documentation
 #### global_auth_token: The authentication token clients will use to submit data to and query daggre.
-#### content_share_nfs_location: The location of the NFS share for customer website content.
-#### config_share_nfs_location: The location of the NFS share for web cluster configuration.
+#### content_share_nfs_location: The location of the NFS share for customer website content. If using the default setup with GlusterFS leave blank otherwise you need to fill it in.
+#### config_share_nfs_location: The location of the NFS share for web cluster configuration. If using the default setup with GlusterFS leave blank otherwise you need to fill it in.
 #### use_nfs3: Determines if we should use NFS3 or NFS2.
 #### ip_addr: Which IP to use when connecting to daggre from the rest of the platform.
 
 ### Validations
+##### ip_addr(advanced): %password
 ##### global_auth_token(advanced): %password
 ##### content_share_nfs_location(advanced): %nfs_share
 ##### config_share_nfs_location(advanced): %nfs_share
@@ -17,8 +18,8 @@
 
 class atomia::daggre (
 	$global_auth_token,
-	$content_share_nfs_location	= expand_default("[[content_share_nfs_location]]"),
-	$config_share_nfs_location	= expand_default("[[config_share_nfs_location]]"),
+	$content_share_nfs_location	= '',
+	$config_share_nfs_location	= '',
 	$use_nfs3			= true,
 	$ip_addr			= $ipaddress
 ) {
@@ -94,19 +95,44 @@ class atomia::daggre (
 		subscribe	=> File["/etc/default/daggre"],
 	}
 
-	if $content_share_nfs_location != '' {
-		atomia::nfsmount { 'mount_content':
-			use_nfs3	=> $use_nfs3,
-			mount_point	=> '/storage/content',
-			nfs_location	=> $content_share_nfs_location
-		}
-	}
+		$internal_zone = hiera('atomia::internaldns::zone_name','')
+		
+		if $content_share_nfs_location == '' {
+			package { 'glusterfs-client': ensure => present, }
+			
+			if !defined(File["/storage"]) {
+				file { "/storage":
+				ensure => directory,
+				}
+			}
+			
+			fstab::mount { '/storage/content':
+				ensure  => 'mounted',
+				device  => "gluster.${internal_zone}:/web_volume",
+				options => 'defaults,_netdev',
+				fstype  => 'glusterfs',
+				require => [Package['glusterfs-client'],File["/storage"]],
+			}	
+			fstab::mount { '/storage/configuration':
+				ensure  => 'mounted',
+				device  => "gluster.${internal_zone}:/config_volume",
+				options => 'defaults,_netdev',
+				fstype  => 'glusterfs',
+				require => [ Package['glusterfs-client'],File["/storage"]],
+			}			
+    	}
+		else
+		{
+			atomia::nfsmount { 'mount_content':
+				use_nfs3		 => 1,
+				mount_point  => '/storage/content',
+				nfs_location => $content_share_nfs_location
+			}
 	
-	if $config_share_nfs_location != '' {
-		atomia::nfsmount { 'mount_config':
-			use_nfs3	=> $use_nfs3,
-			mount_point	=> '/storage/configuration',
-			nfs_location	=> $config_share_nfs_location
+			atomia::nfsmount { 'mount_configuration':
+				use_nfs3		 => 1,
+				mount_point  => '/storage/configuration',
+				nfs_location => $config_share_nfs_location
+			}
 		}
-	}
 }
