@@ -10,10 +10,11 @@ class atomia::nagios::client(
     $awstats_class          = "atomia::nagios::client::awstats",
     $domainreg_class        = "atomia::nagios::client::domainreg",
     $internaldns_class      = "atomia::nagios::client::internaldns",
+    $active_directory_class = "atomia::nagios::client::active_directory",
 ) {
 
   $atomia_domain = hiera('atomia::config::atomia_domain')
-
+  $internal_domain = hiera('atomia::internaldns::zone_name','')
   if $ec2_public_ipv4 {
     $ip_address = $ec2_public_ipv4
   } else {
@@ -23,18 +24,27 @@ class atomia::nagios::client(
 	# Deploy on Windows.
 	if $operatingsystem == 'windows' {
 		class { 'nsclient':
-  			allowed_hosts => ["nagios.${atomia_domain}"],
+  			allowed_hosts => ["*"],
+        package_source_location => 'https://github.com/mickem/nscp/releases/download/0.4.4.15',
+        package_source => 'NSCP-0.4.4.15-x64.msi',
 		}
 
-    	@@nagios_host { "${fqdn}-host" :
-        	use                 => "generic-host",
-        	host_name           => $ip_address,
-        	alias               => "${atomia_role_1}",
-        	address             => $ip_address ,
-        	target              => "/etc/nagios3/conf.d/${hostname}_host.cfg",
-        	hostgroups          => "windows-all"
-
-    	}
+    case $atomia_role_1 {
+      
+      'active_directory':   {
+          $hostgroup = 'windows-all,windows-domain-controllers'
+          class { "${active_directory_class}": }
+        }      
+    }      
+     @@nagios_host { "${fqdn}-host" :
+        use                 => "generic-host",
+        host_name           => $fqdn,
+        alias			          => "${atomia_role_1} - ${fqdn}",
+        address             => $ip_address,
+        target              => "/usr/local/nagios/etc/servers/${hostname}_host.cfg",
+        hostgroups          => $hostgroup,
+        max_check_attempts  => '5'
+      }     
 
 	} else {
 	# Deploy on other OS (Linux)
@@ -122,13 +132,13 @@ class atomia::nagios::client(
     }
 
     @@nagios_host { "${fqdn}-host" :
-        use                 => "generic-host",
-        host_name           => $fqdn,
-	    alias			    => "${atomia_role_1} - ${fqdn}",
-        address             => $ip_address,
-        target              => "/usr/local/nagios/etc/servers/${hostname}_host.cfg",
-        hostgroups          => $hostgroup,
-        max_check_attempts  => '5'
+      use                 => "generic-host",
+      host_name           => $fqdn,
+      alias			    => "${atomia_role_1} - ${fqdn}",
+      address             => $ip_address,
+      target              => "/usr/local/nagios/etc/servers/${hostname}_host.cfg",
+      hostgroups          => $hostgroup,
+      max_check_attempts  => '5'
     }
 
 	if ($atomia_role_1 == "daggre") {

@@ -21,8 +21,9 @@ class atomia::linux_base {
       }
     }
         
-    concat { $factfile:
+    concat {  $factfile:
       ensure => present,
+      force => true,
       require => File['/etc/facter/facts.d'],
     }    
     
@@ -45,8 +46,8 @@ class atomia::linux_base {
 	  # Add Puppetmaster to local hosts file
 	  host { 'puppetmaster-host':
 	  	name 	=> hiera('atomia::config::puppet_hostname'),
-		ensure 	=> present,
-		ip 		=> hiera('atomia::config::puppet_ip'),
+      ensure 	=> present,
+      ip 		=> hiera('atomia::config::puppet_ip'),
 	  }
 
       Host <<| |>>

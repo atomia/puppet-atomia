@@ -19,7 +19,7 @@ mod "openssl",
   :git => "git://github.com/camptocamp/puppet-openssl.git"
 
 mod "nsclient",
-  :git => "git://github.com/stefanmortensen/puppet-nsclient.git"
+  :git => "git://github.com/stefanmortensen/puppet-nsclient"
 
 mod "nfs",
   :git => "git://github.com/stefanmortensen/puppet-nfs.git"
@@ -33,8 +33,6 @@ mod "htpasswd",
 mod "powershell",
   :git => "git://github.com/puppetlabs/puppetlabs-powershell.git"
 
-mod "download_file",
-  :git => "git://github.com/stefanmortensen/puppet-download_file.git"
 
 mod "postgresql",
   :git => "git://github.com/puppetlabs/puppetlabs-postgresql.git"
@@ -48,8 +46,7 @@ mod "resolv_conf",
 mod "glusterfs",
   :git => "git://github.com/stefanmortensen/puppet-glusterfs.git"
 
-mod "concat",
-  :git => "git://github.com/puppetlabs/puppetlabs-concat.git"
+mod 'puppetlabs-concat'
 
 mod "hosts",
   :git => "git://github.com/ghoneycutt/puppet-module-hosts.git"

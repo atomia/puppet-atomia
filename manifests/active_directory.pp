@@ -3,8 +3,8 @@
 ### Deploys and configures Active Directory
 
 ### Variable documentation
-#### domain_name: The Active Directory domain name for your environment. Ex: atomia.local
-#### netbios_domain_name: Short version of the domain name. Ex: ATOMIA
+#### domain_name: The Active Directory domain name for your environment. Example atomia.local
+#### netbios_domain_name: Short version of the domain name. Example ATOMIA
 #### restore_password: Password used for Active Directory restore
 #### app_password: Password for the Atomia apppooluser
 #### bind_password: Password for the Atomia posixuser
@@ -56,7 +56,7 @@ class atomia::active_directory (
 
   if($is_master == 1 and !$::vagrant) {
     atomia::active_directory::store_ip{ "${::fqdn}": content => $ipaddress}
-    @@host { 'domain-name-host':
+    @@host { "${fqdn}-domain-name-host":
     		name		=> "$domain_name",
     		ip	=> "${ipaddress}"
   	}

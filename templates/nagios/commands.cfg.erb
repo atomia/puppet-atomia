@@ -64,3 +64,26 @@ define command {
        command_name                             check_nrpe_1arg
        command_line                             $USER2$/check_nrpe -H $HOSTADDRESS$ -t 30 -c $ARG1$ -a $ARG2$ $ARG3$ $ARG4$
 }
+
+
+define command{
+	command_name check_nt_disk
+	command_line $USER2$/check_nt -H $HOSTADDRESS$ -p 12489 -v USEDDISKSPACE -l c -d SHOWALL -w 80 -c 90
+}
+
+define command{
+	command_name check_nt_cpu
+	command_line $USER2$/check_nt -H $HOSTADDRESS$ -p 12489 -v CPULOAD -w 80 -c 90 -l 5,80,90,10,80,90
+}
+
+define command{
+	command_name check_nt_service
+	command_line $USER2$/check_nt -H $HOSTADDRESS$ -p 12489 -v SERVICESTATE -l $ARG1$
+}
+
+define command{
+	command_name check_nt_memory
+	command_line $USER2$/check_nt -H $HOSTADDRESS$ -p 12489 -v MEMUSE -w 80 -c 90
+}
+
+

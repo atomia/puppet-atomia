@@ -41,25 +41,49 @@ define service {
 
 
 define service {
-		hostgroup_name					windows-all
-		service_description				CPU utilization
-		check_command				 	check_nscp!'CPULOAD -l 5,80,90'
-		use                             generic-service
-		notification_interval           0 ; set > 0 if you want to be renotified
-}
-
-define service {
         hostgroup_name                  windows-all
-        service_description             Memory usage
-        check_command                   check_nscp!'MEMUSE -w 80 -c 90'
+        service_description             C:\ Disk space
+        check_command                   check_nt_disk
         use                             generic-service
         notification_interval           0 ; set > 0 if you want to be renotified
 }
 
 define service {
         hostgroup_name                  windows-all
-        service_description             C:\ Disk space
-        check_command                   check_nscp!'USEDDISKSPACE -l c -w 80 -c 90'
+        service_description             CPU Utilization
+        check_command                   check_nt_cpu
+        use                             generic-service
+        notification_interval           0 ; set > 0 if you want to be renotified
+}
+
+define service {
+        hostgroup_name                  windows-all
+        service_description             Memory Utilization
+        check_command                   check_nt_memory
+        use                             generic-service
+        notification_interval           0 ; set > 0 if you want to be renotified
+}
+
+define service {
+        hostgroup_name                  windows-all
+        service_description             PING
+        check_command                   check_ping!200.0,70%!400.0,90%
+        use                             generic-service
+        notification_interval           0 ; set > 0 if you want to be renotified
+}
+
+define service {
+        hostgroup_name                  windows-domain-controllers
+        service_description             Active Directory Service
+        check_command                   check_nt_service!NTDS
+        use                             generic-service
+        notification_interval           0 ; set > 0 if you want to be renotified
+}
+
+define service {
+        hostgroup_name                  windows-domain-controllers
+        service_description             DNS Service
+        check_command                   check_nt_service!DNS
         use                             generic-service
         notification_interval           0 ; set > 0 if you want to be renotified
 }
