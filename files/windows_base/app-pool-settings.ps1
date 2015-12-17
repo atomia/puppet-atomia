@@ -8,7 +8,7 @@ try{
 		if ( $webapp.name.StartsWith("sts") ){
 			$userProfiles = (Get-ItemProperty $name processModel.loadUserProfile).Value
 			if( !$userProfiles ){
-				Set-ItemProperty $name processModel.loadUserProfile true			
+				Set-ItemProperty $name processModel.loadUserProfile true
 			}
 		}
 
@@ -17,9 +17,18 @@ try{
 			$appPool.startMode = "AlwaysRunning"
 			Set-Item $name $appPool
 		}
+		
 		$idleTimeout = (Get-ItemProperty $name processModel.idleTimeout).Value.Minutes
 		if($idleTimeout -ne 0) {
 			Set-ItemProperty $name processModel.idleTimeout "0"
+		}
+		
+		if ((Get-ItemProperty $name recycling.periodicRestart.time).Value.Ticks -ne 0) {
+			Set-ItemProperty $name recycling.periodicRestart.time 0.00:00:00
+		}
+		
+		if ((Get-ItemProperty $name recycling.periodicRestart.schedule.Collection).Count -ne 0) {
+			Clear-ItemProperty $name recycling.periodicRestart.schedule
 		}
 	}
 
