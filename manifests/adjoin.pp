@@ -134,10 +134,10 @@ class atomia::adjoin (
 }
 
 
-define atomia::adjoin::register ($content="", $order='10') {
+define atomia::adjoin::register ($content="", $order='10', $res_name="") {
   $factfile = '/etc/facter/facts.d/ad_servers.txt'
 
-  @@concat::fragment {"active_directory_${content}":
+  @@concat::fragment {"active_directory_${content}_${res_name}":
       target => $factfile,
       content => "ldap://${content} ",
       tag => 'ad_servers',

@@ -45,7 +45,6 @@
 ##### mail_reply_to: ^\S+@\S+\.\S+$
 ##### storage_server_hostname(advanced): ^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z0-9]{1,6}$
 ##### mail_dispatcher_interval(advanced): [0-9]{1,5}
-
 ##### is_iis(advanced): %hide
 ##### automationserver_encryption_cert_thumb(advanced): .*
 ##### billing_encryption_cert_thumb(advanced): .*

@@ -11,6 +11,8 @@ class atomia::nagios::client(
     $domainreg_class        = "atomia::nagios::client::domainreg",
     $internaldns_class      = "atomia::nagios::client::internaldns",
     $active_directory_class = "atomia::nagios::client::active_directory",
+    $glusterfs_class        = "atomia::nagios::client::glusterfs",
+    $internal_mailserver_class = "atomia::nagios::client::internal_mailserver",
 ) {
 
   $atomia_domain = hiera('atomia::config::atomia_domain')
@@ -32,19 +34,16 @@ class atomia::nagios::client(
     case $atomia_role_1 {
       
       'active_directory':   {
-          $hostgroup = 'windows-all,windows-domain-controllers'
-          class { "${active_directory_class}": }
-        }      
-    }      
-     @@nagios_host { "${fqdn}-host" :
-        use                 => "generic-host",
-        host_name           => $fqdn,
-        alias			          => "${atomia_role_1} - ${fqdn}",
-        address             => $ip_address,
-        target              => "/usr/local/nagios/etc/servers/${hostname}_host.cfg",
-        hostgroups          => $hostgroup,
-        max_check_attempts  => '5'
-      }     
+          class { "${active_directory_class}": 
+            hostgroup => 'windows-all,windows-domain-controllers'
+           }
+        }
+      'active_directory_replica':   {
+          class { "${active_directory_class}": 
+            hostgroup => 'windows-all,windows-domain-controllers'
+           }
+        }               
+    }       
 
 	} else {
 	# Deploy on other OS (Linux)
@@ -112,6 +111,18 @@ class atomia::nagios::client(
         'mysql':                { $hostgroup = 'linux-atomia-agents,linux-all'}
         'phpmyadmin':           { $hostgroup = 'linux-atomia-agents,linux-all'}
         'postgresql':           { $hostgroup = 'linux-atomia-agents,linux-all'}
+        'glusterfs': {
+          $hostgroup = 'linux-all'
+          class { "${glusterfs_class}": }
+         }
+        'glusterfs_replica': {
+          $hostgroup = 'linux-all'
+          class { "${glusterfs_class}": }
+         }
+        'internal_mailserver': {
+          $hostgroup = 'linux-all'
+          class { "${internal_mailserver_class}": }
+         }             
 
     }
     if ! defined(Service['nagios-nrpe-server']) {

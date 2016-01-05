@@ -238,6 +238,10 @@ class atomia::nagios::server(
       target              => '/usr/local/nagios/etc/servers/localhost_service.cfg'
   }
 
+  Nagios_host <<| |>>
+  ->
+  Nagios_service <<| |>>
+  ->
   file { 'nagios-servers-dir':
     ensure  => 'directory',
     path    => '/usr/local/nagios/etc/servers',
@@ -245,10 +249,6 @@ class atomia::nagios::server(
     recurse => true,
     notify  => Service['nagios']
   }
-  ->
-  Nagios_host <<| |>>
-  ->
-  Nagios_service <<| |>>
   ->
   exec { 'restart-nagios':
     command => '/etc/init.d/nagios reload',

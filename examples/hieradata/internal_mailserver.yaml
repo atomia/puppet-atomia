@@ -1,0 +1,4 @@
+---
+classes:
+   - atomia::internal_mailserver
+   - atomia::nagios::client

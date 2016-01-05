@@ -40,7 +40,7 @@ class atomia::active_directory (
     $public_ip = $ipaddress_eth0
   }
 
-  atomia::adjoin::register{ "${::fqdn}": content => $ipaddress}
+  atomia::adjoin::register{ "${::fqdn}": content => $ipaddress, name=> $fqdn}
 
   if !defined(File["c:/install"]) {
     file { 'c:/install':
@@ -56,10 +56,21 @@ class atomia::active_directory (
 
   if($is_master == 1 and !$::vagrant) {
     atomia::active_directory::store_ip{ "${::fqdn}": content => $ipaddress}
-    @@host { "${fqdn}-domain-name-host":
-    		name		=> "$domain_name",
-    		ip	=> "${ipaddress}"
-  	}
+
+      #@@host { "domain-name-host":
+      #    name		=> "$domain_name",
+      #    ip	=> "${ipaddress}"
+      #}
+  
+  	@@bind::zone {"domain-forward":
+      zone_contact => "contact.${domain_name}",
+      zone_ns      => ["ns0.${domain_name}"],
+      zone_serial  => '2012112901',
+      zone_ttl     => '604800',
+      zone_origin  => "${domain_name}",
+      zone_type    => "forward",
+      zone_forwarders => $ip_address,
+	   }
 
     file { 'C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role_ad.ps1':
       content => template('atomia/active_directory/atomia_role_active_directory.ps1.erb'),
@@ -77,7 +88,6 @@ class atomia::active_directory (
       onlyif      => "if((gwmi WIN32_ComputerSystem).Domain -eq '${domain_name}'){exit 1}",
       require   => Exec["enable-ad-feature"]
     }
-
 
     file { 'c:/install/add_users.ps1':
       ensure => 'file',
@@ -130,8 +140,6 @@ class atomia::active_directory (
       unless => 'if(Get-DnsClientServerAddress -InterfaceIndex 12 | Where-Object {$_.ServerAddresses -like "*${active_directory_ip}*"}) { exit 1 }',
     }
     ->
-    Host <<| |>>
-    ->
     exec { "enable-ad-feature":
       command   => "Install-windowsfeature -name AD-Domain-Services -IncludeManagementTools",
       unless    => "Import-Module ServerManager; if (@(Get-WindowsFeature AD-Domain-Services | ?{$_.Installed -match 'false'}).count -eq 0) { exit 1 }",
@@ -145,9 +153,8 @@ class atomia::active_directory (
       require   => Exec['enable-ad-feature'],
       provider  => powershell,
     }
-  }
-
-
+  }    
+    
   exec { 'sync-time':
     command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/sync_time.ps1',
     require => File['c:/install/sync_time.ps1'],
@@ -157,7 +164,7 @@ class atomia::active_directory (
 define atomia::active_directory::store_ip ($content="", $order='10') {
   $factfile = 'C:/ProgramData/PuppetLabs/facter/facts.d/domain_controller.txt'
 
-  @@concat::fragment {"active_directory_ip_${hostname}":
+  @@concat::fragment {"active_directory_ip_${fqdn}":
       target => $factfile,
       content => "active_directory_ip=${content} ",
       tag => 'dc_ip',
@@ -166,7 +173,7 @@ define atomia::active_directory::store_ip ($content="", $order='10') {
     
   $factfile_linux= '/etc/facter/facts.d/ad_server.txt'
 
-  @@concat::fragment {"active_directory_ip__linux_${hostname}":
+  @@concat::fragment {"active_directory_ip__linux_${fqdn}":
       target => $factfile_linux,
       content => "ad_server=${content}",
       tag => 'dc_ip_linux',
