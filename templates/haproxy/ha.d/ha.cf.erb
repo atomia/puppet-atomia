@@ -1,0 +1,11 @@
+autojoin	none
+watchdog	/dev/watchdog
+logfile		/var/log/ha-log
+debugfile	/var/log/ha-debug
+warntime	<%= @cluster_ip_warntime %>
+deadtime	<%= @cluster_ip_deadtime %>
+initdead	<%= @cluster_ip_initdead %>
+keepalive	<%= @cluster_ip_keepalive %>
+bcast		<%= @virtual_ips_interface_to_manage %>
+auto_failback	on
+node		<%= @haproxy_nodes.gsub(",", " ") %>

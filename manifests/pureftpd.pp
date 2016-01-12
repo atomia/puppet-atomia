@@ -8,7 +8,7 @@
 #### master_ip: The IP of the master FTP server.
 #### provisioning_host: The IP or hostname of the server running automation server, used for the automation server MySQL user to restrict access.
 #### pureftpd_password: The password for the MySQL user with the name pureftpd that the FTP server connects to the user database as.
-#### cluster_ip: The virtual IP of the FTP cluster.
+#### ftp_cluster_ip: The virtual IP of the FTP cluster.
 #### content_share_nfs_location: The location of the NFS share for customer website content.
 #### is_master: Toggles if we are provisioning the master FTP node (with the main user database) or a slave node (with a replicated database). 
 #### pureftpd_slave_password: The password for the MySQL user with the name slave_user that the user database replication uses.
@@ -24,7 +24,7 @@
 ##### master_ip(advanced): %ip
 ##### provisioning_host(advanced): ^[0-9.a-z%-]+$
 ##### pureftpd_password(advanced): %password
-##### cluster_ip(advanced): %ip
+##### ftp_cluster_ip(advanced): %ip
 ##### content_share_nfs_location(advanced): %nfs_share
 ##### is_master(advanced): %int_boolean
 ##### pureftpd_slave_password(advanced): %password

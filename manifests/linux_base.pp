@@ -98,3 +98,17 @@ define limits::conf (
 		 ],
 	 }
 }
+
+define sysctl::conf ($value) {
+	exec { "/sbin/sysctl -p":
+		alias => "sysctl",
+		refreshonly => true,
+	}
+
+	augeas { "sysctl_conf/$title":
+		context => "/files/etc/sysctl.conf",
+		onlyif  => "get $title != '$value'",
+		changes => "set $title '$value'",
+		notify  => Exec["sysctl"],
+	}
+} 

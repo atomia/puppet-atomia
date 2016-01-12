@@ -4,12 +4,15 @@
 
 ### Variable documentation
 #### sharePath: The path to the IIS shared configuration folder.
+#### cluster_ip: The virtual IP of the IIS cluster.
 
 ### Validations
 ##### sharePath(advanced): ^[a-z0-9.:_\\-]+$
+##### cluster_ip: %ip
 
 class atomia::iis(
 	$sharePath = '\\storage\configshare\iis',
+	$cluster_ip = ""
 ){
 
 	$adminUser = "WindowsAdmin"
