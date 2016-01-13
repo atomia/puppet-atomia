@@ -32,4 +32,13 @@ class atomia::atomia_database (
 		createrole => true,
 		superuser => true
 	}
+    
+    postgresql::server::pg_hba_rule { 'allow network acces for atomia user':
+        description => "Open up postgresql for access for Atomia user",
+        type => 'host',
+        database => 'all',
+        user => $atomia_user,
+        address => '0.0.0.0/0',
+        auth_method => 'password',
+    }    
 }
