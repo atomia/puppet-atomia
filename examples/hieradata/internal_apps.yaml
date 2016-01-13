@@ -1,0 +1,7 @@
+---
+classes:
+   - atomia::adjoin
+   - atomia::windows_base
+   - atomia::internal_apps
+   - atomia::resource_transformation   
+   - atomia::nagios::client

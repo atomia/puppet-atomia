@@ -11,6 +11,7 @@
 #### skip_mount: Toggles if we are to mount the content share or not.
 #### ssl_cert_key: SSL key to use if ssl is enabled
 #### ssl_cert_file: SSL cert to use if ssl is enabled
+#### server_ip: Awstats server ip
 
 ### Validations
 ##### agent_user(advanced): %username
@@ -18,11 +19,10 @@
 ##### ssl_enabled(advanced): %boolean
 ##### content_share_nfs_location(advanced): %nfs_share
 ##### configuration_share_nfs_location(advanced): %nfs_share
-##### skip_mount(advanced): [%boolean
+##### skip_mount(advanced): %boolean
 ##### ssl_cert_key(advanced): .*
 ##### ssl_cert_file(advanced): .*
-
-
+##### server_ip(advanced): .*
 
 class atomia::awstats (
 		$agent_user = "awstats",
@@ -32,7 +32,8 @@ class atomia::awstats (
 		$configuration_share_nfs_location = '',
 		$ssl_cert_key = "",
 		$ssl_cert_file = "",
-		$skip_mount        = false
+		$skip_mount        = false,
+        $server_ip = $ipaddress
 	) {
 
   package { atomia-pa-awstats: ensure => present }

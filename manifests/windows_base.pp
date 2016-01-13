@@ -76,6 +76,8 @@ class atomia::windows_base (
   $root_cert_thumb,
   $signing_cert_thumb,
   $is_iis             = 0,
+  $enable_mssql         = "false",
+  $enable_postgresql    = "true",
   ){
 
     File { source_permissions => ignore }
@@ -85,6 +87,9 @@ class atomia::windows_base (
     $domainreg_service_url = hiera('atomia::domainreg::service_url','')
     $domainreg_service_username = hiera('atomia::domainreg::service_username','')
     $domainreg_service_password = hiera('atomia::domainreg::service_password','')
+    $database_server_host = hiera('atomia::atomia_database::server_address','')
+    $database_server_username = hiera('atomia::atomia_database::atomia_user','')
+    $database_server_password = hiera('atomia::atomia_database::atomia_password','')
     $order_host = "order"
 
     if( $is_iis == 0 ){
@@ -158,7 +163,7 @@ class atomia::windows_base (
   	    }
 
   	    exec { 'app-pool-settings':
-  	        command => 'C:\Windows\sysnative\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/app-pool-settings.ps1',
+  	        command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/app-pool-settings.ps1',
   	        require => File["c:/install/app-pool-settings.ps1"]
   	      }
 
@@ -299,7 +304,7 @@ class atomia::windows_base (
       require => File['c:/install/certificates'],
     }
     exec { 'install-certificates':
-      command => 'C:\Windows\sysnative\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file C:\install\install_certificates.ps1',
+      command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file C:\install\install_certificates.ps1',
       creates => 'C:\install\install_certificates.txt',
       require => File['C:\install\install_certificates.ps1'],
       }

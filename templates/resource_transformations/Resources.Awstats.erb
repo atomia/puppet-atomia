@@ -2,10 +2,10 @@
   <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.AWStats.AWStats'])">
     <resourceList>
       <resource name="AWStats" xdt:Transform="Insert">
-        <property name="URL">http://<%= IO.popen("#{@lookup_var} awstats awstats_ip #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'').gsub(/\n/,"").gsub(/\r/,"") %>:8888/AwstatsAgentService</property>
-        <property name="Username"><%= IO.popen("#{@lookup_var} awstats agent_user #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %></property>
-        <property name="Password"><%= IO.popen("#{@lookup_var} awstats agent_password #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %></property>
-        <property name="ReportsSiteIP"><%= IO.popen("#{@lookup_var} awstats awstats_ip #{@hierapath} #{@modulepath}").read.gsub(/\n/,'').gsub(/\r/,'').gsub(/\n/,"") %></property>
+        <property name="URL">http://<%= @awstats_url %>:8888/AwstatsAgentService</property>
+        <property name="Username"><%= @awstats_username %></property>
+        <property name="Password"><%= @awstats_password %></property>
+        <property name="ReportsSiteIP"><%= @awstats_reportip %></property>
       </resource>
     </resourceList>
   </bindings>

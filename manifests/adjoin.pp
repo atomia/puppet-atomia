@@ -46,7 +46,7 @@ class atomia::adjoin (
     Host <<| |>>
 	->
     exec { 'join-domain':
-      command  => "netdom join $hostname /Domain:$domain_name  /UserD:$admin_user /PasswordD:$admin_password /REBoot:5",
+      command  => "netdom join $hostname /Domain:$domain_name  /UserD:$admin_user /PasswordD:\"$admin_password\" /REBoot:5",
       unless   => "if((gwmi WIN32_ComputerSystem).Domain -ne \"$domain_name\") { exit 1 }",
       provider => powershell
     }

@@ -12,11 +12,14 @@
 
 class atomia::atomia_database (
 	$atomia_user = "atomia",
-	$atomia_password
+	$atomia_password,
+    $server_address = $fqdn
 	){
 
+    package { 'postgresql-contrib':
+        ensure  => present
+    }
 	class { 'postgresql::server':
-		ip_mask_deny_postgres_user => '0.0.0.0/32',
 		ip_mask_allow_all_users    => '0.0.0.0/0',
 		listen_addresses           => '*',
 		ipv4acls                   => ['host all all 0.0.0.0/0 md5']

@@ -92,6 +92,6 @@ class atomia::internal_apps (
 	}
 
 	file { 'C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role_internal.txt':
-	  content => 'atomia_role_1=atomia_internal_apps',
+	  content => 'atomia_role_1=internal_apps',
 	}
 }
