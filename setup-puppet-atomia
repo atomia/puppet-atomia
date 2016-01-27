@@ -84,7 +84,7 @@ echo "
 [atomia]
    path /etc/puppet/atomia
    allow *
-" >> /etc/puppet/fileserver.conf
+" > /etc/puppet/fileserver.conf
 
 
 echo "[main]

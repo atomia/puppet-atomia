@@ -63,7 +63,7 @@ class atomia::apache_agent (
 		$pa_site_enabled = "000-default"
 	}
 
-	if $should_have_pa_apache == 1 {
+	if $should_have_pa_apache == "1" {
 		package { atomia-pa-apache:
 			ensure	=> present,
 			require	=> Package["apache2"],

@@ -6,3 +6,5 @@ classes:
    - atomia::pureftpd
    - atomia::nagios::client
 
+atomia::pureftpd::is_master: 0
+

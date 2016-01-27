@@ -34,23 +34,17 @@ class atomia::installatron (
 		}
 	}
 
-	if !defined(File["/storage/content"]) {
-		file { "/storage/content":
-			ensure => directory,
-			require => File["/storage"],
-		}
-	}
 	
 	if $content_share_nfs_location == "" {
-		package { 'gluster-client': ensure => present, }
-		
-		fstab::mount { '/storage/content':
-			ensure  => 'mounted',
-			device  => "gluster.${internal_zone}:/content_volume",
-			options => 'defaults,_netdev',
-			fstype  => 'glusterfs',
-			require => [File['/storage/content'], Package['gluster-client']],
-		}			
+		package { 'glusterfs-client': ensure => present, }
+		$internal_zone = hiera('atomia::internaldns::zone_name','')
+        fstab::mount { '/storage/content':
+            ensure  => 'mounted',
+            device  => "gluster.${internal_zone}:/web_volume",
+            options => 'defaults,_netdev',
+            fstype  => 'glusterfs',
+            require => [Package['glusterfs-client'],File["/storage"]],
+        }			
 	}
 	else {
 		atomia::nfsmount { 'mount_content':
@@ -58,6 +52,12 @@ class atomia::installatron (
 			mount_point => '/storage/content',
 			nfs_location => $content_share_nfs_location
 		}
+        if !defined(File["/storage/content"]) {
+            file { "/storage/content":
+                ensure => directory,
+                require => File["/storage"],
+            }
+        }      
 	}
 		
 

@@ -72,7 +72,8 @@ class atomia::domainreg (
 	if !defined(Class['atomia::apache_password_protect']) {
 		class { 'atomia::apache_password_protect':
 			username => $service_username,
-			password => $service_password
+			password => $service_password,
+            require => Package['atomiadomainregistration-masterserver'],
 		}
 	}
 

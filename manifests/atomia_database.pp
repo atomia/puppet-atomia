@@ -22,7 +22,7 @@ class atomia::atomia_database (
 	class { 'postgresql::server':
 		ip_mask_allow_all_users    => '0.0.0.0/0',
 		listen_addresses           => '*',
-		ipv4acls                   => ['host all all 0.0.0.0/0 md5']
+		ipv4acls                   => ['host all atomia 0.0.0.0/0 md5']
 	}
 
 	postgresql::server::role { 'atomia_postgresql_provisioning_user':

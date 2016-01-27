@@ -6,5 +6,5 @@ classes:
    - atomia::mailserver
    - atomia::nagios::client
    
- atomia::mailserver::is_master: 1
+atomia::mailserver::is_master: 0
 

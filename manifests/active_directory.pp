@@ -3,7 +3,7 @@
 ### Deploys and configures Active Directory
 
 ### Variable documentation
-#### domain_name: The Active Directory domain name for your environment. Example atomia.local
+#### domain_name: The Active Directory domain name for your environment. 
 #### netbios_domain_name: Short version of the domain name. Example ATOMIA
 #### restore_password: Password used for Active Directory restore
 #### app_password: Password for the Atomia apppooluser
@@ -12,8 +12,8 @@
 #### is_master: Specify if the server is master or slave
 
 ### Validations
-##### domain_name: %hostname
 ##### netbios_domain_name: ^[a-zA-Z0-9]+$
+##### domain_name: %hostname
 ##### restore_password(advanced): %password
 ##### app_password(advanced): %password
 ##### bind_password(advanced): %password
@@ -107,7 +107,7 @@ class atomia::active_directory (
 		command		=> "Add-DnsServerConditionalForwarderZone -Name ${internal_zone} -MasterServers ${internal_ip}",
 		provider	=> powershell,
 		require		=> Exec['Install AD forest'],
-		onlyif		=> "if((Get-DnsServerZone -Name atomia.internal).ZoneName -Match '${internal_zone}') {exit 1}",
+		onlyif		=> "if((Get-DnsServerZone -Name ${internal_zone}).ZoneName -Match '${internal_zone}') {exit 1}",
 	}
 
   } elsif($::vagrant) {

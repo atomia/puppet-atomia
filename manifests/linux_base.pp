@@ -20,15 +20,16 @@ class atomia::linux_base {
         require => File['/etc/facter'],
       }
     }
-        
-    concat {  $factfile:
-      ensure => present,
-      force => true,
-      require => File['/etc/facter/facts.d'],
-    }    
     
-    Concat::Fragment <<| tag == 'dc_ip_linux' |>>
-	
+    if($atomia_role_1 != 'nagios_server' and $atomia_role_1 != 'atomia_database'){    
+        concat {  $factfile:
+        ensure => present,
+        force => true,
+        require => File['/etc/facter/facts.d'],
+        }    
+        
+        Concat::Fragment <<| tag == 'dc_ip_linux' |>>
+    }
     if $internal_dns != '' {
       if ($atomia_role_1 != "glusterfs") and ($atomia_role_1 != "glusterfs_replica") {
         class { 'resolv_conf':
@@ -73,13 +74,8 @@ define limits::conf (
 	$value = "10000"
 	) {
 
-	# guid of this entry
 	$key = "$domain/$type/$item"
-
-	# augtool> match /files/etc/security/limits.conf/domain[.="root"][./type="hard" and ./item="nofile" and ./value="10000"]
-
 	$context = "/files/etc/security/limits.conf"
-
 	$path_list	= "domain[.=\"$domain\"][./type=\"$type\" and ./item=\"$item\"]"
 	$path_exact = "domain[.=\"$domain\"][./type=\"$type\" and ./item=\"$item\" and ./value=\"$value\"]"
 

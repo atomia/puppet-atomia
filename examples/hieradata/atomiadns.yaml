@@ -1,5 +1,5 @@
 ---
 classes:
-	- atomia::linux_base
-	- atomia::atomiarepository
-	- atomia::atomia::atomiadns
+   - atomia::linux_base
+   - atomia::atomiarepository
+   - atomia::atomiadns

@@ -65,12 +65,14 @@ class atomia::adjoin (
       } else {
         $factfile = '/etc/facter/facts.d/ad_servers.txt'
 
-        file { '/etc/facter':
-          ensure => directory,
-        }
-        file { '/etc/facter/facts.d':
-          ensure => directory,
-          require => File['/etc/facter']
+        if !defined(File['/etc/facter']) {
+            file { '/etc/facter':
+            ensure => directory,
+            }
+            file { '/etc/facter/facts.d':
+            ensure => directory,
+            require => File['/etc/facter']
+            }
         }
 
         concat { $factfile:
@@ -134,7 +136,7 @@ class atomia::adjoin (
 }
 
 
-define atomia::adjoin::register ($content="", $order='10', $res_name="") {
+define atomia::adjoin::register ($content="", $res_name="", $order='10') {
   $factfile = '/etc/facter/facts.d/ad_servers.txt'
 
   @@concat::fragment {"active_directory_${content}_${res_name}":

@@ -20,7 +20,15 @@ class atomia::internal_apps (
   }
 
 	File { source_permissions => ignore }
-
+    
+    file { 'c:/install/logonasaservice.ps1':
+      ensure => 'file',
+      source  => "puppet:///modules/atomia/internal_apps/logonasaservice.ps1",
+    }
+    exec { 'set-logonasaservice':
+      command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/logonasaservice.ps1',
+      require => File['c:/install/logonasaservice.ps1'],
+    }
 
 	if($repository == 'PublicRepository')
 	{
@@ -42,7 +50,7 @@ class atomia::internal_apps (
 		exec {'install-automationserver':
 			command	=> 'C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Executionpolicy Unrestricted -File c:/install/install_atomia_application.ps1 -repository PublicRepository -application "Atomia Automation Server"',
 			require   => [Exec['install-actiontrail'],File['unattended.ini']],
-			creates => 'C:\Program Files (x86)\Atomia\AutomationServer',
+			creates => 'C:\Program Files (x86)\Atomia\AutomationServer\AutomationServerEngine',
 		}
 		->
 		exec {'install-cloudhostingpack':
@@ -75,7 +83,7 @@ class atomia::internal_apps (
 		exec {'install-automationserver':
 			command	=> 'C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Executionpolicy Unrestricted -File c:/install/install_atomia_application.ps1 -repository TestRepository -application "Atomia Automation Server"',
 			require   => [Exec['install-actiontrail'],File['unattended.ini']],
-			creates => 'C:\Program Files (x86)\Atomia\AutomationServer',
+			creates => 'C:\Program Files (x86)\Atomia\AutomationServer\AutomationServerEngine',
 		}
 		->
 		exec {'install-cloudhostingpack':

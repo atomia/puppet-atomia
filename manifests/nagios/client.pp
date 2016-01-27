@@ -13,6 +13,9 @@ class atomia::nagios::client(
     $active_directory_class = "atomia::nagios::client::active_directory",
     $glusterfs_class        = "atomia::nagios::client::glusterfs",
     $internal_mailserver_class = "atomia::nagios::client::internal_mailserver",
+    $atomia_database_class  = "atomia::nagios::client::atomia_database",
+    $internal_apps_class = "atomia::nagios::client::internal_apps",
+    $public_apps_class = "atomia::nagios::client::public_apps",
 ) {
 
   $atomia_domain = hiera('atomia::config::atomia_domain')
@@ -26,7 +29,7 @@ class atomia::nagios::client(
 	# Deploy on Windows.
 	if $operatingsystem == 'windows' {
 		class { 'nsclient':
-  			allowed_hosts => ["*"],
+  			allowed_hosts => ["0.0.0.0/0"],
         package_source_location => 'https://github.com/mickem/nscp/releases/download/0.4.4.15',
         package_source => 'NSCP-0.4.4.15-x64.msi',
 		}
@@ -42,7 +45,17 @@ class atomia::nagios::client(
           class { "${active_directory_class}": 
             hostgroup => 'windows-all,windows-domain-controllers'
            }
-        }               
+        }
+        'public_apps': {
+           class { "${public_apps_class}": 
+            hostgroup => 'windows-all'
+           }           
+        }   
+        'internal_apps': {
+           class { "${internal_apps_class}": 
+            hostgroup => 'windows-all'
+           }           
+        }                       
     }       
 
 	} else {
@@ -122,7 +135,11 @@ class atomia::nagios::client(
         'internal_mailserver': {
           $hostgroup = 'linux-all'
           class { "${internal_mailserver_class}": }
-         }             
+         }    
+        'atomia_database': {
+          $hostgroup = 'linux-all'
+          class { "${atomia_database_class}": }
+         }                      
 
     }
     if ! defined(Service['nagios-nrpe-server']) {
@@ -141,16 +158,18 @@ class atomia::nagios::client(
         require => Package["nagios-nrpe-server"],
         notify  => Service["nagios-nrpe-server"]
     }
+    
 
     @@nagios_host { "${fqdn}-host" :
-      use                 => "generic-host",
-      host_name           => $fqdn,
-      alias			    => "${atomia_role_1} - ${fqdn}",
-      address             => $ip_address,
-      target              => "/usr/local/nagios/etc/servers/${hostname}_host.cfg",
-      hostgroups          => $hostgroup,
-      max_check_attempts  => '5'
+        use                 => "generic-host",
+        host_name           => $fqdn,
+        alias			    => "${atomia_role_1} - ${fqdn}",
+        address             => $ip_address,
+        target              => "/usr/local/nagios/etc/servers/${hostname}_host.cfg",
+        hostgroups          => $hostgroup,
+        max_check_attempts  => '5'
     }
+ 
 
 	if ($atomia_role_1 == "daggre") {
 		@@nagios_service { "${fqdn}-daggre":

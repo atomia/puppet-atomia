@@ -31,7 +31,7 @@ class atomia::fsagent (
 	$content_share_nfs_location	= "",
 	$config_share_nfs_location	= "",
 	$skip_mount			= false,
-	$enable_config_agent		= false,
+	$enable_config_agent		= "false",
 	$create_storage_files		= true,
 	$allow_ssh_key			= "",
 ) {
@@ -39,15 +39,19 @@ class atomia::fsagent (
 
 
 	package { python-software-properties: ensure => present }
-
 	package { python: ensure => present }
-
 	package { 'g++': ensure => present }
-
 	package { make: ensure => present }
-
 	package { procmail: ensure => present }
-
+    package { 'atomia-manager': ensure => present }
+    package { 'python-pkg-resources': ensure => present }
+    package { 'ruby1.9.1-dev': ensure => present }
+    
+     package { ['jgrep']:
+  		ensure => installed,
+  		provider => 'gem',
+  		require	=> [Package['ruby1.9.1-dev']],
+	 }
 	class { 'apt': }
 
 	if $operatingsystem == "Ubuntu" {
@@ -75,7 +79,7 @@ class atomia::fsagent (
 
 	package { atomia-fsagent: ensure => present, require => Package["nodejs"] }
 
-	if !$skip_mount {
+	if $skip_mount == 'false' {
 		
 		$internal_zone = hiera('atomia::internaldns::zone_name','')
 		
@@ -116,6 +120,18 @@ class atomia::fsagent (
 				mount_point  => '/storage/configuration',
 				nfs_location => $config_share_nfs_location
 			}
+            if !defined(File["/storage/content"]) {
+                file { "/storage/content":
+                    ensure => directory,
+                    require => File["/storage"],
+                }
+            }   
+            
+            file { "/storage/configuration":
+                ensure => directory,
+                mode	 => "711",
+                require => File["/storage"],
+            }                            
 		}
 	}
 
@@ -125,12 +141,7 @@ class atomia::fsagent (
 		}
 	}
 
-	if !defined(File["/storage/content"]) {
-		file { "/storage/content":
-			ensure => directory,
-			require => File["/storage"],
-		}
-	}
+
 
 	file { "/storage/content/backup":
 		ensure => "directory",
@@ -148,18 +159,12 @@ class atomia::fsagent (
 		require => [Package["atomia-fsagent"], File["/storage/content/backup"]],
 	}
 
-	file { "/storage/configuration":
-		ensure => directory,
-		mode	 => "711",
-		require => File["/storage"],
-	}
-
 	file { "/etc/cron.d/clearsessions":
 		ensure	=> file,
 		content => "15 * * * * root lockfile -r0 /var/run/clearsession.lock && (find /storage/configuration/php_session_path -mtime +2 -exec rm -f '{}' '+'; rm -f /var/run/clearsession.lock) \n"
 	}
 
-	if $enable_config_agent {
+	if $enable_config_agent == "true" {
 		file { "/etc/default/fsagent-ssl":
 			owner		=> root,
 			group		=> root,
@@ -234,5 +239,28 @@ class atomia::fsagent (
 			mode => "600",
 			content => $allow_ssh_key
 		}
+	}
+    $appdomain = hiera('atomia::windows_base::appdomain','')
+    file { '/etc/atomia.conf':
+        owner   => 'root',
+        group   => 'root',
+        mode    => "0644",
+        content => template('atomia/nagios/atomia.conf.erb'),
+        require => Package["atomia-manager"]
+    }
+    
+    
+    file { '/root/setup_atomia_account.sh':
+        owner   => 'root',
+        group   => 'root',
+        mode    => "0777",
+        source  => "puppet:///modules/atomia/nagios/setup_atomia_account.sh",
+        require => [Package['jgrep'],Package['atomia-manager'], Package['python-pkg-resources']],
+        notify  => Exec['/root/setup_atomia_account.sh']
+	}
+
+	exec { '/root/setup_atomia_account.sh':
+		require	    => [File['/root/setup_atomia_account.sh'], File['/etc/atomia.conf']],
+        
 	}
 }

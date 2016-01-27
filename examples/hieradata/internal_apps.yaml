@@ -3,5 +3,5 @@ classes:
    - atomia::adjoin
    - atomia::windows_base
    - atomia::internal_apps
-   - atomia::resource_transformation   
+   - atomia::resource_transformations
    - atomia::nagios::client

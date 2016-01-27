@@ -10,7 +10,7 @@
 #### slave_password: The password for the MySQL user with the name slave_user that the mail user database replication uses.
 #### install_antispam: Toggles if we are to configure spam and virus filtering.
 #### cluster_ip: The virtual IP of the mail cluster.
-#### mail_share_nfs_location: The location of the NFS share for mailbox content.
+#### mail_share_nfs_location: The location of the NFS share for mailbox content. Leave empty if using the default storage setup with GlusterFS.
 #### use_nfs3: Toggles if we are to use NFSv3 for the NFS mount.
 #### skip_mount: Toggles if we are to mount the content share or not.
 #### mailbox_base: The mountpoint where the mailbox content share is mounted.
@@ -24,13 +24,13 @@
 #### dovecot_override_config: If set will override the dovecot.conf configuration file.
 
 ### Validations
-##### provisioning_host(advanced): ^[0-9.a-z%-]+$
-##### is_master(advanced): %int_boolean
+##### provisioning_host: ^[0-9.a-z%-]+$
+##### is_master(advanced): %hide
 ##### master_ip(advanced): %ip
 ##### agent_password(advanced): %password
 ##### slave_password(advanced): %password
 ##### install_antispam(advanced): %int_boolean
-##### cluster_ip(advanced): %ip
+##### cluster_ip: %ip
 ##### mail_share_nfs_location(advanced): %nfs_share
 ##### use_nfs3(advanced): %int_boolean
 ##### skip_mount(advanced): %int_boolean
@@ -112,7 +112,24 @@ class atomia::mailserver (
 			mode => "775",
 			require => User["virtual"]
 		}
-	}
+	} else {
+			$internal_zone = hiera('atomia::internaldns::zone_name','')
+			package { 'glusterfs-client': ensure => present, }
+			
+			if !defined(File["/storage"]) {
+				file { "/storage":
+				ensure => directory,
+				}
+			}
+			
+			fstab::mount { '/storage/content':
+				ensure  => 'mounted',
+				device  => "gluster.${internal_zone}:/mail_volume",
+				options => 'defaults,_netdev',
+				fstype  => 'glusterfs',
+				require => [Package['glusterfs-client'],File["/storage"]],
+			}        
+    }
 
 	if $mysql_server_id == ""
 	{

@@ -253,7 +253,7 @@ class atomia::glusterfs (
 
 	file { '/etc/samba/smbusers':
 		ensure	=> present,
-		content => "root = ${$netbios_domain_name}\\Administrator",
+		content => "root = ${$netbios_domain_name}\\Administrator,${$netbios_domain_name}\\WindowsAdmin ",
 		require => Package['samba'],
 	}
 

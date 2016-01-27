@@ -161,7 +161,7 @@ class atomia::awstats (
 			mode    => "444",
 			source  => "puppet:///modules/atomia/awstats/awstats.conf",
 			notify	=> Service["apache2"],
-			require => Package['awstats'],
+			require => [Package['awstats'],Package['atomia-pa-awstats']],
 	}
 	
 	file { "/etc/awstats/awstats.conf.local":

@@ -46,7 +46,8 @@ mod "resolv_conf",
 mod "glusterfs",
   :git => "git://github.com/stefanmortensen/puppet-glusterfs.git"
 
-mod 'puppetlabs-concat'
+mod 'concat',
+   :git => "git://github.com/puppetlabs/puppetlabs-concat.git"
 
 mod "hosts",
   :git => "git://github.com/ghoneycutt/puppet-module-hosts.git"

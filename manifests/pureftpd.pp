@@ -9,7 +9,7 @@
 #### provisioning_host: The IP or hostname of the server running automation server, used for the automation server MySQL user to restrict access.
 #### pureftpd_password: The password for the MySQL user with the name pureftpd that the FTP server connects to the user database as.
 #### ftp_cluster_ip: The virtual IP of the FTP cluster.
-#### content_share_nfs_location: The location of the NFS share for customer website content.
+#### content_share_nfs_location: The location of the NFS share for customer website content. Leave blank if using the default setup with GlusterFS
 #### is_master: Toggles if we are provisioning the master FTP node (with the main user database) or a slave node (with a replicated database). 
 #### pureftpd_slave_password: The password for the MySQL user with the name slave_user that the user database replication uses.
 #### mysql_root_password: The password for the MySQL root user.
@@ -22,11 +22,11 @@
 ##### agent_user(advanced): %username
 ##### agent_password(advanced): %password
 ##### master_ip(advanced): %ip
-##### provisioning_host(advanced): ^[0-9.a-z%-]+$
+##### provisioning_host: ^[0-9.a-z%-]+$
 ##### pureftpd_password(advanced): %password
-##### ftp_cluster_ip(advanced): %ip
+##### ftp_cluster_ip: %ip
 ##### content_share_nfs_location(advanced): %nfs_share
-##### is_master(advanced): %int_boolean
+##### is_master(%advanced): %hide
 ##### pureftpd_slave_password(advanced): %password
 ##### mysql_root_password(advanced): %password
 ##### ssl_enabled(advanced): %int_boolean
@@ -41,7 +41,7 @@ class atomia::pureftpd (
 	$provisioning_host		= "%",
 	$pureftpd_password,
 	$ftp_cluster_ip,
-	$content_share_nfs_location	= ''
+	$content_share_nfs_location	= '',
 	$is_master			= 1,
 	$pureftpd_slave_password,
 	$mysql_root_password,
@@ -84,19 +84,22 @@ class atomia::pureftpd (
 		}
 	}
 
-	if $is_master == "1" {
+	if $is_master == 1 {
+        $override_options = {
+				'mysqld' => {
+					'server_id'	=> '1',
+					'log_bin'	=> '/var/log/mysql/mysql-bin.log',
+					'binlog_do_db'	=> 'pureftpd',
+                    'expire_logs_days' => 5,
+					'bind-address'	=> "${master_ip}",
+				}
+			}
 		class { 'mysql::server':
 			restart			=> true,
 			root_password		=> $mysql_root_password,
 			remove_default_accounts	=> true,
-			override_options => {
-				mysqld => {
-					'server_id'	=> '1',
-					'log_bin'	=> '/var/log/mysql/mysql-bin.log',
-					'binlog_do_db'	=> 'pureftpd',
-					'bind_address'	=> $master_ip,
-				}
-			}
+            override_options        => $override_options
+
 		}
 
 		mysql_user { "create-automationserver-user":

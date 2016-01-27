@@ -212,7 +212,14 @@ class atomia::nagios::server(
     }
   }
 
-
+  file { 'nagios-servers-dir':
+    ensure  => 'directory',
+    path    => '/usr/local/nagios/etc/servers',
+    owner   => 'nagios',
+    recurse => true,
+    notify  => Service['nagios']
+  }
+  ->
   @@nagios_host { 'localhost-host' :
     use                 => 'generic-host',
     host_name           => 'localhost',
@@ -221,7 +228,7 @@ class atomia::nagios::server(
     target              => '/usr/local/nagios/etc/servers/localhost_host.cfg',
     max_check_attempts  => '5'
   }
-
+  ->
   @@nagios_service { 'localhost-http':
     host_name           => 'localhost',
     service_description => 'HTTP Linux',
@@ -229,7 +236,7 @@ class atomia::nagios::server(
     use                 => 'generic-service',
     target              => '/usr/local/nagios/etc/servers/localhost_service.cfg'
   }
-
+  ->
   @@nagios_service { "localhost-hcp":
       host_name               => "localhost",
       service_description     => "HCP login",
@@ -237,18 +244,15 @@ class atomia::nagios::server(
       use                     => "generic-service",
       target              => '/usr/local/nagios/etc/servers/localhost_service.cfg'
   }
+  
 
   Nagios_host <<| |>>
   ->
   Nagios_service <<| |>>
-  ->
-  file { 'nagios-servers-dir':
-    ensure  => 'directory',
-    path    => '/usr/local/nagios/etc/servers',
-    owner   => 'nagios',
-    recurse => true,
-    notify  => Service['nagios']
-  }
+  ->  
+  exec { "/bin/chown -R nagios:nagios /usr/local/nagios/etc/servers":
+    unless => "/bin/sh -c '[ $(/usr/bin/stat -c %U nagios) == nagios ]'",
+  }  
   ->
   exec { 'restart-nagios':
     command => '/etc/init.d/nagios reload',
