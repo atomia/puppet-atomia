@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+This file is managed by Puppet, any editing done directly will be overwritten
+
+Enables Installatron
+-->
+<provisioningDescription xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+    <servicesDescription>
+        <simpleServiceList>
+            <simpleService name="PackageInstalled" description="Simple service for installing and working with a package." providingModule="Atomia.Provisioning.Modules.Installatron.Installatron" xdt:Transform="SetAttributes(providingModule)" xdt:Locator="Match(name)"/>
+            <simpleService name="PackageBackup" description="Simple service for installing and working with a package." providingModule="Atomia.Provisioning.Modules.Installatron.Installatron" xdt:Transform="SetAttributes(providingModule)" xdt:Locator="Match(name)"/>
+            <simpleService name="PackageQueryService" description="Simple dummy service for querying Atomia Web Installer without installing a package." providingModule="Atomia.Provisioning.Modules.Installatron.Installatron" xdt:Transform="SetAttributes(providingModule)" xdt:Locator="Match(name)"/>
+    </simpleServiceList>
+   </servicesDescription>
+</provisioningDescription>

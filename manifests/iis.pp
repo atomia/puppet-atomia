@@ -5,14 +5,17 @@
 ### Variable documentation
 #### sharePath: The path to the IIS shared configuration folder. Leave blank if using the default GlusterFS setup
 #### cluster_ip: The virtual IP of the IIS cluster.
+#### first_node: The hostname of the first node in the cluster
 
 ### Validations
 ##### sharePath(advanced): .*
 ##### cluster_ip: %ip
+##### first_node(advanced): .*
 
 class atomia::iis(
 	$sharePath = "",
-	$cluster_ip = ""
+	$cluster_ip = "",
+    $first_node = $fqdn
 ){
 
 	$adminUser = "WindowsAdmin"
@@ -70,7 +73,7 @@ class atomia::iis(
 
 	exec { 'setup_iis':
 		provider => powershell,
-		command => "c:/install/setup_iis.ps1 enable ${realSharePath} '${adDomain}\\WindowsAdmin' '$adminPassword'",
+		command => "c:/install/setup_iis.ps1 -Action 'enable' -UNCPath '${realSharePath}' -adminUser '${adDomain}\\WindowsAdmin' -adminPassword '$adminPassword'",
 		require => [File["c:/install/setup_iis.ps1"], File["c:/install/IISSharedConfigurationEnabler.exe"], File["c:/install/LsaStorePrivateData.exe"], File["c:/install/RegistryUnlocker.exe"]],
 		creates => 'c:\windows\install\installed'
 	}

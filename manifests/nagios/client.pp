@@ -16,6 +16,7 @@ class atomia::nagios::client(
     $atomia_database_class  = "atomia::nagios::client::atomia_database",
     $internal_apps_class = "atomia::nagios::client::internal_apps",
     $public_apps_class = "atomia::nagios::client::public_apps",
+    $iis_class = "atomia::nagios::client::iis",
 ) {
 
   $atomia_domain = hiera('atomia::config::atomia_domain')
@@ -55,7 +56,12 @@ class atomia::nagios::client(
            class { "${internal_apps_class}": 
             hostgroup => 'windows-all'
            }           
-        }                       
+        }
+        'iis': {
+           class { "${iis_class}": 
+            hostgroup => 'windows-all'
+           }           
+        }                                   
     }       
 
 	} else {
@@ -91,13 +97,13 @@ class atomia::nagios::client(
           class { "${$apache_agent_class}": }
         }
 
-        'atomiadns_master': {
+        'atomiadns': {
           $hostgroup = 'linux-dns,linux-all'
           class { "${atomiadns_master_class}": }
           class { "${nameserver_class}": }
         }
 
-        'nameserver': {
+        'atomiadns_powerdns': {
           $hostgroup = 'linux-dns,linux-all'
           class { "${nameserver_class}": }
         }

@@ -5,7 +5,7 @@
         <property name="URL"><%= @atomiadns_url %></property>
         <property name="Username"><%= @atomiadns_username %></property>
         <property name="Password"><%= @atomiadns_password %></property>
-        <property name="Nameservers"><%= @atomiadns_nameservers %></property>
+        <property name="Nameservers"><%= @atomiadns_nameservers.gsub('[','').gsub(']','') %></property>
         <property name="NameserverGroup"><%= @atomiadns_nameserverGroup %></property>
       </resource>
     </resourceList>

@@ -102,4 +102,13 @@ class atomia::internal_apps (
 	file { 'C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role_internal.txt':
 	  content => 'atomia_role_1=internal_apps',
 	}
+    
+    # Automation Server default transformations
+
+     file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/ProvisioningDescriptions/Transformation Files/ProvisioningDescription.Installatron.xml' :
+      ensure => 'file',
+      content  => template('atomia/transformations/ProvisioningDescriptions/ProvisioningDescription.Installatron.xml.erb'),
+      require => Exec['install-automationserver'],
+    }
+        
 }

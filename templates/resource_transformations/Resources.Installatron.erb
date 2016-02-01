@@ -1,0 +1,11 @@
+<resourceDescription xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+  <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.Installatron.Installatron'])">
+    <resourceList>
+      <resource name="Installatron" xdt:Transform="Insert">
+        <property name="URL">http://<%= @installatron_url %>/installatron/</property>
+        <property name="key"><%= @installatron_key %></property>
+        <property name="StoragePath">/storage/content</property>  
+      </resource>
+    </resourceList>
+  </bindings>
+</resourceDescription>

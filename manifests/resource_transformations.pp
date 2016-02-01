@@ -106,10 +106,10 @@ class atomia::resource_transformations (
       require => File['C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/'],
     }
 
-    $apache_url = hiera('atomia::apache::apache_agent_ip', '')
-    $apache_username = hiera('atomia::apache::username', '')
-    $apache_password = hiera('atomia::apache::password', '')
-    $apache_clusterIp = hiera('atomia::apache::cluster_ip', '')
+    $apache_url = hiera('atomia::apache_agent::apache_agent_ip', '')
+    $apache_username = hiera('atomia::apache_agent::username', '')
+    $apache_password = hiera('atomia::apache_agent::password', '')
+    $apache_clusterIp = hiera('atomia::apache_agent::cluster_ip', '')
     file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.ApacheAgent.xml' :
       ensure => 'file',
       content  => template('atomia/resource_transformations/Resources.ApacheAgent.erb'),
@@ -131,9 +131,17 @@ class atomia::resource_transformations (
       require => File['C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/'],
     }
     
-    #TODO: Fix these 2
-    $iis_ip = ''
-    $iis_clusterIp = ''
+
+    $installatron_url = hiera('atomia::installatron::installatron_hostname','')
+    $installatron_key = hiera('atomia::installatron::authentication_key','')
+    file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.Installatron.xml' :
+      ensure => 'file',
+      content  => template('atomia/resource_transformations/Resources.Installatron.erb'),
+      require => File['C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/'],
+    }
+        
+    $iis_ip = hiera('atomia::iis::first_node','')
+    $iis_clusterIp = hiera('atomia::iis::cluster_ip','')
     file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.IIS.xml' :
       ensure => 'file',
       content  => template('atomia/resource_transformations/Resources.IIS.erb'),

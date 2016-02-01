@@ -6,16 +6,20 @@
 #### license_key: The license key needed to use Installatron server.
 #### use_nfs3: Toggles if we are to use NFSv3 for the NFS mount.
 #### content_share_nfs_location: The location of the NFS share for customer website content. Leave blank if using the default GlusterFS setup, otherwise fill it in.
-
+#### installatron_hostname: The hostname of the Installatron server
+#### authentication_key: You will need to get this after installation is complete, you can find it with the command grep key /usr/local/installatron/etc/settings.ini, paste it here and run provisioning again
 ### Validations
 ##### license_key: ^.+$
+##### authentication_key: .*
 ##### use_nfs3(advanced): %int_boolean
 ##### content_share_nfs_location(advanced): %nfs_share
-
+##### installatron_hostname(advanced): .*
 class atomia::installatron (
 		$license_key,
 		$use_nfs3 = 1,
 		$content_share_nfs_location = "",
+        $installatron_hostname = $fqdn,
+        $authentication_key
 	) {
 		
 	package { [
@@ -80,7 +84,7 @@ class atomia::installatron (
 		require		=> File['/etc/profile.d/installatron-key.sh'],
 	}
 
-	file { '/etc/apache2/sites-enabled/000-default':
+	file { '/etc/apache2/sites-enabled/000-default.conf':
 		ensure		=> absent,
 		require		=> Package["apache2"],
 		notify		=> Service["apache2"]

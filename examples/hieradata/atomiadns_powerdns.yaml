@@ -3,3 +3,4 @@ classes:
    - atomia::linux_base
    - atomia::atomiarepository
    - atomia::atomiadns_powerdns
+   - atomia::nagios::client
