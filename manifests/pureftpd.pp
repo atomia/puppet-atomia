@@ -307,7 +307,7 @@ class atomia::pureftpd (
 		],
 	}
 
-	if $ssl_enabled != 0 {
+	if $ssl_enabled != "0" {
 		file { "/etc/ssl":
 			ensure	=> directory,
 			owner	=> "root",

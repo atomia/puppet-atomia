@@ -17,6 +17,21 @@ class atomia::nagios::client::awstats (
     use						        => "generic-service",
     target              	=> "/usr/local/nagios/etc/servers/${hostname}_service.cfg",
   }
+  
+  @@nagios_service { "${fqdn}-apace-process-awstats":
+    host_name				       => $fqdn,
+    service_description	  => "Apache processes",
+    check_command			    => "check_nrpe!check_apache_procs",
+    use						        => "generic-service",
+    target              	=> "/usr/local/nagios/etc/servers/${hostname}_service.cfg",
+  }  
 
+  @@nagios_service { "${fqdn}-awstats-process-awstats":
+    host_name				       => $fqdn,
+    service_description	  => "Awstats agent processes",
+    check_command			    => "check_nrpe!check_awstats_procs",
+    use						        => "generic-service",
+    target              	=> "/usr/local/nagios/etc/servers/${hostname}_service.cfg",
+  }  
 
 }

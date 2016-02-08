@@ -3,9 +3,9 @@ class atomia::nagios::client::fsagent (
   ) {
 
   $fsagent_ip = generate("/etc/puppet/modules/atomia/files/lookup_variable.sh", "fsagent", "fsagent_ip")
-  $fsagent_url = "http://${fsagent_ip}:10201"
-  $fsagent_username = generate("/etc/puppet/modules/atomia/files/lookup_variable.sh", "fsagent", "username")
-  $fsagent_password = generate("/etc/puppet/modules/atomia/files/lookup_variable.sh", "fsagent", "password")
+  $fsagent_url = "http://${hiera('atomia::fsagent::fsagent_ip','')}:10201"
+  $fsagent_username = hiera('atomia::fsagent::username','')
+  $fsagent_password = hiera('atomia::fsagent::password','')
   @@nagios_service { "${fqdn}-fsagent-mountpoints":
     host_name				       => $fqdn,
     service_description	  => "NFS mounts",

@@ -204,15 +204,22 @@ command[check_total_procs]=/usr/lib/nagios/plugins/check_procs -w 150 -c 200
 command[check_all_disks]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -e
 command[check_apache_procs]=/usr/lib/nagios/plugins/check_procs -c 1: -w 3: -C apache2
 command[check_php_procs]=/usr/lib/nagios/plugins/check_procs -c 100 -w 50 -a php
+command[check_bind_proc]=/usr/lib/nagios/plugins/check_procs -c 1: -C named
 command[check_powerdnssync_procs]=/usr/lib/nagios/plugins/check_procs -c 1: -a atomiapowerdnssync
 command[check_powerdns_procs]=/usr/lib/nagios/plugins/check_procs -c 2: -a pdns_server
+command[check_postgres_proc]=/usr/lib/nagios/plugins/check_procs -c 4:100 -a postgres
+command[check_awstats_procs]=/usr/lib/nagios/plugins/check_procs -c 1: -a awstats-agent
+command[check_daggre_proc]=/usr/lib/nagios/plugins/check_procs -c 1: -a daggre
+command[check_cronagent_proc]=/usr/lib/nagios/plugins/check_procs -c 1: -a atomia-cronagent
+command[check_pureftpd_proc]=/usr/lib/nagios/plugins/check_procs -c 1: -a pure-ftpd
+
 
 <% $hierapath = "/etc/puppet/hieradata" %>
 <% $modulepath = "/etc/puppet/modules/atomia/manifests" %>
 <% $lookup_var     = "/etc/puppet/modules/atomia/files/lookup_variable.sh" %>
 
-command[check_daggre_ftp]=/usr/lib/nagios/plugins/atomia/check_daggre.pl --uri "http://<%= @public_ip %>:999/g?a=<%= IO.popen("#{$lookup_var} daggre global_auth_token #{$hierapath} #{$modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %>&o=100000&latest=ftp_storage" --timeout 5 --days 1
-command[check_daggre_weblog]=/usr/lib/nagios/plugins/atomia/check_daggre.pl --uri "http://<%= @public_ip %>:999/g?a=<%= IO.popen("#{$lookup_var} daggre global_auth_token #{$hierapath} #{$modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %>&o=100000&latest=web_traffic_bytes" --timeout 5 --days 1
+command[check_daggre_ftp]=/usr/local/nagios/libexec/atomia/check_daggre.pl --uri "<%= @daggre_check_ftp_url %>" --timeout 5 --days 1
+command[check_daggre_weblog]=/usr/local/nagios/libexec/atomia/check_daggre.pl --uri "<%= @daggre_check_traffic_url %>" --timeout 5 --days 1
 
 command[check_all_mountpoints] = /usr/lib/nagios/plugins/atomia/check_mountpoints.sh -A
 

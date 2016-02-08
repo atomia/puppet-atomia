@@ -42,7 +42,10 @@ class atomia::nagios::server(
       'atomia-manager',
       'ruby1.9.1-dev',
       'python-pkg-resources',
-      'nagios-nrpe-plugin']:
+      'nagios-nrpe-plugin',
+      'libjson-perl',
+      'libdatetime-perl',
+      'libdatetime-format-iso8601-perl']:
       ensure => installed,
     }
 
@@ -126,6 +129,7 @@ class atomia::nagios::server(
   }
   # Done installing Nagios
 
+  $hcp_url = "https://${hiera('atomia::windows_base::hcp_host','')}.${hiera('atomia::config::atomia_domain','')}"
   file { '/usr/local/nagios/etc/objects/atomia-commands.cfg':
     ensure  => 'file',
     owner   => 'nagios',
@@ -146,6 +150,11 @@ class atomia::nagios::server(
     content => template('atomia/nagios/services.cfg.erb'),
     require => Exec['install_nagios']
   }
+    
+  $daggre_ip = hiera('atomia::daggre::ip_addr','')
+  $daggre_token = hiera('atomia::daggre::global_auth_token','')
+  $daggre_check_ftp_url = "http://${daggre_ip}:999/g?a=${daggre_token}&o=100000&latest=ftp_storage"
+  $daggre_check_traffic_url = "http://${daggre_ip}:999/g?a=${daggre_token}&o=100000&latest=web_traffic_bytes"
 
   file { '/etc/nagios/nrpe.cfg':
     ensure  => 'file',

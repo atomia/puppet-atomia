@@ -15,7 +15,7 @@ class atomia::nagios::client::domainreg (
   @@nagios_service { "${fqdn}-domainreg":
       host_name               => $fqdn,
       service_description     => "Domainreg API .com",
-      check_command           => "check_nrpe!check_domainreg!foo.com",
+      check_command           => "check_nrpe_1arg!check_domainreg!atomia-test-domain.com",
       use                     => "generic-service",
       target              	=> "/usr/local/nagios/etc/servers/${hostname}_service.cfg",
       owner                 => "nagios"

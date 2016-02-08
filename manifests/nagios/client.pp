@@ -17,6 +17,10 @@ class atomia::nagios::client(
     $internal_apps_class = "atomia::nagios::client::internal_apps",
     $public_apps_class = "atomia::nagios::client::public_apps",
     $iis_class = "atomia::nagios::client::iis",
+    $daggre_class = "atomia::nagios::client::daggre",
+    $cronagent_class = "atomia::nagios::client::cronagent",
+    $pureftpd_class = "atomia::nagios::client::pureftpd",
+    $mailserver_class = "atomia::nagios::client::mailserver",
 ) {
 
   $atomia_domain = hiera('atomia::config::atomia_domain')
@@ -100,7 +104,6 @@ class atomia::nagios::client(
         'atomiadns': {
           $hostgroup = 'linux-dns,linux-all'
           class { "${atomiadns_master_class}": }
-          class { "${nameserver_class}": }
         }
 
         'atomiadns_powerdns': {
@@ -113,8 +116,16 @@ class atomia::nagios::client(
           class { "${awstats_class}": }
         }
 
-        'cronagent':            { $hostgroup = 'linux-atomia-agents,linux-all'}
-        'daggre':               { $hostgroup = 'linux-atomia-agents,linux-all'}
+        'cronagent':              {
+          $hostgroup = 'linux-atomia-agents,linux-all'
+          class { "${cronagent_class}":
+          }
+        }
+        'daggre':              {
+          $hostgroup = 'linux-atomia-agents,linux-all'
+          class { "${daggre_class}":
+          }
+        }
         'fsagent':              {
           $hostgroup = 'linux-atomia-agents,linux-all'
           class { "${fsagent_class}":
@@ -122,11 +133,21 @@ class atomia::nagios::client(
           }
         }
         'nameserver':           { $hostgroup = 'linux-dns,linux-all'}
-        'pureftpd':             { $hostgroup = 'linux-ftp-servers,linux-all'}
+        'pureftpd': {
+          $hostgroup = 'linux-all'
+          class { "${pureftpd_class}": }
+         }
+         'pureftpd_slave': {
+          $hostgroup = 'linux-all'
+          class { "${pureftpd_class}": }
+         }        
         'haproxy':              { $hostgroup = 'linux-atomia-agents,linux-all'}
         'iis':                  { $hostgroup = 'linux-atomia-agents,linux-all'}
         'installatron':         { $hostgroup = 'linux-atomia-agents,linux-all'}
-        'mailserver':           { $hostgroup = 'linux-atomia-agents,linux-all'}
+        'glusterfs': {
+          $hostgroup = 'linux-all'
+          class { "${mailserver_class}": }
+         }
         'mysql':                { $hostgroup = 'linux-atomia-agents,linux-all'}
         'phpmyadmin':           { $hostgroup = 'linux-atomia-agents,linux-all'}
         'postgresql':           { $hostgroup = 'linux-atomia-agents,linux-all'}
@@ -155,6 +176,10 @@ class atomia::nagios::client(
       }
     }
 
+    $daggre_ip = hiera('atomia::daggre::ip_addr','')
+    $daggre_token = hiera('atomia::daggre::global_auth_token','')
+    $daggre_check_ftp_url = "http://${daggre_ip}:999/g?a=${daggre_token}&o=100000&latest=ftp_storage"
+    $daggre_check_traffic_url = "http://${daggre_ip}:999/g?a=${daggre_token}&o=100000&latest=web_traffic_bytes"
     # Configuration files
     file { '/etc/nagios/nrpe.cfg':
         owner   => 'root',

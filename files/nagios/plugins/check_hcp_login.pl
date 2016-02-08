@@ -1,6 +1,5 @@
 #!/usr/bin/perl -w
 
-use strict;
 use warnings;
 
 use WWW::Mechanize;
@@ -40,7 +39,10 @@ exit_unknown("usage: $0 --uri https://hcp.somehost.com/ --user someuser --pass s
 	defined($hcp_uri) && defined($hcp_user) && defined($hcp_pass) &&
 	defined($timeout) && defined($string_match);
 
-my $mech = WWW::Mechanize->new();
+my $mech = WWW::Mechanize->new(ssl_opts => {
+    SSL_verify_mode => IO::Socket::SSL::SSL_VERIFY_NONE,
+    verify_hostname => 0, 
+});
 exit_unknown("error constructing WWW::Mechanize browser object") unless defined($mech);
 
 $mech->timeout($timeout) || exit_unknown("error setting timeout");

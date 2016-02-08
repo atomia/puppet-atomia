@@ -1,7 +1,3 @@
-<% $hierapath = "/etc/puppet/hieradata" %>
-<% $modulepath = "/etc/puppet/modules/atomia/manifests" %>
-<% $lookup_var     = "/etc/puppet/modules/atomia/files/lookup_variable.sh" %>
-<% $hcp_url = "https://" + IO.popen("#{$lookup_var} windows_base hcp #{$hierapath} #{$modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') + "." + IO.popen("#{$lookup_var} windows_base appdomain #{$hierapath} #{$modulepath}").read.gsub(/\n/,'').gsub(/\r/,'') %>
 ###############################################################################
 # COMMANDS.CFG - COMMAND DEFINITIONS FOR NAGIOS
 ###############################################################################
@@ -21,7 +17,7 @@ define command {
 
 define command {
 	command_name	check_hcp
-	command_line	$USER1$/atomia/check_hcp_login.pl --uri "<%= $hcp_url %>/100000" --user $ARG1$ --pass $ARG2$ --timeout 60 --match "Quick guide"
+	command_line	$USER1$/atomia/check_hcp_login.pl --uri "<%= @hcp_url %>/100000" --user $ARG1$ --pass $ARG2$ --timeout 60 --match "Quick guide"
 }
 
 define command {

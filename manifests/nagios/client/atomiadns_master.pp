@@ -11,6 +11,7 @@ class atomia::nagios::client::atomiadns_master (
     check_command			    => "check_nrpe!check_total_procs",
     use						        => "generic-service",
     target              	=> "/usr/local/nagios/etc/servers/${hostname}_service.cfg",
+    owner                 => "nagios"
   }
 
   @@nagios_service { "${fqdn}-atomiadns":
@@ -19,5 +20,9 @@ class atomia::nagios::client::atomiadns_master (
       check_command           => "check_nrpe_1arg!check_atomiadns!atomia-nagios-test.net!$atomiadns_user!$atomiadns_password",
       use                     => "generic-service",
       target                  => "/usr/local/nagios/etc/servers/${hostname}_service.cfg",
+      owner                 => "nagios"
   }
 }
+
+
+
