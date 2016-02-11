@@ -69,7 +69,7 @@ class atomia::windows_base (
   $mail_server_password = "",
   $mail_server_use_ssl  = "false",
   $mail_reply_to    = "",
-  $storage_server_hostname,
+  $storage_server_hostname = "",
   $mail_dispatcher_interval = "30",
   $automationserver_encryption_cert_thumb,
   $billing_encryption_cert_thumb,

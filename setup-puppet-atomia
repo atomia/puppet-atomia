@@ -77,14 +77,12 @@ echo "---
 :logger: console
 " > /etc/puppet/hiera.yaml
 
-echo "
-[atomiacerts]
+echo "[atomiacerts]
    path /etc/puppet/atomiacerts
    allow *
 [atomia]
    path /etc/puppet/atomia
-   allow *
-" > /etc/puppet/fileserver.conf
+   allow * " > /etc/puppet/fileserver.conf
 
 
 echo "[main]

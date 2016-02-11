@@ -1,0 +1,18 @@
+<resourceDescription xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+  <bindings  xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.OpenStack.OpenStack'])">
+    <resourceList>
+        <resource name="Openstack01" xdt:Transform="Insert">
+            <property name="AdminUser"><%=@openstack_admin_user%></property>
+            <property name="AdminPassword"><%=@openstack_admin_password%></property>
+            <property name="OSDomain"><%=@openstack_domain%></property>
+            <property name="IdentityUri"><%=@openstack_identity_uri%></property>
+            <property name="ComputeUri"><%=@openstack_compute_uri%></property>
+            <property name="NetworkUri"><%=@openstack_network_uri%></property>
+            <property name="CeilometerUri"><%=@openstack_ceilometer_uri%></property>
+            <property name="CinderUri"><%=@openstack_cinder_uri%></property>
+            <property name="Hypervisor"><%=@openstack_hypervisor%></property>
+            <property name="ExternalGatewayId"><%=@openstack_external_gateway%></property>
+        </resource>
+    </resourceList>
+  </bindings>
+</resourceDescription>

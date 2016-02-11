@@ -156,4 +156,20 @@ class atomia::resource_transformations (
       content  => template('atomia/resource_transformations/Resources.MSSQL.erb'),
       require => File['C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/'],
     }
+ 
+ 	$openstack_admin_user = hiera('atomia::openstack::admin_user','')
+	$openstack_admin_password = hiera('atomia::openstack::admin_password','')   
+	$openstack_domain = hiera('atomia::openstack::domain','')   
+    $openstack_identity_uri = hiera('atomia::openstack::identity_uri','')   
+    $openstack_compute_uri = hiera('atomia::openstack::compute_uri','')   
+    $openstack_network_uri = hiera('atomia::openstack::network_uri','')   
+    $openstack_ceilometer_uri = hiera('atomia::openstack::ceilometer_uri','')   
+    $openstack_cinder_uri = hiera('atomia::openstack::cinder_uri','')   
+    $openstack_hypervisor = hiera('atomia::openstack::hypervisor','')   
+    $openstack_external_gateway = hiera('atomia::openstack::external_gateway','')   
+    file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.OpenStack.xml' :
+      ensure => 'file',
+      content  => template('atomia/resource_transformations/Resources.OpenStack.erb'),
+      require => File['C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/'],
+    }    
 }

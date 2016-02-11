@@ -56,7 +56,7 @@ class atomia::internal_apps (
 		exec {'install-cloudhostingpack':
 			command	=> 'C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Executionpolicy Unrestricted -File c:/install/install_atomia_application.ps1 -repository PublicRepository -application "Atomia CloudHosting Modules"',
 			require   => [Exec['install-automationserver'],File['unattended.ini']],
-			creates => 'C:\Program Files (x86)\Atomia\AutomationServer\Common\Modules',
+			creates => 'C:\Program Files (x86)\Atomia\AutomationServer\Common\Modules\Atomia.Provisioning.Modules.Common.dll',
 		}
 		->
 		exec {'install-adminpanel':
@@ -89,7 +89,7 @@ class atomia::internal_apps (
 		exec {'install-cloudhostingpack':
 			command	=> 'C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Executionpolicy Unrestricted -File c:/install/install_atomia_application.ps1 -repository TestRepository -application "Atomia CloudHosting Modules"',
 			require   => [Exec['install-automationserver'],File['unattended.ini']],
-			creates => 'C:\Program Files (x86)\Atomia\AutomationServer\Common\Modules',
+			creates => 'C:\Program Files (x86)\Atomia\AutomationServer\Common\Modules\Atomia.Provisioning.Modules.Common.dll',
 		}
 		->
 		exec {'install-adminpanel':
