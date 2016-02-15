@@ -53,3 +53,6 @@ mod "hosts",
   :git => "git://github.com/ghoneycutt/puppet-module-hosts.git"
 
 mod "ceh/fstab"
+
+mod "windows_sql",
+    :git => "git://github.com/insentia/windows_sql.git"
