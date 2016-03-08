@@ -44,7 +44,7 @@ echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref
 cd /etc/puppet
 
 gem install librarian-puppet
-librarian-puppet install
+HOME=/root librarian-puppet install
 cp /etc/puppet/modules/atomia/files/default_files/* /etc/puppet/atomia/service_files/
 
 mkdir -p /etc/puppet/manifests/
