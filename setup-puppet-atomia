@@ -21,8 +21,9 @@ HIERA_USER_PASSWORD=`date +%s | sha256sum | base64 | head -c 16 ; echo`
 fi
 
 SERVER_FQDN=`facter fqdn`
+mysql --defaults-file=/etc/mysql/debian.cnf -e "DROP USER 'hierauser'@'localhost';"
 
-mysql --defaults-file=/etc/mysql/debian.cnf -e "DROP USER 'hierauser'@'localhost';CREATE USER 'hierauser'@'localhost' IDENTIFIED BY '${HIERA_USER_PASSWORD}'; GRANT ALL PRIVILEGES ON hiera.* TO 'hierauser'@'localhost';"
+mysql --defaults-file=/etc/mysql/debian.cnf -e "CREATE USER 'hierauser'@'localhost' IDENTIFIED BY '${HIERA_USER_PASSWORD}'; GRANT ALL PRIVILEGES ON hiera.* TO 'hierauser'@'localhost';"
 
 ## Setup PuppetDB
 
