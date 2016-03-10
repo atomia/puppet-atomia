@@ -54,16 +54,6 @@ class atomia::internaldns (
 
 	Bind::A <<| |>>
 
-	file { "/etc/bind/named.conf.options":
-		ensure  => present,
-		owner   => root,
-		group   => bind,
-		mode    => "0644",
-		notify  => Exec["restart_bind"],
-		source  => "puppet:///modules/atomia/internaldns/named.conf.options",
-		require => Package["bind9"],
-	}
-
 	exec { "restart_bind":
 		command => "/etc/init.d/bind9 restart",
 		refreshonly => true,
