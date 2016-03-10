@@ -79,11 +79,11 @@ echo "---
 " > /etc/puppet/hiera.yaml
 
 echo "[atomiacerts]
-   path /etc/puppet/atomiacerts
-   allow *
+        path /etc/puppet/atomiacerts
+        allow *
 [atomia]
-   path /etc/puppet/atomia
-   allow * " > /etc/puppet/fileserver.conf
+        path /etc/puppet/atomia
+        allow *" > /etc/puppet/fileserver.conf
 
 
 echo "[main]
@@ -95,7 +95,7 @@ factpath=$vardir/lib/facter
 parser = future
 
 [master]
-# These are needed when the puppetmaster is run by passenger
+# These are needfed when the puppetmaster is run by passenger
 # and can safely be removed if webrick is used.
 ssl_client_header = SSL_CLIENT_S_DN
 ssl_client_verify_header = SSL_CLIENT_VERIFY
