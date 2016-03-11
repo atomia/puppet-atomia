@@ -16,7 +16,11 @@ class atomia::internaldns (
 ){
 
 
-	class { 'bind': }
+	class { 'bind': 
+		default_view => {
+			'recursion' => 'yes',
+		}
+	}
 
 	bind::zone {"$zone_name":
 	  zone_contact => "contact.${$zone_name}",
