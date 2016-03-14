@@ -4,7 +4,7 @@
 
 ### Variable documentation
 #### zone_name: The name of the zone where all servers will be placed (for example atomia.internal)
-#### ip_address: The public ip address of the server
+#### ip_address: The private ip address of the server
 
 ### Validations
 ##### zone_name: .*
