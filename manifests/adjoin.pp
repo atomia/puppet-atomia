@@ -53,7 +53,10 @@ class atomia::adjoin (
 
   } else {
     # Join AD on Linux
-
+    
+    # CloudLinux:
+    # package nss-pam-ldapd
+    
       $dc=regsubst($domain_name, '\.', ',dc=', 'G')
       $base_dn = "cn=Users,dc=${$dc}"
 
@@ -89,7 +92,31 @@ class atomia::adjoin (
 
       }
 
-      package { libpam-ldap: ensure => present }
+      if($osfamily == 'RedHat') { 
+          
+        package { nss-pam-ldapd: ensure => present }
+          
+        file { "/etc/nslcd.conf":
+            ensure  => file,
+            owner   => nslcd,
+            group   => ldap,
+            mode    => "600",
+            content => template("atomia/adjoin/nslcd.conf.erb"),
+            require => Package['nss-pam-ldapd'],
+        }            
+      }
+      else {
+          
+        package { libpam-ldap: ensure => present }
+        
+        file { "/etc/ldap.conf":
+            ensure  => file,
+            owner   => root,
+            group   => root,
+            mode    => "644",
+            content => template("atomia/adjoin/ldap.conf.erb"),
+        }    
+     }
 
       file { "/etc/pam.d/common-account":
         ensure => file,
@@ -105,14 +132,6 @@ class atomia::adjoin (
        group  => root,
        mode   => "644",
        source => "puppet:///modules/atomia/adjoin/nsswitch.conf",
-     }
-
-     file { "/etc/ldap.conf":
-       ensure  => file,
-       owner   => root,
-       group   => root,
-       mode    => "644",
-       content => template("atomia/adjoin/ldap.conf.erb"),
      }
 
 

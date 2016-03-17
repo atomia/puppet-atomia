@@ -1,0 +1,22 @@
+# This file is managed by Puppet no use trying to edit it manually
+
+base <%= @base_dn %>
+uri <%= @ad_servers %>
+
+binddn cn=PosixGuest,<%= @base_dn %>
+bindpw @posix123
+scope sub
+scope group sub
+scope hosts sub
+ssl no
+ldap_version 3
+filter passwd (&(objectClass=user)(!(objectClass=computer))(uidNumber=*)(unixHomeDirectory=*))
+map    passwd homeDirectory    unixHomeDirectory
+filter shadow (&(objectClass=user)(!(objectClass=computer))(uidNumber=*)(unixHomeDirectory=*))
+map    shadow shadowLastChange pwdLastSet
+filter group  (objectClass=group)
+
+uid nslcd
+gid ldap
+tls_cacertdir /etc/openldap/cacerts
+idle_timelimit 120
