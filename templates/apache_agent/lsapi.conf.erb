@@ -1,0 +1,163 @@
+# lsapi.conf
+# This file is managed by Puppet, it should not be edited manually
+
+LoadModule lsapi_module modules/mod_lsapi.so
+
+<IfModule lsapi_module>
+
+<FilesMatch "\.(php|php4|php5|php53|php54|php55|php56|php6|phtml)$">
+    # Map php versions to Atomia
+    Include conf/phpversions.conf
+</FilesMatch>
+
+LSAPIPath /storage/content/[0-9]*/([^/]*)/
+
+# Timeout to connect to backend, in usec.
+# Optional, default value is 500000.
+# Should be more than 0.
+# In the case of wrong format default value will be used.
+# lsapi_backend_connect_timeout 500000
+
+# Number of tries to connect to backend.
+# Optional, default value is 20.
+# Should be more than 0.
+# In the case of wrong format default value will be used.
+# lsapi_backend_connect_tries 20
+
+# Maximum number of simultaneously running child backend processes.
+# Optional, default value is 120.
+# Should be more than 1.
+# In the case of wrong format default value will be used.
+# In the case of value more than 10000, 10000 will be used.
+# lsapi_backend_children 120
+
+# How long an control backend process will wait for a new request before it exits, in sec.
+# 0 stands for infinite.
+# Optional, default value is 30.
+# Should be more or equal to 0.
+# In the case of wrong format default value will be used.
+# lsapi_backend_pgrp_max_idle 30
+
+# How long a backend child process will wait for a new request before it exits, in sec.
+# 0 stands for infinite.
+# Optional, default value is 300.
+# Should be more or equal to 0.
+# In the case of wrong format default value will be used.
+# lsapi_backend_max_idle 300
+
+# The maximum processing time allowed when processing a request, in sec.
+# Optional, default value is 300.
+# Should be more than 0.
+# In the case of wrong format default value will be used.
+# lsapi_backend_max_process_time 300
+
+# How many requests each child process will handle before it exits automatically.
+# Optional, default value is 10000.
+# Should be more than 0.
+# In the case of wrong format default value will be used.
+# lsapi_backend_max_reqs 10000
+
+# Default value is On.
+# lsapi_terminate_backends_on_exit On
+
+# Default value is /var/run/mod_lsapi
+lsapi_socket_path /var/run/mod_lsapi
+
+
+# The value of PHPRC env variable.
+# Special values are "No" and "Auto".
+# Default value is "No" - without PHPRC at all.
+# "Auto" value stands for DocumentRoot of the corresponding VirtualHost.
+# lsapi_phprc No
+# lsapi_phprc Auto
+# lsapi_phprc /etc/
+
+lsapi_debug Off
+
+# Optional, default value is On.
+# Check or not owner of DOCUMENT_ROOT.
+# lsapi_check_document_root On
+
+# Optional, default value is Off.
+# Check or not owner of target script.
+# lsapi_target_perm Off
+
+# Optional, default value is Off.
+# Check or not permissions of target script.
+# lsapi_paranoid Off
+
+# Optional, default value is On.
+# Use or not apache uid/gid for request as fallback.
+# lsapi_use_default_uid On
+
+
+# uid/gid for requests
+# lsapi_uid_gid 500 501
+# or user/group for requests instead of lsapi_uid_gid
+# lsapi_user_group user1 user1
+
+# Backend core dump enabled or not.
+# Print to error_log stacktrace and 'lsof' output for runaway process
+# and before it is killed
+# Default is Off
+# lsapi_backend_coredump Off
+
+# Timeout to poll backend.
+# Optional, default value is 0.
+# Should be >= 0.
+# In the case of wrong format default value will be used.
+# 0 stands for infinite poll.
+# lsapi_poll_timeout 0
+
+# Enable or disable processing of the following directives:
+#     php_value, php_flag, php_admin_value, php_admin_flag
+# Optional, default value is On.
+# lsapi_mod_php_behaviour On
+
+# Use or not suexec to target user.
+# Default is On
+# lsapi_use_suexec On
+
+# Switch LSAPI_ACCEPT_NOTIFY mode for lsphp.
+# This option can be used both in Global and VirtualHost scopes.
+# Optional, default value is On.
+# This mode is incompatible with PHP 4.4
+# lsapi_backend_accept_notify On
+
+# Whether to resend request when lsapi backend worker occasionally crashes
+# lsapi_resend_if_crashed 2
+
+# Maximum buffer in KiB to resend for request that has a body (like POST request body)
+# lsapi_max_resend_buffer 200
+
+# Resend request works only for http methods in comma separated list
+# lsapi_resend_if_method GET,OPTIONS,HEAD,CONNECT,PROPFIND
+
+# Connection pool mode
+# Default value if Off.
+# lsapi_with_connection_pool Off
+
+# Connection pool size
+# Maximum number of the simultaneous open connections to the same VirtualHost.
+# Optional, default value is 0, stands for default value - 50.
+# Should be more or equal to 0.
+# In the case of wrong format default value will be used.
+# lsapi_max_connection 0
+
+
+# Set variables in backend environment.
+# Environment variables PATH, HTTP_* and LSAPI_* will be ignored.
+lsapi_set_env TEMP "/tmp"
+lsapi_set_env TMP "/tmp"
+lsapi_set_env TMPDIR "/tmp"
+
+
+# Dedicated option to set PATH variable in backend environment.
+# Default path /usr/local/bin:/usr/bin:/bin will be used if not set.
+# lsapi_set_env_path /usr/local/bin:/usr/bin:/bin
+
+# If Off, use Apache error log file for backend output, or separate file otherwise.
+# Default value is Off
+# lsapi_backend_use_own_log Off
+
+</IfModule>

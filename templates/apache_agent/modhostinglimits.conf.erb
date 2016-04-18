@@ -1,0 +1,9 @@
+LoadModule hostinglimits_module /etc/httpd/modules/mod_hostinglimits.so
+
+<IfModule mod_hostinglimits.c>
+    SkipErrors Off
+    AllowedHandlers cgi-script fcgid-script application/x-miva-compiled
+    AddHandler cgi-script .pl .cgi .py
+    LVEParseMode PATH
+    LVEPathRegexp /storage/content/[0-9]*/([^/]*)/
+</IfModule>

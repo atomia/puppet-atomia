@@ -12,6 +12,7 @@ class atomia::atomiarepository {
   if $osfamily == "RedHat" {   
     exec { 'add rpm repo':
         command => '/usr/bin/rpm -Uhv http://rpm.atomia.com/rhel6/atomia-repository-setup-1.0-1.el6.noarch.rpm',
+        unless => "/usr/bin/rpm -qi atomia-repository-setup-1.0-1.el6.noarch | /bin/grep  -c 'Build Date'"
     }
   }    
   else {

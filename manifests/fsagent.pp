@@ -43,7 +43,9 @@ class atomia::fsagent (
 	package { 'g++': ensure => present }
 	package { make: ensure => present }
 	package { procmail: ensure => present }
-    package { 'atomia-manager': ensure => present }
+    if !defined(Package['atomia-manager']) {
+        package { 'atomia-manager': ensure => present }
+    }
     package { 'python-pkg-resources': ensure => present }
     package { 'ruby1.9.1-dev': ensure => present }
     
@@ -141,8 +143,18 @@ class atomia::fsagent (
 		}
 	}
 
+	if !defined(File["/storage/content"]) {
+		file { "/storage/content":
+			ensure => directory,
+		}
+	}
 
-
+	if !defined(File["/storage/configuration"]) {
+		file { "/storage/configuration":
+			ensure => directory,
+		}
+	}
+    
 	file { "/storage/content/backup":
 		ensure => "directory",
 		owner  => root,

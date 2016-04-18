@@ -70,14 +70,24 @@ class atomia::apache_agent (
 		}
 	}
 
-	if !defined(Package['apache2']) {
-		package { apache2: ensure => present }
-	}
-
-	$packages_to_install = [
-		"atomiastatisticscopy", "libapache2-mod-fcgid-atomia", "apache2-suexec-custom-cgroups-atomia",
-		"php5-cgi", "libexpat1", "cgroup-bin"
-	]
+    if($operatingsystem == 'CloudLinux') {
+        exec { 'add epel repo':
+            command => '/usr/bin/rpm -Uhv http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm',
+        }    
+            
+        $packages_to_install = [
+            "atomiastatisticscopy", "httpd"
+        ]        
+    } else {
+        $packages_to_install = [
+            "atomiastatisticscopy", "libapache2-mod-fcgid-atomia", "apache2-suexec-custom-cgroups-atomia",
+            "php5-cgi", "libexpat1", "cgroup-bin"
+        ]
+        
+        if !defined(Package['apache2']) {
+		    package { apache2: ensure => present }
+	    }
+    }
 
 	package { $packages_to_install: ensure => installed }
 

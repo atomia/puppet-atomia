@@ -52,15 +52,9 @@ class atomia::adjoin (
     }
 
   } else {
-    # Join AD on Linux
-    
-    # CloudLinux:
-    # package nss-pam-ldapd
-    
+    # Join AD on Linux  
       $dc=regsubst($domain_name, '\.', ',dc=', 'G')
       $base_dn = "cn=Users,dc=${$dc}"
-
-
       # Set ad_servers fact
 
       if $::vagrant {
