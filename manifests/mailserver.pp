@@ -66,20 +66,78 @@ class atomia::mailserver (
 	$dovecot_override_config	= ""
 ) {
 
-	$required_packages = [
-		"postfix-mysql", "dovecot-common", "libmime-encwords-perl", "libemail-valid-perl",
-		"libmail-sendmail-perl", "liblog-log4perl-perl", "libdbd-mysql-perl", "dovecot-imapd", "dovecot-pop3d", "dovecot-mysql"
-	]
+  case $::osfamily {
+    'Debian' : {
+      $required_packages = [
+        'dovecot-common',
+        'dovecot-imapd',
+        'dovecot-mysql',
+        'dovecot-pop3d',
+        'libdbd-mysql-perl',
+        'libemail-valid-perl',
+        'liblog-log4perl-perl',
+        'libmail-sendmail-perl',
+        'libmime-encwords-perl',
+        'postfix-mysql',
+      ]
 
+      $postfix_mysql_package = 'postfix-mysql'
+      $dovecot_package       = 'dovecot-common'
+      $clamav_package        = 'clamav-daemon'
+
+      $required_packages_antispam = [
+        'amavisd-new',
+        'arj',
+        'bzip2',
+        'cabextract',
+        'clamav-daemon',
+        'cpio',
+        'file',
+        'gzip',
+        'libnet-dns-perl',
+        'nomarch',
+        'pax',
+        'pyzor',
+        'rar',
+        'razor',
+        'spamassassin',
+        'unrar',
+        'unzip',
+        'zip',
+        'zoo'
+      ]
+    }
+    'Redhat' : {
+      $required_packages = [
+        'dovecot',
+        'dovecot-mysql',
+        'perl-DBD-MySQL',
+        'perl-Log-Log4perl',
+        'perl-MIME-EncWords',
+        'perl-Mail-Sendmail',
+        'perl-Email-Valid',
+        'postfix',
+      ]
+
+      $postfix_mysql_package = 'postfix'
+      $dovecot_package       = 'dovecot'
+      $clamav_package        = 'clamav-scanner'
+
+      $required_packages_antispam = [
+        'amavisd-new',
+        'clamav-scanner',
+        'perl-Net-DNS',
+        'spamassassin',
+        'unar',
+        'unzip',
+        'zip',
+      ]
+    }
+  }
 
 	package { $required_packages: ensure => installed }
 
 	if $install_antispam == 1 {
-		$required_packages_antispam = [
-			"amavisd-new", "spamassassin", "clamav-daemon", "libnet-dns-perl", "pyzor", "razor",
-			"arj", "bzip2", "cabextract", "cpio", "file", "gzip", "nomarch", "pax", "rar",
-			"unrar", "unzip", "zip", "zoo"
-		]
 
 		package { $required_packages_antispam: ensure => installed }
 
@@ -113,6 +171,9 @@ class atomia::mailserver (
 			require => User["virtual"]
 		}
 	} else {
+      if $::osfamily == 'Redhat' {
+        warning('RedHat-based servers with glusterfs are not supported yet')
+      } else {
 			$internal_zone = hiera('atomia::internaldns::zone_name','')
 			package { 'glusterfs-client': ensure => present, }
 			
@@ -130,6 +191,7 @@ class atomia::mailserver (
 				require => [Package['glusterfs-client'],File["/storage"]],
 			}        
     }
+  }
 
 	if $mysql_server_id == ""
 	{
@@ -196,13 +258,13 @@ class atomia::mailserver (
 			require		=> Class[Mysql::Server::Service],
 		}
 
-		file { "/etc/postfix/mysql.schema.sql":
-			owner => root,
-			group => root,
-			mode => "444",
-			source => "puppet:///modules/atomia/mailserver/mysql.schema.sql",
-			require => Package["postfix-mysql"]
-		}
+    file { '/etc/postfix/mysql.schema.sql':
+      owner   => root,
+      group   => root,
+      mode    => '0444',
+      source  => 'puppet:///modules/atomia/mailserver/mysql.schema.sql',
+      require => Package["$postfix_mysql_package"]
+    }
 
 		exec { 'setup-master':
 			command	=> "/etc/postfix/setup_database.sh master",
@@ -271,7 +333,7 @@ class atomia::mailserver (
 		group		=> root,
 		mode		=> "500",
 		content		=> template("atomia/mailserver/setup_database.sh.erb"),
-		require		=> Package["postfix-mysql"]
+		require		=> Package["$postfix_mysql_package"]
 	}
 
 	if $postfix_override_main_cf != "" {
@@ -285,7 +347,7 @@ class atomia::mailserver (
 		group => root,
 		mode => "444",
 		content => $postfix_main_cf_content,
-		require => Package["postfix-mysql"]
+		require => Package["$postfix_mysql_package"]
 	}
 
 	if $postfix_override_master_cf == "" {
@@ -294,7 +356,7 @@ class atomia::mailserver (
 			group => root,
 			mode => "444",
 			source => "puppet:///modules/atomia/mailserver/master.cf",
-			require => Package["postfix-mysql"]
+			require => Package["$postfix_mysql_package"]
 		}
 	} else {
 		file { "/etc/postfix/master.cf":
@@ -302,7 +364,7 @@ class atomia::mailserver (
 			group => root,
 			mode => "444",
 			content => $postfix_override_master_cf,
-			require => Package["postfix-mysql"]
+			require => Package["$postfix_mysql_package"]
 		}
 	}
 
@@ -311,7 +373,7 @@ class atomia::mailserver (
 		group => root,
 		mode => "444",
 		content => template('atomia/mailserver/mysql_relay_domains_maps.cf.erb'),
-		require => Package["postfix-mysql"],
+		require => Package["$postfix_mysql_package"],
 		notify => Service["postfix"],
 	}
 
@@ -320,7 +382,7 @@ class atomia::mailserver (
 		group => root,
 		mode => "444",
 		content => template('atomia/mailserver/mysql_virtual_alias_maps.cf.erb'),
-		require => Package["postfix-mysql"],
+		require => Package["$postfix_mysql_package"],
 		notify => Service["postfix"],
 	}
 
@@ -329,7 +391,7 @@ class atomia::mailserver (
 		group => root,
 		mode => "444",
 		content => template('atomia/mailserver/mysql_virtual_domains_maps.cf.erb'),
-		require => Package["postfix-mysql"],
+		require => Package["$postfix_mysql_package"],
 		notify => Service["postfix"],
 	}
 
@@ -338,7 +400,7 @@ class atomia::mailserver (
 		group => root,
 		mode => "444",
 		content => template('atomia/mailserver/mysql_virtual_mailbox_maps.cf.erb'),
-		require => Package["postfix-mysql"],
+		require => Package["$postfix_mysql_package"],
 		notify => Service["postfix"],
 	}
 
@@ -347,7 +409,7 @@ class atomia::mailserver (
 		group => root,
 		mode => "444",
 		content => template('atomia/mailserver/mysql_virtual_transport.cf.erb'),
-		require => Package["postfix-mysql"],
+		require => Package["$postfix_mysql_package"],
 		notify => Service["postfix"],
 	}
 
@@ -356,7 +418,7 @@ class atomia::mailserver (
 		group => root,
 		mode => "444",
 		content => template('atomia/mailserver/dovecot-sql.conf.erb'),
-		require => Package["dovecot-common"],
+		require => Package["$dovecot_package"],
 	}
 
 	if $dovecot_override_config == "" {
@@ -365,7 +427,7 @@ class atomia::mailserver (
 			group => root,
 			mode => "444",
 			source => "puppet:///modules/atomia/mailserver/dovecot.conf",
-			require => Package["dovecot-common"],
+			require => Package["$dovecot_package"],
 		}
 	} else {
 		file { "/etc/dovecot/dovecot.conf":
@@ -373,7 +435,7 @@ class atomia::mailserver (
 			group => root,
 			mode => "444",
 			content => $dovecot_override_config,
-			require => Package["dovecot-common"],
+			require => Package["$dovecot_package"],
 		}
 	}
 
@@ -411,7 +473,7 @@ class atomia::mailserver (
 		command => "/usr/bin/openssl genrsa -out /etc/dovecot/ssl.key 2048; chown root:root /etc/dovecot/ssl.key; chmod 0700 /etc/dovecot/ssl.key",
 		creates => "/etc/dovecot/ssl.key",
 		provider => "shell",
-		require => Package["dovecot-common"],
+		require => Package["$dovecot_package"],
 	}
 
 	exec { "gen-csr":
@@ -429,17 +491,17 @@ class atomia::mailserver (
 	}
 
 	service { postfix:
-		name => postfix,
-		enable => true,
-		ensure => running,
-		subscribe => [Package["postfix-mysql"], File["/etc/postfix/main.cf"], File["/etc/postfix/master.cf"]]
+		name      => postfix,
+		enable    => true,
+		ensure    => running,
+		subscribe => [Package["$postfix_mysql_package"], File["/etc/postfix/main.cf"], File["/etc/postfix/master.cf"]]
 	}
 
 	service { dovecot:
-		name => dovecot,
-		enable => true,
-		ensure => running,
-		subscribe => [Package["dovecot-common"], File["/etc/dovecot/dovecot.conf"], File["/etc/dovecot/dovecot-sql.conf"]]
+		name      => dovecot,
+		enable    => true,
+		ensure    => running,
+		subscribe => [Package["$dovecot_package"], File["/etc/dovecot/dovecot.conf"], File["/etc/dovecot/dovecot-sql.conf"]]
 	}
 
 	group { "virtual": 
@@ -467,13 +529,13 @@ class atomia::mailserver (
 		user { 'clamav':
 			ensure => 'present',
 			groups => 'amavis',
-			require => [Package["amavisd-new"], Package["clamav-daemon"]],
+			require => [Package["amavisd-new"], Package["$clamav_package"]],
 		}
 
 		user { 'amavis':
 			ensure => 'present',
 			groups => 'clamav',
-			require => [Package["amavisd-new"], Package["clamav-daemon"]],
+			require => [Package["amavisd-new"], Package["$clamav_package"]],
 		}
 
 		exec { "enable-spamd": command => "/bin/sed -i /etc/default/spamassassin -e 's/ENABLED=0/ENABLED=1/' && /bin/sed -i /etc/default/spamassassin -e 's/CRON=0/CRON=1/' ", 
