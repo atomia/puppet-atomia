@@ -19,12 +19,11 @@ if [ -e '/etc/debian_version' ]; then
                 rm puppetlabs-release-*.deb
         fi
 elif [ -e '/etc/redhat-release' ]; then
-        if rpm -q --quiet centos-release; then
-                major_version=$(rpm -q --queryformat '%{VERSION}' centos-release)
-        elif rpm -q --quiet redhat-release; then
-                major_version=$(rpm -q --queryformat '%{VERSION}' redhat-release)
-        fi
-
+	for os_release in redhat-release centos-release; do
+		if rpm -q --quiet $os_release; then
+			major_version=$(rpm -q --queryformat '%{VERSION}' $os_release)
+		fi
+	done
         if ! rpm -q --quiet puppet puppetlabs-release; then
                 rpm -ivh https://yum.puppetlabs.com/puppetlabs-release-el-$major_version.noarch.rpm
                 yum install puppet puppetlabs-release -y && chkconfig puppet off
