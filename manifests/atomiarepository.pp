@@ -9,10 +9,29 @@ class atomia::atomiarepository {
     $repo = "ubuntu-$lsbdistcodename $lsbdistcodename main"
   }
 
-  if $osfamily == "RedHat" {   
-    exec { 'add rpm repo':
-        command => '/usr/bin/rpm -Uhv http://rpm.atomia.com/rhel6/atomia-repository-setup-1.0-1.el6.noarch.rpm',
-        unless => "/usr/bin/rpm -qi atomia-repository-setup-1.0-1.el6.noarch | /bin/grep  -c 'Build Date'"
+  if $osfamily == "RedHat" {  
+    if $operatingsystemmajrelease == "7" {
+        file { "/etc/pki/rpm-gpg/RPM-GPG-KEY-ATOMIA":
+            owner   => root,
+            group   => root,
+            mode    =>  06444,
+            source  => "puppet:///modules/atomia/repository/RPM-GPG-KEY-ATOMIA",
+        }
+        
+        file { "/etc/yum.repos.d/atomia-rhel7.repo": 
+            owner   => root,
+            group   => root,
+            mode    =>  06444,
+            source  => "puppet:///modules/atomia/repository/atomia-rhel7.repo", 
+            require => File["/etc/pki/rpm-gpg/RPM-GPG-KEY-ATOMIA"],       
+        }
+    }
+    else
+    {   
+        exec { 'add rpm repo':
+            command => '/usr/bin/rpm -Uhv http://rpm.atomia.com/rhel6/atomia-repository-setup-1.0-1.el6.noarch.rpm',
+            unless => "/usr/bin/rpm -qi atomia-repository-setup-1.0-1.el6.noarch | /bin/grep  -c 'Build Date'"
+        }
     }
   }    
   else {
