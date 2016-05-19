@@ -21,7 +21,7 @@ if [ -e '/etc/debian_version' ]; then
 elif [ -e '/etc/redhat-release' ]; then
 	for os_release in redhat-release centos-release cloudlinux-release; do
 		if rpm -q --quiet $os_release; then
-			major_version=$(rpm -q --queryformat '%{VERSION}' $os_release)
+			major_version=$(rpm -q --queryformat '%{VERSION}' $os_release|cut -d. -f1)
 		fi
 	done
         if ! rpm -q --quiet puppet puppetlabs-release; then
