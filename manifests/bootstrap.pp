@@ -1,7 +1,11 @@
 class atomia::bootstrap
 {
   if $kernel == "Linux" {
-     file { "/usr/lib/ruby/vendor_ruby/facter/atomia_role.rb":
+    case $osfamily {
+      'RedHat' : { $facter_path = '/usr/share/ruby/vendor_ruby/facter' }
+      default  : { $facter_path = '/usr/lib/ruby/vendor_ruby/facter' }
+    }
+     file { "${facter_path}/atomia_role.rb":
        owner  => root,
        group  => root,
        mode   => "755",
