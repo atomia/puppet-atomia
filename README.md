@@ -1,4 +1,6 @@
-# Puppet Atomia #
+# Puppet Atomia
+
+[![Build Status](https://travis-ci.org/atomia/puppet-atomia.svg?branch=master)](https://travis-ci.org/atomia/puppet-atomia)
 
 We are in the process of rewriting this module in order to improve the installation process.
 New instructions are coming once this is done. To install using the old procedure please use the stable branch.
