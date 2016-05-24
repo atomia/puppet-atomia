@@ -27,16 +27,16 @@
 ##### external_gateway: .*
 
 class atomia::openstack (
-	$admin_user        = "admin",
-	$admin_password,    
-	$domain			   = "Default",
-    $identity_uri,
-    $compute_uri,
-    $network_uri,
-    $ceilometer_uri,
-    $cinder_uri,
-    $hypervisor        = "kvm",
-    $external_gateway  = "",
+  $admin_user       = 'admin',
+  $admin_password,
+  $domain           = 'Default',
+  $identity_uri,
+  $compute_uri,
+  $network_uri,
+  $ceilometer_uri,
+  $cinder_uri,
+  $hypervisor       = 'kvm',
+  $external_gateway = '',
 ){
 
 }

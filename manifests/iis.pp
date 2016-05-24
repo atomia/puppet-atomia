@@ -13,72 +13,72 @@
 ##### first_node(advanced): .*
 
 class atomia::iis(
-	$sharePath = "",
-	$cluster_ip = "",
-    $first_node = $fqdn
+  $sharePath  = '',
+  $cluster_ip = '',
+  $first_node = $fqdn
 ){
 
-	$adminUser = "WindowsAdmin"
-	$adminPassword = hiera('atomia::active_directory::windows_admin_password', '')
-	$adDomain = hiera('atomia::active_directory::domain_name', '')
+  $adminUser     = 'WindowsAdmin'
+  $adminPassword = hiera('atomia::active_directory::windows_admin_password', '')
+  $adDomain      = hiera('atomia::active_directory::domain_name', '')
 
-	$dism_features_to_enable = [
-		'NetFx3', 'IIS-WebServerRole', 'IIS-WebServer', 'IIS-CommonHttpFeatures', 'IIS-Security', 'IIS-RequestFiltering',
-		'IIS-StaticContent', 'IIS-DefaultDocument', 'IIS-ApplicationDevelopment', 'IIS-NetFxExtensibility', 'IIS-ASPNET',
-		'IIS-ASP', 'IIS-CGI', 'IIS-ServerSideIncludes', 'IIS-CustomLogging', 'IIS-BasicAuthentication', 'IIS-WebServerManagementTools',
-		'IIS-ManagementConsole',
-	]
+  $dism_features_to_enable = [
+    'NetFx3', 'IIS-WebServerRole', 'IIS-WebServer', 'IIS-CommonHttpFeatures', 'IIS-Security', 'IIS-RequestFiltering',
+    'IIS-StaticContent', 'IIS-DefaultDocument', 'IIS-ApplicationDevelopment', 'IIS-NetFxExtensibility', 'IIS-ASPNET',
+    'IIS-ASP', 'IIS-CGI', 'IIS-ServerSideIncludes', 'IIS-CustomLogging', 'IIS-BasicAuthentication', 'IIS-WebServerManagementTools',
+    'IIS-ManagementConsole',
+  ]
 
-	dism { $dism_features_to_enable: ensure => present, all => true }
+  dism { $dism_features_to_enable: ensure => present, all => true }
 
-	if !defined(File['c:/install']) {
-		file { 'c:/install': ensure => 'directory' }
-	}
+  if !defined(File['c:/install']) {
+    file { 'c:/install': ensure => 'directory' }
+  }
 
-	file { 'c:/install/IISSharedConfigurationEnabler.exe':
-		ensure => 'file',
-		source => "puppet:///modules/atomia/iis/IISSharedConfigurationEnabler.exe",
-	mode	 => "0777",
-		require => File['c:/install'],
-	}
+  file { 'c:/install/IISSharedConfigurationEnabler.exe':
+    ensure  => 'file',
+    source  => 'puppet:///modules/atomia/iis/IISSharedConfigurationEnabler.exe',
+    mode    => '0777',
+    require => File['c:/install'],
+  }
 
-	file { 'c:/install/LsaStorePrivateData.exe':
-		ensure => 'file',
-		source => "puppet:///modules/atomia/iis/LsaStorePrivateData.exe",
-	mode	 => "0777",
-		require => File['c:/install'],
-	}
+  file { 'c:/install/LsaStorePrivateData.exe':
+    ensure  => 'file',
+    source  => 'puppet:///modules/atomia/iis/LsaStorePrivateData.exe',
+    mode    => '0777',
+    require => File['c:/install'],
+  }
 
-	file { 'c:/install/RegistryUnlocker.exe':
-		ensure => 'file',
-		source => "puppet:///modules/atomia/iis/RegistryUnlocker.exe",
-	mode	 => "0777",
-		require => File['c:/install'],
-	} 
+  file { 'c:/install/RegistryUnlocker.exe':
+    ensure  => 'file',
+    source  => 'puppet:///modules/atomia/iis/RegistryUnlocker.exe',
+    mode    => '0777',
+    require => File['c:/install'],
+  }
 
-	file { 'c:/install/setup_iis.ps1':
-		ensure => 'file',
-		source => "puppet:///modules/atomia/iis/setup_iis.ps1",
-		require => File['c:/install'],
-	}
+  file { 'c:/install/setup_iis.ps1':
+    ensure  => 'file',
+    source  => 'puppet:///modules/atomia/iis/setup_iis.ps1',
+    require => File['c:/install'],
+  }
 
-    if sharePath == "" {
-        $internal_zone = hiera('atomia::internaldns::zone_name','')
-        $realSharePath = '\\gluster' + $internal_zone + '\configshare\iis'
-    }
-    else
-    {
-        $realSharePath = $sharePath
-    }
+  if $sharePath == '' {
+    $internal_zone = hiera('atomia::internaldns::zone_name','')
+    $realSharePath = '\\gluster' + $internal_zone + '\configshare\iis'
+  }
+  else
+  {
+    $realSharePath = $sharePath
+  }
 
-	exec { 'setup_iis':
-		provider => powershell,
-		command => "c:/install/setup_iis.ps1 -Action 'enable' -UNCPath '${realSharePath}' -adminUser '${adDomain}\\WindowsAdmin' -adminPassword '$adminPassword'",
-		require => [File["c:/install/setup_iis.ps1"], File["c:/install/IISSharedConfigurationEnabler.exe"], File["c:/install/LsaStorePrivateData.exe"], File["c:/install/RegistryUnlocker.exe"]],
-		creates => 'c:\windows\install\installed'
-	}
-    
-	file { 'C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role_iis.txt':
-	  content => 'atomia_role_1=iis',
-	}    
+  exec { 'setup_iis':
+    provider => powershell,
+    command  => "c:/install/setup_iis.ps1 -Action 'enable' -UNCPath '${realSharePath}' -adminUser '${adDomain}\\WindowsAdmin' -adminPassword '${adminPassword}'",
+    require  => [File['c:/install/setup_iis.ps1'], File['c:/install/IISSharedConfigurationEnabler.exe'], File['c:/install/LsaStorePrivateData.exe'], File['c:/install/RegistryUnlocker.exe']],
+    creates  => 'c:\windows\install\installed'
+  }
+
+  file { 'C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role_iis.txt':
+    content => 'atomia_role_1=iis',
+  }
 }
