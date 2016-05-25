@@ -18,10 +18,12 @@
 
 class atomia::daggre (
   $global_auth_token,
-  $content_share_nfs_location = '',
-  $config_share_nfs_location  = '',
-  $use_nfs3                   = true,
-  $ip_addr                    = $ipaddress,
+  $content_share_nfs_location   = '',
+  $config_share_nfs_location    = '',
+  $use_nfs3                     = true,
+  $ip_addr                      = $ipaddress,
+  $cloudlinux_database          = 'false',
+  $cloudlinux_database_password = 'atomia123',
 ) {
 
   include atomia::mongodb
@@ -135,4 +137,35 @@ class atomia::daggre (
       nfs_location => $config_share_nfs_location
     }
   }
+
+  if $cloudlinux_database == 'true' {
+
+    package { 'postgresql-contrib':
+      ensure  => present
+    }
+    
+    class { 'postgresql::server':
+      ip_mask_allow_all_users => '0.0.0.0/0',
+      listen_addresses        => '*',
+      ipv4acls                => ['host all atomia 0.0.0.0/0 md5']
+    }
+
+    postgresql::server::role { 'atomia_lve_user':
+      username      => 'atomia-lve',
+      password_hash => postgresql_password('atomia-lve', $cloudlinux_database_password),
+      createdb      => true,
+      createrole    => true,
+      superuser     => true
+    }
+      
+    postgresql::server::pg_hba_rule { 'allow network acces for atomia user':
+      description => 'Open up postgresql for access for Atomia user',
+      type        => 'host',
+      database    => 'all',
+      user        => 'atomia-lve',
+      address     => '0.0.0.0/0',
+      auth_method => 'password',
+    }
+  }
+  
 }
