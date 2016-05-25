@@ -24,6 +24,7 @@ class atomia::daggre (
   $ip_addr                      = $ipaddress,
   $cloudlinux_database          = 'false',
   $cloudlinux_database_password = 'atomia123',
+  $local_address                = 'localhost'
 ) {
 
   include atomia::mongodb
@@ -139,9 +140,21 @@ class atomia::daggre (
   }
 
   if $cloudlinux_database == 'true' {
-
+    
+    package { 'atomia-daggre-reporters-cloudlinux':
+      ensure  => present,
+    }
+    
     package { 'postgresql-contrib':
-      ensure  => present
+      ensure  => present,
+    }
+    
+    package { 'libdbi-perl':
+      ensure  => present,
+    }
+    
+    package { 'libdbd-pg-perl':
+      ensure  => present,
     }
     
     class { 'postgresql::server':
@@ -150,14 +163,11 @@ class atomia::daggre (
       ipv4acls                => ['host all atomia 0.0.0.0/0 md5']
     }
 
-    postgresql::server::role { 'atomia_lve_user':
-      username      => 'atomia-lve',
-      password_hash => postgresql_password('atomia-lve', $cloudlinux_database_password),
-      createdb      => true,
-      createrole    => true,
-      superuser     => true
+    postgresql::server::db { 'lve':
+      user     => 'atomia-lve',
+      password => postgresql_password('atomia-lve', $cloudlinux_database_password),
     }
-      
+    
     postgresql::server::pg_hba_rule { 'allow network acces for atomia user':
       description => 'Open up postgresql for access for Atomia user',
       type        => 'host',

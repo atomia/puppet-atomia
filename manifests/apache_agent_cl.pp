@@ -43,7 +43,8 @@ class atomia::apache_agent_cl (
   $should_have_php_farm       = 0,
   $apache_modules_to_enable   = 'rewrite,userdir,fcgid,suexec,expires,headers,deflate,include',
   $is_master                  = 1,
-  $cloudlinux_agent_secret
+  $cloudlinux_agent_secret,
+  $daggre_ip,
 ) {
 
 
@@ -60,11 +61,24 @@ class atomia::apache_agent_cl (
       require => Exec['install lve-stats2'],
     }
     
-    $cloudlinux_database_password = hiera('atomia::daggre::cloudlinux_database_password','abc123')
+    $cloudlinux_database_password = hiera('atomia::daggre::cloudlinux_database_password','atomia123')
     exec { 'update lve-stats connections tring':
-      command => "/usr/bin/sed -i 's/connect_string=.*/connect_string=atomia-lve:$cloudlinux_database_password@$daggre_ip/' /etc/sysconfig/lvestats2",
-      unless  => "/usr/bin/grep -c 'connect_string=atomia-lve:$cloudlinux_database_password@$daggre_ip' /etc/sysconfig/lvestats2",
+      command => "/usr/bin/sed -i 's/connect_string=.*/connect_string=atomia-lve:${cloudlinux_database_password}@${daggre_ip}\/lve/' /etc/sysconfig/lvestats2",
+      unless  => "/usr/bin/grep -c 'connect_string=atomia-lve:${cloudlinux_database_password}@${daggre_ip}\/lve' /etc/sysconfig/lvestats2",
       notify  => Service['lvestats'],
+      require => Exec['install lve-stats2'],
+    }
+    
+    exec { 'set postgres backend':
+      command => "/usr/bin/sed -i 's/db_type.*/^db_type=postgresql/' /etc/sysconfig/lvestats2",
+      unless  => "/usr/bin/grep -c '^db_type=postgresql' /etc/sysconfig/lvestats2",
+      notify  => Exec['create lve database'],
+      require => Exec['install lve-stats2'],
+    }
+    
+    exec { 'create lve database':
+      command     => '/usr/sbin/lve-create-db',
+      refreshonly => true,
     }
     
     # Install alt-php
