@@ -13,15 +13,15 @@
 
 
 class atomia::nagios::server(
-  $username   = "nagiosadmin",
-  $password   = ""
+  $username   = 'nagiosadmin',
+  $password   = ''
 ) {
 
   # Set ip correctly when on ec2
-  if $ec2_public_ipv4 {
-    $nagios_ip = $ec2_public_ipv4
+  if $::ec2_public_ipv4 {
+    $nagios_ip = $::ec2_public_ipv4
   } else {
-    $nagios_ip = $ipaddress_eth0
+    $nagios_ip = $::ipaddress_eth0
   }
 
   $admin_pass = hiera('atomia::config::atomia_admin_password')
@@ -29,41 +29,41 @@ class atomia::nagios::server(
   #$apache_ip  = generate('/etc/puppet/modules/atomia/files/lookup_variable.sh', 'apache_agent', 'cluster_ip')
 
   package { ['build-essential',
-      'libgd2-xpm-dev',
-      'openssl',
-      'libssl-dev',
-      'apache2-utils',
-      'apache2',
-      'php5',
-      'libapache2-mod-php5',
-      'php5-mcrypt',
-      'nagios-plugins',
-      'nagios-nrpe-server',
-      'atomia-manager',
-      'ruby1.9.1-dev',
-      'python-pkg-resources',
-      'nagios-nrpe-plugin',
-      'libjson-perl',
-      'libdatetime-perl',
-      'libdatetime-format-iso8601-perl']:
+  'libgd2-xpm-dev',
+  'openssl',
+  'libssl-dev',
+  'apache2-utils',
+  'apache2',
+  'php5',
+  'libapache2-mod-php5',
+  'php5-mcrypt',
+  'nagios-plugins',
+  'nagios-nrpe-server',
+  'atomia-manager',
+  'ruby1.9.1-dev',
+  'python-pkg-resources',
+  'nagios-nrpe-plugin',
+  'libjson-perl',
+  'libdatetime-perl',
+  'libdatetime-format-iso8601-perl']:
+    ensure => installed,
+  }
+
+  if ! defined(Package['libwww-mechanize-perl']) {
+    package { 'libwww-mechanize-perl':
       ensure => installed,
     }
+  }
 
-    if ! defined(Package['libwww-mechanize-perl']) {
-  		package { 'libwww-mechanize-perl':
-  			ensure => installed,
-  		}
-  	}
-
-    package { ['jgrep']:
-  		ensure => installed,
-  		provider => 'gem',
-  		require	=> [Package['ruby1.9.1-dev']],
-	 }
+  package { ['jgrep']:
+    ensure   => installed,
+    provider => 'gem',
+    require  => [Package['ruby1.9.1-dev']],
+  }
 
   group { 'nagios-group':
-    ensure  => 'present',
-    name    => 'nagcmd'
+    ensure => 'present',
+    name   => 'nagcmd'
   }
 
   user { 'nagios-user':
@@ -77,7 +77,7 @@ class atomia::nagios::server(
     ensure  => 'file',
     source  => 'puppet:///modules/atomia/nagios/install_nagios',
     path    => '/root/install_nagios',
-    mode    => "0744",
+    mode    => '0744',
     notify  => Exec['install_nagios'],
     require => [Package['build-essential'], Package['libgd2-xpm-dev'], Package['openssl'], Package['libssl-dev'], Package['apache2'], User['nagios-user']]
   }
@@ -111,11 +111,11 @@ class atomia::nagios::server(
     command     => '/usr/sbin/a2ensite nagios.conf',
     refreshonly => true,
     notify      => [Exec['reload-apache'], Exec['add-httpasswd-user']],
-    require => Package['apache2']
+    require     => Package['apache2']
   }
 
   service { 'nagios':
-    ensure => 'running',
+    ensure  => 'running',
     require => [Exec['install_nagios'], Package['apache2']],
   }
 
@@ -129,7 +129,10 @@ class atomia::nagios::server(
   }
   # Done installing Nagios
 
-  $hcp_url = "https://${hiera('atomia::windows_base::hcp_host','')}.${hiera('atomia::config::atomia_domain','')}"
+  $hcp_host      = hiera('atomia::windows_base::hcp_host','')
+  $atomia_domain = hiera('atomia::config::atomia_domain','')
+  $hcp_url       = "${hcp_host}.${atomia_domain}"
+
   file { '/usr/local/nagios/etc/objects/atomia-commands.cfg':
     ensure  => 'file',
     owner   => 'nagios',
@@ -150,7 +153,7 @@ class atomia::nagios::server(
     content => template('atomia/nagios/services.cfg.erb'),
     require => Exec['install_nagios']
   }
-    
+
   $daggre_ip = hiera('atomia::daggre::ip_addr','')
   $daggre_token = hiera('atomia::daggre::global_auth_token','')
   $daggre_check_ftp_url = "http://${daggre_ip}:999/g?a=${daggre_token}&o=100000&latest=ftp_storage"
@@ -164,8 +167,8 @@ class atomia::nagios::server(
   }
 
   file_line { 'add-plugin-lib':
-    path  => '/usr/local/nagios/etc/resource.cfg',
-    line  => '$USER2$=/usr/lib/nagios/plugins',
+    path    => '/usr/local/nagios/etc/resource.cfg',
+    line    => '$USER2$=/usr/lib/nagios/plugins',
     require => Exec['install_nagios']
   }
 
@@ -228,15 +231,15 @@ class atomia::nagios::server(
     recurse => true,
     notify  => Service['nagios']
   }
-  ->
-  @@nagios_host { 'localhost-host' :
-    use                 => 'generic-host',
-    host_name           => 'localhost',
-    alias               => 'localhost general checks',
-    address             => 'localhost' ,
-    target              => '/usr/local/nagios/etc/servers/localhost_host.cfg',
-    max_check_attempts  => '5'
-  }
+->
+@@nagios_host { 'localhost-host' :
+  use                => 'generic-host',
+  host_name          => 'localhost',
+  alias              => 'localhost general checks',
+  address            => 'localhost' ,
+  target             => '/usr/local/nagios/etc/servers/localhost_host.cfg',
+  max_check_attempts => '5'
+}
   ->
   @@nagios_service { 'localhost-http':
     host_name           => 'localhost',
@@ -245,62 +248,64 @@ class atomia::nagios::server(
     use                 => 'generic-service',
     target              => '/usr/local/nagios/etc/servers/localhost_service.cfg'
   }
-  ->
-  @@nagios_service { "localhost-hcp":
-      host_name               => "localhost",
-      service_description     => "HCP login",
-      check_command           => "check_hcp!Administrator!${admin_pass}",
-      use                     => "generic-service",
-      target              => '/usr/local/nagios/etc/servers/localhost_service.cfg'
-  }
-  
+->
+@@nagios_service { 'localhost-hcp':
+  host_name           => 'localhost',
+  service_description => 'HCP login',
+  check_command       => "check_hcp!Administrator!${admin_pass}",
+  use                 => 'generic-service',
+  target              => '/usr/local/nagios/etc/servers/localhost_service.cfg'
+}
 
-  Nagios_host <<| |>>
+
+Nagios_host <<| |>>
   ->
   Nagios_service <<| |>>
-  ->  
-  exec { "/bin/chown -R nagios:nagios /usr/local/nagios/etc/servers":
-    unless => "/bin/sh -c '[ $(/usr/bin/stat -c %U nagios) == nagios ]'",
-  }  
+->
+exec { '/bin/chown -R nagios:nagios /usr/local/nagios/etc/servers':
+  unless => "/bin/sh -c '[ $(/usr/bin/stat -c %U nagios) == nagios ]'",
+}
   ->
   exec { 'restart-nagios':
     command => '/etc/init.d/nagios reload',
   }
 
 
-#  host { 'atomia-nagios-test.net':
-#		ip	=> $apache_ip,
-#	}
+  #  host { 'atomia-nagios-test.net':
+  #		ip	=> $apache_ip,
+  #	}
 
   file { '/etc/atomia.conf':
-      owner   => 'root',
-      group   => 'root',
-      mode    => "0644",
-      content => template('atomia/nagios/atomia.conf.erb'),
-      require => Package["atomia-manager"]
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
+    content => template('atomia/nagios/atomia.conf.erb'),
+    require => Package['atomia-manager']
   }
 
-#  file { '/root/setup_atomia_account.sh':
-#    owner   => 'root',
-#    group   => 'root',
-#    mode    => "0777",
-#    source  => "puppet:///modules/atomia/nagios/setup_atomia_account.sh",
-#    require => [Package['jgrep'],Package['atomia-manager'], Package['python-pkg-resources']],
-#    notify  => Exec['/root/setup_atomia_account.sh']
-#	}
+  #  file { '/root/setup_atomia_account.sh':
+  #    owner   => 'root',
+  #    group   => 'root',
+  #    mode    => "0777",
+  #    source  => "puppet:///modules/atomia/nagios/setup_atomia_account.sh",
+  #    require => [Package['jgrep'],Package['atomia-manager'], Package['python-pkg-resources']],
+  #    notify  => Exec['/root/setup_atomia_account.sh']
+  #	}
 
-#	exec { '/root/setup_atomia_account.sh':
-#		require	    => [File['/root/setup_atomia_account.sh'], File['/etc/atomia.conf']],
-#    refreshonly => true
-#	}
+  #	exec { '/root/setup_atomia_account.sh':
+  #		require	    => [File['/root/setup_atomia_account.sh'], File['/etc/atomia.conf']],
+  #    refreshonly => true
+  #	}
 
-@@bind::a { 'Nagios DNS record':
-  ensure    => 'present',
-  zone      => hiera('atomia::internaldns::zone_name'),
-  ptr       => false,
-  hash_data => {
-    'nagios' => { owner => "${nagios_ip}" },
-  },
-}
+  @@bind::a { 'Nagios DNS record':
+    ensure    => 'present',
+    zone      => hiera('atomia::internaldns::zone_name'),
+    ptr       => false,
+    hash_data => {
+      'nagios' => {
+        owner => $nagios_ip
+      },
+    },
+  }
 
-}
+  }

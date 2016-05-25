@@ -20,29 +20,29 @@
 #
 
 class atomia::rsyslog(
-    $is_server              = false,
-    $server_ip,
+  $is_server  = false,
+  $server_ip,
 ) {
 
-    if($is_server == true){
-        file{ '/etc/rsyslog.d/atomia-rsyslog-server.conf':
-            ensure      => present,
-            content     => "puppet:///modules/atomia/rsyslog/atomia-rsyslog-server.conf",
-        }
-
-        file{ '/etc/rsyslog.conf':
-            ensure      => present,
-            content     => "puppet:///modules/atomia/rsyslog/rsyslog-server.conf",
-        }
-    } else{
-        file{ '/etc/apache2/conf.d/log-to-syslog.conf':
-            ensure      => present,
-            content     => "ErrorLog syslog",
-        }
-
-        file{ '/etc/rsyslog.d/atomia-rsyslog-client.conf':
-            ensure      => present,
-            content     => template("atomia/rsyslog/atomia-rsyslog-client.conf.erb"),
-        }
+  if($is_server == true){
+    file{ '/etc/rsyslog.d/atomia-rsyslog-server.conf':
+      ensure  => present,
+      content => 'puppet:///modules/atomia/rsyslog/atomia-rsyslog-server.conf',
     }
+
+    file{ '/etc/rsyslog.conf':
+      ensure  => present,
+      content => 'puppet:///modules/atomia/rsyslog/rsyslog-server.conf',
+    }
+  } else{
+    file{ '/etc/apache2/conf.d/log-to-syslog.conf':
+      ensure  => present,
+      content => 'ErrorLog syslog',
+    }
+
+    file{ '/etc/rsyslog.d/atomia-rsyslog-client.conf':
+      ensure  => present,
+      content => template('atomia/rsyslog/atomia-rsyslog-client.conf.erb'),
+    }
+  }
 }

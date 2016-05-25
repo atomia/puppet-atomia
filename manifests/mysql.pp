@@ -17,46 +17,49 @@
 ##### server_ips: .*
 
 class atomia::mysql (
-	$mysql_username = "automationserver",
-	$mysql_password,
-	$mysql_root_password,
-	$provisioning_host = "%",
-    $server_ips = "",
-	){
+  $mysql_username       = 'automationserver',
+  $mysql_password,
+  $mysql_root_password,
+  $provisioning_host    = '%',
+  $server_ips           = '',
+){
 
-	# TODO: Consider changing % to hostname for automation server in internal zone when this is setup.
+  # TODO: Consider changing % to hostname for automation server in internal zone when this is setup.
 
-	class { '::mysql::server':
-		restart			=> true,
-		root_password		=> $mysql_root_password,
-		remove_default_accounts	=> true,
-  		override_options	=> { 'mysqld' => { 'bind_address' => '*' } }
-	}	
+  class { '::mysql::server':
+    restart                 => true,
+    root_password           => $mysql_root_password,
+    remove_default_accounts => true,
+    override_options        => {
+    'mysqld' => {
+      'bind_address' => '*' }
+    }
+  }
 
-	mysql_user { "$mysql_username@$provisioning_host":
- 		ensure          => 'present',
-		password_hash	=> mysql_password($mysql_password),
-	}
+  mysql_user { "${mysql_username}@${provisioning_host}":
+    ensure        => 'present',
+    password_hash => mysql_password($mysql_password),
+  }
 
-	mysql_grant { "$mysql_username@$provisioning_host/*.*":
-  		ensure     => 'present',
-  		options    => ['GRANT'],
-  		privileges => ['ALL'],
-  		table      => '*.*',
-  		user       => "$mysql_username@$provisioning_host",
-	}
+  mysql_grant { "${mysql_username}@${provisioning_host}/*.*":
+    ensure     => 'present',
+    options    => ['GRANT'],
+    privileges => ['ALL'],
+    table      => '*.*',
+    user       => "${mysql_username}@${provisioning_host}",
+  }
 
-	limits::conf { "soft-file-limit":
-		domain	=> '*',
-		type	=> 'soft',
-		item	=> 'nofile',
-		value	=> 65535
-	}
+  limits::conf { 'soft-file-limit':
+    domain => '*',
+    type   => 'soft',
+    item   => 'nofile',
+    value  => 65535
+  }
 
-	limits::conf { "hard-file-limit":
-		domain	=> '*',
-		type	=> 'hard',
-		item	=> 'nofile',
-		value	=> 65535
-	}
+  limits::conf { 'hard-file-limit':
+    domain => '*',
+    type   => 'hard',
+    item   => 'nofile',
+    value  => 65535
+  }
 }

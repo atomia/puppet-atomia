@@ -10,21 +10,21 @@
 
 
 class atomia::internal_mailserver (
-	$allow_subnet = "10.0.0.0/24",
+  $allow_subnet = '10.0.0.0/24',
 ){
-	package { postfix: ensure => present }
-	
-	# Modify configuration with Augeas
-	
-	augeas { 'postfix-main-cf':
-		context => '/files/etc/postfix/main.cf',
-		changes => [
-			"set mynetworks ${allow_subnet}", 
-		],
-		notify	=> Service['postfix']
-	}
-	
-	service { postfix:
-		ensure	=> running
-	}
+  package { 'postfix': ensure => present }
+
+  # Modify configuration with Augeas
+
+  augeas { 'postfix-main-cf':
+    context => '/files/etc/postfix/main.cf',
+    changes => [
+      "set mynetworks ${allow_subnet}",
+    ],
+    notify  => Service['postfix']
+  }
+
+  service { 'postfix':
+    ensure  => running
+  }
 }
