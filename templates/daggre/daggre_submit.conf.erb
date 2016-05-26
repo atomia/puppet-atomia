@@ -5,6 +5,14 @@ daggre_hosts=<%= @ip_addr %>:999
 # Disk usage reporter specifics
 agents_diskusage_customerdir=/storage/content/*/%account/%domain
 
+local_address=<%= @local_address %>
+
+dbname=lve
+dbhost=<%= @ip_addr %>
+dbport=5432
+dbuser=atomia-lve
+dbpassword=<%= @cloudlinux_database_password %>
+
 # Web log traffic reporter specifics
 alias_map_path=/storage/configuration/maps/vhost.map
 user_map_path=/storage/configuration/maps/users.map

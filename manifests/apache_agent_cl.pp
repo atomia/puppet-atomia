@@ -43,9 +43,51 @@ class atomia::apache_agent_cl (
   $should_have_php_farm       = 0,
   $apache_modules_to_enable   = 'rewrite,userdir,fcgid,suexec,expires,headers,deflate,include',
   $is_master                  = 1,
-  $cloudlinux_agent_secret
+  $cloudlinux_agent_secret,
+  $daggre_ip,
 ) {
 
+    # Install lve-stats
+    exec { 'install lve-stats2':
+      command => '/usr/bin/yum -y install lve-stats --enablerepo=cloudlinux-updates-testing',
+      unless  => '/usr/bin/rpm -qa | /bin/grep -c lve-stats-2',
+      require => [Package['lvemanager'], Package['cagefs']],
+    }
+
+    service { 'lvestats':
+      ensure  => running,
+      require => Exec['install lve-stats2'],
+    }
+
+    $cloudlinux_database_password = hiera('atomia::daggre::cloudlinux_database_password','atomia123')
+    exec { 'update lve-stats connections tring':
+      command => "/usr/bin/sed -i 's#connect_string=.*#connect_string=atomia-lve:${cloudlinux_database_password}@${daggre_ip}/lve#' /etc/sysconfig/lvestats2",
+      unless  => "/usr/bin/grep -c 'connect_string=atomia-lve:${cloudlinux_database_password}@${daggre_ip}/lve' /etc/sysconfig/lvestats2",
+      notify  => Service['lvestats'],
+      require => Exec['install lve-stats2'],
+    }
+
+    exec { 'set postgres backend':
+      command => "/usr/bin/sed -i 's/db_type.*/^db_type=postgresql/' /etc/sysconfig/lvestats2",
+      unless  => "/usr/bin/grep -c '^db_type=postgresql' /etc/sysconfig/lvestats2",
+      notify  => Exec['create lve database'],
+      require => Exec['install lve-stats2'],
+    }
+
+    exec { 'create lve database':
+      command     => '/usr/sbin/lve-create-db',
+      refreshonly => true,
+    }
+
+    # Install alt-php
+    package { 'lvemanager': ensure => installed }
+
+    exec { 'install altphp':
+        command => '/usr/bin/yum -y groupinstall alt-php',
+        timeout => 1800,
+        unless  => '/usr/bin/rpm -qa | /bin/grep -c alt-php70',
+        require => [Package['lvemanager'], Package['cagefs']],
+    }
 
   if $content_share_nfs_location == '' {
     $internal_zone = hiera('atomia::internaldns::zone_name','')
@@ -65,6 +107,7 @@ class atomia::apache_agent_cl (
       fstype  => 'glusterfs',
       require => [Package['glusterfs-client'],File['/storage']],
     }
+
     fstab::mount { '/storage/configuration':
       ensure  => 'mounted',
       device  => "gluster.${internal_zone}:/config_volume",
@@ -87,7 +130,6 @@ class atomia::apache_agent_cl (
       nfs_location => $config_share_nfs_location,
     }
   }
-
 
   if $should_have_pa_apache == '1' {
     package { 'atomia-pa-apache':
