@@ -22,7 +22,7 @@ class atomia::daggre (
   $config_share_nfs_location    = '',
   $use_nfs3                     = true,
   $ip_addr                      = $ipaddress,
-  $cloudlinux_database          = 'false',
+  $cloudlinux_database          = false,
   $cloudlinux_database_password = 'atomia123',
   $local_address                = 'localhost'
 ) {
@@ -139,24 +139,24 @@ class atomia::daggre (
     }
   }
 
-  if $cloudlinux_database == 'true' {
-    
+  if $cloudlinux_database == true {
+
     package { 'atomia-daggre-reporters-cloudlinux':
       ensure  => present,
     }
-    
+
     package { 'postgresql-contrib':
       ensure  => present,
     }
-    
+
     package { 'libdbi-perl':
       ensure  => present,
     }
-    
+
     package { 'libdbd-pg-perl':
       ensure  => present,
     }
-    
+
     class { 'postgresql::server':
       ip_mask_allow_all_users => '0.0.0.0/0',
       listen_addresses        => '*',
@@ -167,7 +167,7 @@ class atomia::daggre (
       user     => 'atomia-lve',
       password => postgresql_password('atomia-lve', $cloudlinux_database_password),
     }
-    
+
     postgresql::server::pg_hba_rule { 'allow network acces for atomia user':
       description => 'Open up postgresql for access for Atomia user',
       type        => 'host',
@@ -177,5 +177,5 @@ class atomia::daggre (
       auth_method => 'password',
     }
   }
-  
+
 }
