@@ -51,12 +51,12 @@ class atomia::apache_agent_cl (
     exec { 'install lve-stats2':
       command => '/usr/bin/yum -y install lve-stats --enablerepo=cloudlinux-updates-testing',
       unless  => '/usr/bin/rpm -qa | /bin/grep -c lve-stats-2',
-      require => [Package['lvemanager'], Package['cagefs']],
+      require => [Package['cagefs']],
     }
 
     service { 'lvestats':
       ensure  => running,
-      require => Exec['install lve-stats2'],
+      require => [Exec['install lve-stats2'],Exec['set postgres backend']],
     }
 
     $cloudlinux_database_password = hiera('atomia::daggre::cloudlinux_database_password','atomia123')
@@ -67,26 +67,34 @@ class atomia::apache_agent_cl (
       require => Exec['install lve-stats2'],
     }
 
-    exec { 'set postgres backend':
-      command => "/usr/bin/sed -i 's/db_type.*/^db_type=postgresql/' /etc/sysconfig/lvestats2",
-      unless  => "/usr/bin/grep -c '^db_type=postgresql' /etc/sysconfig/lvestats2",
-      notify  => Exec['create lve database'],
-      require => Exec['install lve-stats2'],
-    }
+    if $is_master == 1 {
+      exec { 'set postgres backend':
+        command => "/usr/bin/sed -i 's/db_type.*/db_type=postgresql/' /etc/sysconfig/lvestats2",
+        unless  => "/usr/bin/grep -c '^db_type=postgresql' /etc/sysconfig/lvestats2",
+        notify  => Exec['create lve database'],
+        require => Exec['install lve-stats2'],
+      }
 
-    exec { 'create lve database':
-      command     => '/usr/sbin/lve-create-db',
-      refreshonly => true,
+      exec { 'create lve database':
+        command     => '/usr/sbin/lve-create-db',
+        refreshonly => true,
+      }
+    } else {
+      exec { 'set postgres backend':
+        command => "/usr/bin/sed -i 's/db_type.*/^db_type=postgresql/' /etc/sysconfig/lvestats2",
+        unless  => "/usr/bin/grep -c '^db_type=postgresql' /etc/sysconfig/lvestats2",
+        require => Exec['install lve-stats2'],
+      }
     }
 
     # Install alt-php
-    package { 'lvemanager': ensure => installed }
+    #package { 'lvemanager': ensure => installed }
 
     exec { 'install altphp':
         command => '/usr/bin/yum -y groupinstall alt-php',
         timeout => 1800,
         unless  => '/usr/bin/rpm -qa | /bin/grep -c alt-php70',
-        require => [Package['lvemanager'], Package['cagefs']],
+        require => [Package['cagefs']],
     }
 
   if $content_share_nfs_location == '' {
@@ -147,12 +155,22 @@ class atomia::apache_agent_cl (
     }
 
     service { 'atomia-cloudlinux-agent':
-      ensure  => running
+      ensure  => running,
+      require => Package['atomia-cloudlinux-agent'],
     }
 
-    exec { 'sync php versions':
-      command => "/usr/bin/curl -X PUT -H \"Authorization: ${cloudlinux_agent_secret}\" http://localhost:8000/php/sync -v",
-      require => [Package['atomia-cloudlinux-agent'], Exec['install altphp']],
+    if $is_master == 1 {
+      exec { 'sync php versions':
+        command => "/usr/bin/curl -X PUT -H \"Authorization: ${cloudlinux_agent_secret}\" http://localhost:8000/php/sync -v",
+        require => [Package['atomia-cloudlinux-agent'], Exec['install altphp'], File['/etc/httpd/conf/phpversions.conf']],
+      }
+    }
+
+    file { '/etc/httpd/conf/phpversions.conf':
+      ensure  => 'link',
+      target  => '/storage/configuration/cloudlinux/phpversions.conf',
+      require => [File['/storage/configuration/cloudlinux']],
+      force   => true,
     }
   }
 
@@ -200,22 +218,6 @@ class atomia::apache_agent_cl (
     refreshonly => true,
   }
 
-  # Install alt-php
-  package { 'lvemanager':
-    ensure => installed
-  }
-
-  exec { 'install altphp':
-    command => '/usr/bin/yum -y groupinstall alt-php',
-    timeout => 1800,
-    unless  => '/usr/bin/rpm -qa | /bin/grep -c alt-php70',
-    require => [Package['lvemanager'], Package['cagefs']],
-  }
-
-  file { '/etc/httpd/conf/phpversions.conf':
-    ensure  => present,
-    require => Package['httpd'],
-  }
 
   # Install mod_lsapi
   exec { 'install mod_lsapi':
@@ -323,6 +325,7 @@ class atomia::apache_agent_cl (
     content => template('atomia/apache_agent/ve.cfg.erb'),
     require => File['/etc/container']
   }
+  
 
   $maps_to_ensure = [
     "${maps_path}/frmrs.map", "${maps_path}/parks.map", "${maps_path}/phpvr.map", "${maps_path}/redrs.map", "${maps_path}/sspnd.map",
