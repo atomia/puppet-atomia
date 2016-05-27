@@ -63,7 +63,7 @@ class atomia::apache_agent (
     $pa_site_enabled        = '000-default'
   }
 
-  if $should_have_pa_apache == '1' {
+  if $should_have_pa_apache == 1 {
     package { 'atomia-pa-apache':
       ensure  => present,
       require => Package['apache2'],
@@ -172,7 +172,15 @@ class atomia::apache_agent (
     before => Service['apache2'],
   }
 
-  file { '/var/www/cgi-wrappers': mode => '0755', }
+  file { '/var/www/':
+    ensure  => directory,
+  }
+
+  file { '/var/www/cgi-wrappers':
+    ensure  => directory,
+    mode    => '0755',
+    recurse => true,
+  }
 
   file { $maps_path:
     ensure  => directory,
@@ -383,7 +391,7 @@ define arrayPHP {
     group   => 'root',
     mode    => '0555',
     content => template('atomia/apache_agent/php-fcgid-wrapper-custom.erb'),
-    require => [Exec["compile_php_${php_version}"], Exec["check_php_install_${php_version}"]],
+    require => [Exec["compile_php_${php_version}"], Exec["check_php_install_${php_version}"],File['/var/www/cgi-wrappers']],
   }
 }
 
