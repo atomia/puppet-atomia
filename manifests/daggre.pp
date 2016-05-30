@@ -8,6 +8,9 @@
 #### config_share_nfs_location: The location of the NFS share for web cluster configuration. If using the default setup with GlusterFS leave blank otherwise you need to fill it in.
 #### use_nfs3: Determines if we should use NFS3 or NFS2.
 #### ip_addr: Which IP to use when connecting to daggre from the rest of the platform.
+#### cloudlinux_database: Enable if server is to be used in conjunction with CloudLinux web servers
+#### cloudlinux_database_password: The CloudLinux database server password
+#### local_address: Local address for the agent
 
 ### Validations
 ##### ip_addr(advanced): %password
@@ -15,6 +18,9 @@
 ##### content_share_nfs_location(advanced): %nfs_share
 ##### config_share_nfs_location(advanced): %nfs_share
 ##### use_nfs3(advanced): %boolean
+##### cloudlinux_database(advanced): %boolean
+##### cloudlinux_database_password(advanced): %password
+##### local_address(advanced): .*
 
 class atomia::daggre (
   $global_auth_token,
