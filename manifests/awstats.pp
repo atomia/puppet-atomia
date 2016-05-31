@@ -46,7 +46,7 @@ class atomia::awstats (
     package { 'apache2-mpm-worker': ensure => installed }
   }
 
-  if $skip_mount == false {
+  if $skip_mount == 'false' {
 
 
     $internal_zone = hiera('atomia::internaldns::zone_name','')
