@@ -17,8 +17,8 @@
 ##### global_auth_token(advanced): %password
 ##### content_share_nfs_location(advanced): %nfs_share
 ##### config_share_nfs_location(advanced): %nfs_share
-##### use_nfs3(advanced): %boolean
-##### cloudlinux_database(advanced): %boolean
+##### use_nfs3(advanced): %int_boolean
+##### cloudlinux_database(advanced): %int_boolean
 ##### cloudlinux_database_password(advanced): %password
 ##### local_address(advanced): .*
 
@@ -26,9 +26,9 @@ class atomia::daggre (
   $global_auth_token,
   $content_share_nfs_location   = '',
   $config_share_nfs_location    = '',
-  $use_nfs3                     = true,
+  $use_nfs3                     = 1,
   $ip_addr                      = $ipaddress,
-  $cloudlinux_database          = 'false',
+  $cloudlinux_database          = 0,
   $cloudlinux_database_password = 'atomia123',
   $local_address                = 'localhost'
 ) {
@@ -145,7 +145,7 @@ class atomia::daggre (
     }
   }
 
-  if $cloudlinux_database == 'true' {
+  if $cloudlinux_database == 1 {
 
     package { 'atomia-daggre-reporters-cloudlinux':
       ensure  => present,

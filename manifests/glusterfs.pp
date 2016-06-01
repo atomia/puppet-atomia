@@ -26,7 +26,7 @@ class atomia::glusterfs (
   $physical_volume           = '/dev/sdb',
 ) {
 
-  $is_first_node = hiera('atomia::glusterfs::is_first_node', false)
+  $is_first_node = hiera('atomia::glusterfs::is_first_node', 0)
 
   # Set ip correctly when on ec2
   if $::ec2_public_ipv4 {
@@ -175,7 +175,7 @@ class atomia::glusterfs (
 
   if($peers_size > 1)
   {
-    if($is_first_node) {
+    if($is_first_node == 1) {
       exec { 'gluster volume create /export/web':
         command => template('atomia/glusterfs/create_web_volume.erb'),
         creates => '/var/lib/glusterd/vols/web_volume',
@@ -202,7 +202,7 @@ class atomia::glusterfs (
 
   if($peers_size > 1)
   {
-    if($is_first_node) {
+    if($is_first_node == 1) {
       exec { 'gluster volume create /export/mail':
         command => template('atomia/glusterfs/create_mail_volume.erb'),
         creates => '/var/lib/glusterd/vols/mail_volume',
@@ -220,7 +220,7 @@ class atomia::glusterfs (
 
   if($peers_size > 1)
   {
-    if($is_first_node) {
+    if($is_first_node == 1) {
       exec { 'gluster volume create /export/config':
         command => template('atomia/glusterfs/create_config_volume.erb'),
         creates => '/var/lib/glusterd/vols/config_volume',
