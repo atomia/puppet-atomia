@@ -12,8 +12,6 @@
 #### cluster_ip: The virtual IP of the apache cluster.
 #### apache_agent_ip: The IP or hostname of the apache agent used by Automation Server to provision apache websites.
 #### maps_path: The pathw here the apache website and user maps are stored.
-#### php_extension_packages: Determines which PHP extensions to install (comma separated list of package names).
-#### apache_modules_to_enable: Determines which Apache modules to enable (comma separated list of modules).
 #### cloudlinux_agent_secret: Secret key for authenticating to the CloudLinux agent
 
 ### Validations
@@ -26,8 +24,6 @@
 ##### cluster_ip: %ip
 ##### apache_agent_ip(advanced): %ip_or_hostname
 ##### maps_path(advanced): %path
-##### php_extension_packages(advanced): ^.*$
-##### apache_modules_to_enable(advanced): ^[a-z0-9_-]+(,[a-z0-9_-]+)$
 ##### cloudlinux_agent_secret: %password
 
 class atomia::apache_agent_cl (
@@ -41,7 +37,6 @@ class atomia::apache_agent_cl (
   $apache_agent_ip            = $::fqdn,
   $maps_path                  = '/storage/configuration/maps',
   $should_have_php_farm       = 0,
-  $apache_modules_to_enable   = 'rewrite,userdir,fcgid,suexec,expires,headers,deflate,include',
   $is_master                  = 1,
   $cloudlinux_agent_secret,
   $daggre_ip,
@@ -166,10 +161,14 @@ class atomia::apache_agent_cl (
       }
     }
 
+    file { '/storage/configuration/cloudlinux/phpversions.conf':
+      ensure  => present,
+    }
+
     file { '/etc/httpd/conf/phpversions.conf':
       ensure  => 'link',
       target  => '/storage/configuration/cloudlinux/phpversions.conf',
-      require => [File['/storage/configuration/cloudlinux']],
+      require => [File['/storage/configuration/cloudlinux'], File['/storage/configuration/cloudlinux/phpversions.conf']],
       force   => true,
     }
   }
