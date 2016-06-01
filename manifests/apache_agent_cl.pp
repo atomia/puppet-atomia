@@ -62,10 +62,13 @@ class atomia::apache_agent_cl (
       require => Exec['install lve-stats2'],
     }
 
+    $lve_postgres_backend_sed_cmd  = '/usr/bin/sed -i "s/db_type = sqlite/db_type = postgresql/" /etc/sysconfig/lvestats2'
+    $lve_postgres_backend_grep_cmd = '/usr/bin/grep "^db_type = postgresql" /etc/sysconfig/lvestats2'
+
     if $is_master == 1 {
       exec { 'set postgres backend':
-        command => "/usr/bin/sed -i 's/db_type.*/db_type=postgresql/' /etc/sysconfig/lvestats2",
-        unless  => "/usr/bin/grep -c '^db_type=postgresql' /etc/sysconfig/lvestats2",
+        command => $lve_postgres_backend_sed_cmd,
+        unless  => $lve_postgres_backend_grep_cmd,
         notify  => Exec['create lve database'],
         require => Exec['install lve-stats2'],
       }
@@ -76,8 +79,8 @@ class atomia::apache_agent_cl (
       }
     } else {
       exec { 'set postgres backend':
-        command => "/usr/bin/sed -i 's/db_type.*/^db_type=postgresql/' /etc/sysconfig/lvestats2",
-        unless  => "/usr/bin/grep -c '^db_type=postgresql' /etc/sysconfig/lvestats2",
+        command => $lve_postgres_backend_sed_cmd,
+        unless  => $lve_postgres_backend_grep_cmd,
         require => Exec['install lve-stats2'],
       }
     }
