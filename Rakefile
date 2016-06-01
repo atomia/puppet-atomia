@@ -5,8 +5,6 @@ require 'puppet-syntax/tasks/puppet-syntax'
 #FIXME: disabling autoloader via disable_checks didn't work
 PuppetLint.configuration.send("disable_autoloader_layout")
 
-#FIXME: use a smarter way of managing boolean values in the future
-PuppetLint.configuration.send('disable_quoted_booleans')
 
 exclude_paths = [
   "pkg/**/*",

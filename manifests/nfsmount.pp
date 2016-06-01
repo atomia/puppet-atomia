@@ -10,7 +10,7 @@ define atomia::nfsmount(
 
   if $nfs_type == 'nfs'
   {
-    if $use_nfs3 {
+    if $use_nfs3 == 1 {
       $fs_type = 'nfs'
     } else {
       $fs_type = 'nfs4'

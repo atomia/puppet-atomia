@@ -36,7 +36,6 @@ class atomia::apache_agent_cl (
   $cluster_ip,
   $apache_agent_ip            = $::fqdn,
   $maps_path                  = '/storage/configuration/maps',
-  $should_have_php_farm       = 0,
   $is_master                  = 1,
   $cloudlinux_agent_secret,
   $daggre_ip,

@@ -3,21 +3,18 @@
 ### Joins a server to Active Directory
 
 ### Variable documentation
-#### domain_name: The URL of the Atomia DNS API service.
-#### admin_user: A comman separated list of your nameservers (used as NS for default zones created).
-#### admin_password: The username to require for accessing the service.
-#### ldap_uris: The password to require for accessing the service.
-#### bind_user: The hostname of the Atomia Domain Registration database.
-#### no_nscd: The username for the Atomia Domain Registration database.
-
+#### domain_name: The domain name for the environment
+#### admin_user: The admin user to use for joing Active Directory
+#### admin_password: The password fpr the admin user
+#### bind_user: User to use when connectiong to ldap
+#### bind_password: Password for the ldap user
 
 ### Validations
 ##### domain_name(advanced): %url
 ##### admin_user(advanced): %hostname
 ##### admin_password(advanced): %hostname
-##### ldap_uris(advanced): ^\[([a-z0-9.-]+,)*[a-z0-9.-]+\]$
 ##### bind_user(advanced): %username
-##### no_nscd(advanced): %password
+##### bind_password(advanced): %password
 
 
 class atomia::adjoin (
@@ -27,7 +24,7 @@ class atomia::adjoin (
   $admin_password = hiera('atomia::active_directory::windows_admin_password', ''),
   $bind_user      = 'PosixGuest',
   $bind_password  = hiera('atomia::active_directory::bind_password', ''),
-  $no_nscd        = 1,) {
+  ) {
     if $::operatingsystem == 'windows' {
 
       $ad_factfile = 'C:/ProgramData/PuppetLabs/facter/facts.d/domain_controller.txt'
