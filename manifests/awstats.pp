@@ -16,10 +16,10 @@
 ### Validations
 ##### agent_user(advanced): %username
 ##### agent_password(advanced): %password
-##### ssl_enabled(advanced): %boolean
+##### ssl_enabled(advanced): %int_boolean
 ##### content_share_nfs_location(advanced): %nfs_share
 ##### configuration_share_nfs_location(advanced): %nfs_share
-##### skip_mount(advanced): %boolean
+##### skip_mount(advanced): %int_boolean
 ##### ssl_cert_key(advanced): .*
 ##### ssl_cert_file(advanced): .*
 ##### server_ip(advanced): .*
@@ -27,12 +27,12 @@
 class atomia::awstats (
   $agent_user                       = 'awstats',
   $agent_password,
-  $ssl_enabled                      = false,
+  $ssl_enabled                      = 0,
   $content_share_nfs_location       = '',
   $configuration_share_nfs_location = '',
   $ssl_cert_key                     = '',
   $ssl_cert_file                    = '',
-  $skip_mount                       = false,
+  $skip_mount                       = 0,
   $server_ip                        = $ipaddress
 ) {
 
@@ -46,7 +46,7 @@ class atomia::awstats (
     package { 'apache2-mpm-worker': ensure => installed }
   }
 
-  if $skip_mount == 'false' {
+  if $skip_mount == 0 {
 
 
     $internal_zone = hiera('atomia::internaldns::zone_name','')
@@ -90,7 +90,7 @@ class atomia::awstats (
       }
     }
   }
-  if $ssl_enabled == true {
+  if $ssl_enabled == 1 {
     $ssl_generate_var = 'ssl'
 
     file { '/usr/local/awstats-agent/wildcard.key':
