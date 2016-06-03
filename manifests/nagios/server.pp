@@ -33,6 +33,7 @@ class atomia::nagios::server(
     'apache2-utils',
     'atomia-manager',
     'build-essential',
+    'curl',
     'libapache2-mod-php5',
     'libdatetime-format-iso8601-perl',
     'libdatetime-perl',
