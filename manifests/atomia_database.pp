@@ -19,7 +19,7 @@ class atomia::atomia_database (
   package { 'postgresql-contrib':
     ensure  => present
   }
-  
+
   class { 'postgresql::server':
     ip_mask_allow_all_users => '0.0.0.0/0',
     listen_addresses        => '*',
