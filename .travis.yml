@@ -1,12 +1,21 @@
 ---
-sudo: false
+sudo: required
+services:
+  - docker
 cache: bundler
 language: ruby
 before_install: rm Gemfile.lock || true
 rvm:
   - 1.9.3
   - 2.1.0
-script: bundle exec rake
+script: 
+  - bundle exec rake
+  - bundle exec rspec spec/acceptance
 env:
   - PUPPET_GEM_VERSION="~> 2.7.0"
   - PUPPET_GEM_VERSION="~> 3.8.0" STRICT_VARIABLES=yes
+matrix:
+  include:
+  - rvm: default
+    env: BEAKER_set="ubuntu-14.04-amd64"
+
