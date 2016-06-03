@@ -19,6 +19,7 @@ class atomia::atomia_database (
   package { 'postgresql-contrib':
     ensure  => present
   }
+  
   class { 'postgresql::server':
     ip_mask_allow_all_users => '0.0.0.0/0',
     listen_addresses        => '*',
@@ -40,5 +41,6 @@ class atomia::atomia_database (
     user        => $atomia_user,
     address     => '0.0.0.0/0',
     auth_method => 'password',
+    notify      => Service['postgresql']
   }
 }
