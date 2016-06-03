@@ -1,6 +1,6 @@
 require 'spec_helper_acceptance'
 
-describe 'atomia::atomiadns' do
+describe 'atomia::atomia_database' do
   let(:manifest) {
     <<-EOS
       class {'atomia::atomia_database':
