@@ -11,7 +11,7 @@ if (!(Test-Path c:\install))
     New-Item -ItemType Directory -Force -Path c:\install
 }
 
-$page = [xml](new-object net.webclient).DownloadString("http://installer.atomia.com/$repository/versions.xml") | % {$_.version.entry} |? { $_.name -match $application} | sort value -Descending
+$page = [xml](new-object net.webclient).DownloadString("http://installer.atomia.com/$repository/versions.xml") | % {$_.version.entry} |? { $_.name -match "^$application$"} | sort value -Descending
 
 $url = $page[0].metalink.files.file.resources.url.'#text'
 

@@ -134,10 +134,11 @@ class atomia::active_directory (
 
     Concat::Fragment <<| tag == 'dc_ip' |>>
 
+    $network_interface_index = hiera('atomia::windows_base::interface_index', '12')
     exec { 'set-dns':
-      command  => "Set-DNSClientServerAddress -interfaceIndex 12 -ServerAddresses (\"${atomia::active_directory::active_directory_ip}\")",
+      command  => "Set-DNSClientServerAddress -interfaceIndex ${network_interface_index} -ServerAddresses (\"${atomia::active_directory::active_directory_ip}\")",
       provider => powershell,
-      unless   => "if(Get-DnsClientServerAddress -InterfaceIndex 12 | Where-Object {\$_.ServerAddresses -like \"*${atomia::active_directory::active_directory_ip}*\"}) { exit 1 }",
+      unless   => "if(Get-DnsClientServerAddress -InterfaceIndex ${network_interface_index} | Where-Object {\$_.ServerAddresses -like \"*${atomia::active_directory::active_directory_ip}*\"}) { exit 1 }",
     }
   ->
   exec { 'enable-ad-feature':

@@ -78,7 +78,12 @@ class atomia::haproxy (
   class { 'apt': }
 
   if $::operatingsystem == 'Ubuntu' {
-    package { 'python-software-properties': ensure => present }
+    package { [
+      'python-software-properties',
+      'software-properties-common',
+    ]:
+      ensure => present,
+    }
 
     apt::ppa { 'ppa:vbernat/haproxy-1.5':
       require => Package['python-software-properties']
