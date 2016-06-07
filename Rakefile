@@ -2,9 +2,9 @@ require 'puppetlabs_spec_helper/rake_tasks'
 require 'puppet-lint/tasks/puppet-lint'
 require 'puppet-syntax/tasks/puppet-syntax'
 
-#FIXME: disabling autoloader via disable_checks didn't work
+#FIXME: disabling the following checks via disable_checks didn't work
 PuppetLint.configuration.send("disable_autoloader_layout")
-
+PuppetLint.configuration.send("disable_puppet_url_without_modules")
 
 exclude_paths = [
   "pkg/**/*",

@@ -28,24 +28,27 @@ class atomia::nagios::server(
 
   #$apache_ip  = generate('/etc/puppet/modules/atomia/files/lookup_variable.sh', 'apache_agent', 'cluster_ip')
 
-  package { ['build-essential',
-  'libgd2-xpm-dev',
-  'openssl',
-  'libssl-dev',
-  'apache2-utils',
-  'apache2',
-  'php5',
-  'libapache2-mod-php5',
-  'php5-mcrypt',
-  'nagios-plugins',
-  'nagios-nrpe-server',
-  'atomia-manager',
-  'ruby1.9.1-dev',
-  'python-pkg-resources',
-  'nagios-nrpe-plugin',
-  'libjson-perl',
-  'libdatetime-perl',
-  'libdatetime-format-iso8601-perl']:
+  package { [
+    'apache2',
+    'apache2-utils',
+    'atomia-manager',
+    'build-essential',
+    'curl',
+    'libapache2-mod-php5',
+    'libdatetime-format-iso8601-perl',
+    'libdatetime-perl',
+    'libgd2-xpm-dev',
+    'libjson-perl',
+    'libssl-dev',
+    'nagios-nrpe-plugin',
+    'nagios-nrpe-server',
+    'nagios-plugins',
+    'openssl',
+    'php5',
+    'php5-mcrypt',
+    'python-pkg-resources',
+    'ruby1.9.1-dev',
+  ]:
     ensure => installed,
   }
 
