@@ -320,10 +320,14 @@ class atomia::windows_base (
     creates => 'C:\install\install_atomia_installer.txt',
   }
 
+  file { 'C:\ProgramData\Atomia Installer':
+    ensure  => directory,
+  }
+
   file { 'C:\ProgramData\Atomia Installer\appupdater.ini':
     ensure  => 'file',
     source  => 'puppet:///modules/atomia/windows_base/appupdater.ini',
-    require => Exec['install-atomia-installer']
+    require => [Exec['install-atomia-installer'], File['C:\ProgramData\Atomia Installer']],
   }
 
   # Install other requirements
