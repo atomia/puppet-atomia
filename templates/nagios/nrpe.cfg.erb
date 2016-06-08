@@ -223,7 +223,7 @@ command[check_daggre_weblog]=/usr/local/nagios/libexec/atomia/check_daggre.pl --
 
 command[check_all_mountpoints] = /usr/lib/nagios/plugins/atomia/check_mountpoints.sh -A
 
-command[check_atomiadns]=/usr/lib/nagios/plugins/atomia/check_atomiadns.sh atomia-nagios-test.net http://localhost/atomiadns $ARG1$ $ARG2$
+command[check_atomiadns]=/usr/lib/nagios/plugins/atomia/check_atomiadns.sh $ARG1$ http://localhost/atomiadns $ARG2$ $ARG3$
 command[check_domainreg]=/usr/lib/nagios/plugins/atomia/check_domainreg.sh $ARG1$
 command[check_glusterfs]=/usr/lib/nagios/plugins/atomia/check_glusterfs -v $ARG1$ -n $ARG2$
 # The following examples allow user-supplied arguments and can
