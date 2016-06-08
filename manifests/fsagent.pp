@@ -271,9 +271,4 @@ class atomia::fsagent (
     require => [Package['jgrep'],Package['atomia-manager'], Package['python-pkg-resources']],
     notify  => Exec['/root/setup_atomia_account.sh']
   }
-
-  exec { '/root/setup_atomia_account.sh':
-    require      => [File['/root/setup_atomia_account.sh'], File['/etc/atomia.conf']],
-
-  }
 }
