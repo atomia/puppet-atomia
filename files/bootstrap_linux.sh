@@ -30,7 +30,7 @@ elif [ -e '/etc/redhat-release' ]; then
         fi
 fi
 
-SERVER_CONF=`grep '$1' /etc/puppet/puppet.conf | wc -l`
+SERVER_CONF=`grep $1 /etc/puppet/puppet.conf | wc -l`
 if [ $SERVER_CONF -eq 0 ]; then
         sed -i "/\[main\]/a server=$1\nlisten=true" /etc/puppet/puppet.conf
         sed -i "/templatedir/d" /etc/puppet/puppet.conf
