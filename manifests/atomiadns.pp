@@ -5,15 +5,15 @@
 ### Variable documentation
 #### atomia_dns_url: The URL of the Atomia DNS API service.
 #### nameserver1: The name of your primary nameserver (used in SOA for default zones created).
-#### registry:
+#### registry: The registry address for zones created.
 #### nameservers: A comman separated list of your nameservers (used as NS for default zones created).
-#### agent_user: The username to require for accessing the service.
-#### agent_password: The password to require for accessing the service.
-#### db_hostname: The hostname of the Atomia Domain Registration database.
-#### db_username: The username for the Atomia Domain Registration database.
-#### db_password: The password for the Atomia Domain Registration database.
+#### agent_user: The username for accessing the Atomia DNS agent.
+#### agent_password: The password for accessing the Atomia DNS agent.
+#### db_hostname: The hostname of the Atomia DNS database.
+#### db_username: The username for the Atomia DNS database.
+#### db_password: The password for the Atomia DNS database.
 #### ns_group: The Atomia DNS nameserver group used for the zones in your environment.
-#### zones_to_add: A newline delimited list of default zones to add after setup.
+#### zones_to_add: A comma delimited list of default zones to add after setup.
 #### atomia_dns_extra_config: Extra config to append to /etc/atomiadns.conf as-is.
 
 ### Validations

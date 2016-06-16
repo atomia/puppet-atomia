@@ -8,12 +8,14 @@
 #### content_share_nfs_location: The location of the NFS share for customer website content. Leave blank if using the default GlusterFS setup, otherwise fill it in.
 #### installatron_hostname: The hostname of the Installatron server
 #### authentication_key: You will need to get this after installation is complete, you can find it with the command grep key /usr/local/installatron/etc/settings.ini, paste it here and run provisioning again
+
 ### Validations
 ##### license_key: ^.+$
 ##### authentication_key: .*
 ##### use_nfs3(advanced): %int_boolean
 ##### content_share_nfs_location(advanced): %nfs_share
 ##### installatron_hostname(advanced): .*
+
 class atomia::installatron (
   $license_key,
   $use_nfs3                   = 1,

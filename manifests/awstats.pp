@@ -6,8 +6,8 @@
 #### agent_user: The username to require when accessing the awstats agent.
 #### agent_password: The password to require when accessing the awstats agent.
 #### ssl_enabled: Enable or disable SSL
-#### content_share_nfs_location: The location of the NFS share for customer website content. If using the default setup with GlusterFS leave blank otherwise you need to fill it in.
-#### configuration_share_nfs_location: The location of the NFS share for shared configuration. If using the default setup with GlusterFS leave blank otherwise you need to fill it in.
+#### content_share_nfs_location: The location of the NFS share for customer website content. If using the default setup with GlusterFS leave blank otherwise you need to fill it in. Example: 192.168.33.21:/export/content
+#### configuration_share_nfs_location: The location of the NFS share for shared configuration. If using the default setup with GlusterFS leave blank otherwise you need to fill it in. Example: 192.168.33.21:/export/configuration
 #### skip_mount: Toggles if we are to mount the content share or not.
 #### ssl_cert_key: SSL key to use if ssl is enabled
 #### ssl_cert_file: SSL cert to use if ssl is enabled

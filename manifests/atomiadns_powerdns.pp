@@ -3,9 +3,9 @@
 ### Deploys and configures a nameserver running the Atomia DNS PowerDNS agent.
 
 ### Variable documentation
-#### db_hostname: The hostname of the Atomia Domain Registration database.
-#### db_username: The username for the Atomia Domain Registration database.
-#### db_password: The password for the Atomia Domain Registration database.
+#### db_hostname: The hostname of the PowerDNS database.
+#### db_username: The username for the PowerDNS database.
+#### db_password: The password for the PowerDNS database.
 
 
 ### Validations
