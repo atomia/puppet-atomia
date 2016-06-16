@@ -3,16 +3,16 @@
 ### Deploys and configures an apache webserver cluster node with the atomia apache agent.
 
 ### Variable documentation
-#### username: The username to require when accessing the apache agent.
-#### password: The password to require when accessing the apache agent.
+#### username: The username for accessing the apache agent.
+#### password: The password for accessing the apache agent.
 #### atomia_clustered: Defines if this is a clustered instance or not.
 #### should_have_pa_apache: Defines if this node should have a copy of the apache agent installed or not.
-#### content_share_nfs_location: The location of the NFS share for customer website content.
-#### config_share_nfs_location: The location of the NFS share for web cluster configuration.
+#### content_share_nfs_location: The location of the NFS share for customer website content. Example: 192.168.33.21:/export/content
+#### config_share_nfs_location: The location of the NFS share for web cluster configuration. Example: 192.168.33.21:/export/config
 #### use_nfs3: Toggles if we are to use NFSv3 for the NFS mount.
 #### cluster_ip: The virtual IP of the apache cluster.
-#### apache_agent_ip: The IP or hostname of the apache agent used by Automation Server to provision apache websites.
-#### maps_path: The pathw here the apache website and user maps are stored.
+#### apache_agent_ip: The IP or hostname of the apache agent used by Automation Server to provision apache websites. Usually the first node in the cluster.
+#### maps_path: The path here the apache website and user maps are stored.
 #### should_have_php_farm: Toggles if we are to build and install a set of custom PHP versions or use the distribution default.
 #### php_versions: If using custom PHP versions, then this is a comma separated list of the versions to compile and install.
 #### php_extension_packages: Determines which PHP extensions to install (comma separated list of package names).

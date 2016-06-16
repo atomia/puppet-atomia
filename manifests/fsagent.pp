@@ -6,8 +6,8 @@
 #### username: The username to require when accessing the filesystem agent.
 #### password: The password to require when accessing the filesystem agent.
 #### fsagent_ip: The IP or hostname used to connect to the filesystem agent from the rest of the platform.
-#### content_share_nfs_location: The location of the NFS share for customer website content. If using the default setup with GlusterFS leave blank otherwise you need to fill it in.
-#### config_share_nfs_location: The location of the NFS share for shared configuration. If using the default setup with GlusterFS leave blank otherwise you need to fill it in.
+#### content_share_nfs_location: The location of the NFS share for customer website content. If using the default setup with GlusterFS leave blank otherwise you need to fill it in. Example: 192.168.33.21:/export/content.
+#### config_share_nfs_location: The location of the NFS share for shared configuration. If using the default setup with GlusterFS leave blank otherwise you need to fill it in. Example: 192.168.33.21:/export/configuration.
 #### skip_mount: Toggles if we are to mount the content share or not.
 #### enable_config_agent: If set then we also setup a separate fsagent instance for accessing the web cluster configuration share.
 #### create_storage_files: Toggles if we are to create initial storage directory structure if missing.

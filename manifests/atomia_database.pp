@@ -3,8 +3,8 @@
 ### Deploys and configures a PostgreSQL server to use as a backend database for Atomia
 
 ### Variable documentation
-#### atomia_user: The username of the PostgreSQL user that Atomia uses to connecto to the database
-#### atomia_password: The password for the PostgreSQL user that Atomia uses to connecto to the database
+#### atomia_user: The username of the PostgreSQL user that Atomia uses to connect to the database
+#### atomia_password: The password for the PostgreSQL user that Atomia uses to connect to the database
 
 ### Validations
 ##### atomia_user(advanced): ^[a-z0-9_-]+$

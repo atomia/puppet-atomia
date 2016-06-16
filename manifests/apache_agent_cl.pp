@@ -1,17 +1,17 @@
-## Atomia apache agent
+## Atomia CloudLinux
 
-### Deploys and configures an apache webserver cluster node with the atomia apache agent.
+### Deploys and configures an apache webserver cluster node with the atomia apache agent and CloudLinux
 
 ### Variable documentation
 #### username: The username to require when accessing the apache agent.
 #### password: The password to require when accessing the apache agent.
 #### should_have_pa_apache: Defines if this node should have a copy of the apache agent installed or not.
-#### content_share_nfs_location: The location of the NFS share for customer website content.
-#### config_share_nfs_location: The location of the NFS share for web cluster configuration.
+#### content_share_nfs_location: The location of the NFS share for customer website content. Example: 192.168.33.21:/export/content
+#### config_share_nfs_location: The location of the NFS share for web cluster configuration. Example: 192.168.33.21:/export/configuration
 #### use_nfs3: Toggles if we are to use NFSv3 for the NFS mount.
 #### cluster_ip: The virtual IP of the apache cluster.
 #### apache_agent_ip: The IP or hostname of the apache agent used by Automation Server to provision apache websites.
-#### maps_path: The pathw here the apache website and user maps are stored.
+#### maps_path: The path here the apache website and user maps are stored.
 #### cloudlinux_agent_secret: Secret key for authenticating to the CloudLinux agent
 
 ### Validations

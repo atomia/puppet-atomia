@@ -3,7 +3,7 @@
 ### Joins a server to Active Directory
 
 ### Variable documentation
-#### domain_name: The domain name for the environment
+#### domain_name: The Active Directory domain name for the environment
 #### admin_user: The admin user to use for joing Active Directory
 #### admin_password: The password fpr the admin user
 #### bind_user: User to use when connectiong to ldap

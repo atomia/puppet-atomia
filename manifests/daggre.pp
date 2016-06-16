@@ -4,8 +4,8 @@
 
 ### Variable documentation
 #### global_auth_token: The authentication token clients will use to submit data to and query daggre.
-#### content_share_nfs_location: The location of the NFS share for customer website content. If using the default setup with GlusterFS leave blank otherwise you need to fill it in.
-#### config_share_nfs_location: The location of the NFS share for web cluster configuration. If using the default setup with GlusterFS leave blank otherwise you need to fill it in.
+#### content_share_nfs_location: The location of the NFS share for customer website content. If using the default setup with GlusterFS leave blank otherwise you need to fill it in. Example: 192.168.33.21:/export/content.
+#### config_share_nfs_location: The location of the NFS share for web cluster configuration. If using the default setup with GlusterFS leave blank otherwise you need to fill it in. Example: 192.168.33.21:/export/configuration.
 #### use_nfs3: Determines if we should use NFS3 or NFS2.
 #### ip_addr: Which IP to use when connecting to daggre from the rest of the platform.
 #### cloudlinux_database: Enable if server is to be used in conjunction with CloudLinux web servers
