@@ -7,6 +7,7 @@ language: ruby
 before_install: rm Gemfile.lock || true
 script: 
   - bundle exec rake
+  - bundle exec rake spec
   - bundle exec rspec spec/acceptance/*.pp
 matrix:
   include:

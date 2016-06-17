@@ -7,5 +7,8 @@ fixtures:
     dism: "https://github.com/jimmybergman/puppetlabs-dism.git"
     httpauth: "https://github.com/jamtur01/puppet-httpauth"
     htpasswd: "https://github.com/leinaddm/puppet-htpasswd.git"
+    postgresql: "https://github.com/puppetlabs/puppetlabs-postgresql.git"
+    concat: "https://github.com/puppetlabs/puppetlabs-concat.git"
+
   symlinks:
     atomia: "#{source_dir}"
