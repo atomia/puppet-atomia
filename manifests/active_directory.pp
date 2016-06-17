@@ -167,7 +167,7 @@ define atomia::active_directory::store_ip ($content='', $order='10') {
 
   @@concat::fragment {"active_directory_ip_${::fqdn}":
     target  => $factfile,
-    content => "active_directory_ip=${content} ",
+    content => "active_directory_ip=${content}",
     tag     => 'dc_ip',
     order   => 3
   }
