@@ -17,7 +17,7 @@ class atomia::postgresql_backup (
 
     file { '/var/lib/postgresql/.pgpass':
         mode    => '0600',
-        content => "localhost:5432:postgres:${backup_user}:${backup_password}",
+        content => "localhost:5432:*:${backup_user}:${backup_password}",
         owner   => 'postgres',
         require => Package['postgresql-contrib']
     }
