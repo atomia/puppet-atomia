@@ -2,8 +2,8 @@ HOSTS:
   ubuntu-14.04:
     platform: ubuntu-14.04-amd64
     hypervisor : docker
-    image: ubuntu:14.04
-    docker_preserve_image: false
+    image: stolus/ubuntu
+    docker_preserve_image: true
 CONFIG:
   type: foss
   log_level: debug

@@ -1,19 +1,14 @@
 require 'spec_helper_acceptance'
 
-describe 'atomia::atomiadns' do
+describe 'atomia::domainreg' do
   let(:manifest) {
     <<-EOS
         class { 'atomia::linux_base': }
         class {'atomia::atomiarepository': }
-        class {'atomia::atomiadns':
-            nameserver1    => 'ns1.atomia.com',
-            registry       => 'registry.atomia.com',
-            nameservers    => '[ns1.atomia.com, ns2.atomia.com]',
-            agent_password => 'abc123',
-            db_password    => 'abc123',
-            zones_to_add   => 'preview.atomia.com, mysql.atomia.com',
+        class {'atomia::domainreg':
+            service_password => 'abc123',
+            db_password      => 'abc123',
         }
-        class {'atomia::atomiadns_powerdns': }
     EOS
   }
 
