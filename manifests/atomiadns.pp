@@ -15,6 +15,9 @@
 #### ns_group: The Atomia DNS nameserver group used for the zones in your environment.
 #### zones_to_add: A comma delimited list of default zones to add after setup.
 #### atomia_dns_extra_config: Extra config to append to /etc/atomiadns.conf as-is.
+#### enable_backups: If enabled will create a backup schedule of the PostgreSQL databases
+#### backup_dir: The directory to place the PostgreSQL backups in
+#### cron_schedule_hour: At what hour of the day should the backup be run. 1 means 1AM.
 
 ### Validations
 ##### atomia_dns_url(advanced): %url
@@ -29,6 +32,10 @@
 ##### ns_group(advanced): ^[a-z0-9_-]+$
 ##### zones_to_add(advanced): ^([a-z0-9.-]+,)*[a-z0-9.-]+$
 ##### atomia_dns_extra_config(advanced): .*
+##### enable_backups(advanced): %int_boolean
+##### backup_dir(advanced): .*
+##### cron_schedule_hour(advanced): ^[0-9]{1,2}$
+
 
 class atomia::atomiadns (
   $atomia_dns_url          = "http://${::fqdn}/atomiadns",
@@ -38,11 +45,15 @@ class atomia::atomiadns (
   $agent_user              = 'atomiadns',
   $agent_password          = '',
   $db_hostname             = '127.0.0.1',
-  $db_username             = 'domainreg',
+  $db_username             = 'atomiadns',
   $db_password             = '',
   $ns_group                = 'default',
   $zones_to_add            = expand_default('preview.[[atomia_domain]],mysql.[[atomia_domain]],mssql.[[atomia_domain]],cloud.[[atomia_domain]],postgresql.[[atomia_domain]]'),
-  $atomia_dns_extra_config = ''
+  $atomia_dns_extra_config = '',
+  $enable_backups          = 1,
+  $backup_dir              = '/opt/atomia_backups',
+  $cron_schedule_hour      = '1'
+  
 ) {
 
   package { 'atomiadns-masterserver':
@@ -110,6 +121,19 @@ class atomia::atomiadns (
       require => [ File['/usr/share/doc/atomiadns-masterserver/zones_to_add.txt'], File['/usr/share/doc/atomiadns-masterserver/add_zones.sh'], Package['atomiadns-client'], Exec['add_nameserver_group'] ],
       command => "/bin/sh /usr/share/doc/atomiadns-masterserver/add_zones.sh \"${ns_group}\" \"${nameserver1}\" \"${nameservers}\" \"${registry}\"",
       unless  => '/usr/bin/test -f /usr/share/doc/atomiadns-masterserver/sync_zones_done.txt',
+    }
+  }
+
+  package { 'postgresql-contrib':
+    ensure  => present
+  }
+
+  if($enable_backups == 1 and !defined(Class['atomia::postgresql_backup'])) {
+    class {'atomia::postgresql_backup':
+      backup_dir         => $backup_dir,
+      cron_schedule_hour => $cron_schedule_hour,
+      backup_user        => $db_username,
+      backup_password    => $db_password
     }
   }
 }

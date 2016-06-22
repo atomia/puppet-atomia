@@ -14,4 +14,10 @@ describe 'atomia::atomia_database' do
     expect(@result.exit_code).to_not be 1
   end
 
+  it 'should have setup a cronjob for backups' do
+    crontab_exists = shell("sudo -H -u postgres bash -c 'crontab -l' | grep pg_backup  &> /dev/null")
+    expect(crontab_exists.exit_code).to eq 0
+  end
+
+
 end

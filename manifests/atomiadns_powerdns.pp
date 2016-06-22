@@ -25,7 +25,7 @@ class atomia::atomiadns_powerdns (
   $ns_group                = hiera('atomia::atomiadns::ns_group','default')
   $atomia_dns_extra_config = hiera('atomia::atomiadns::atomia_dns_extra_config','')
 
-  if !in_atomia_role('atomiadns') {
+  if !in_atomia_role('atomiadns') and !defined(File['/etc/atomiadns.conf']) {
     file { '/etc/atomiadns.conf':
       owner   => 'root',
       group   => 'root',

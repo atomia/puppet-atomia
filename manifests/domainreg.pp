@@ -11,6 +11,9 @@
 #### db_password: The password for the Atomia Domain Registration database.
 #### domainreg_global_config: The global section of the /etc/domainreg.conf file.
 #### domainreg_tld_config_hash: The TLD configuration sections for all the Atomia Domain Registration TLD processes.
+#### enable_backups: If enabled will create a backup schedule of the PostgreSQL databases
+#### backup_dir: The directory to place the PostgreSQL backups in
+#### cron_schedule_hour: At what hour of the day should the backup be run. 1 means 1AM.
 
 ### Validations
 ##### service_url(advanced): %url
@@ -21,6 +24,9 @@
 ##### db_password(advanced): %password
 ##### domainreg_global_config(advanced,default_file=domainreg_global_default.conf): %domainreg_global_config
 ##### domainreg_tld_config_hash: %domainreg_tld_config_hash
+##### enable_backups(advanced): %int_boolean
+##### backup_dir(advanced): .*
+##### cron_schedule_hour(advanced): ^[0-9]{1,2}$
 
 class atomia::domainreg (
   $service_url               = "http://${::fqdn}/domainreg",
@@ -30,7 +36,10 @@ class atomia::domainreg (
   $db_username               = 'domainreg',
   $db_password               = '',
   $domainreg_global_config   = '',
-  $domainreg_tld_config_hash = {}
+  $domainreg_tld_config_hash = {},
+  $enable_backups          = 1,
+  $backup_dir              = '/opt/atomia_backups',
+  $cron_schedule_hour      = '1'
 ){
 
   # Support both hash and Json format for domainreg_tld_config_hash
@@ -85,5 +94,17 @@ class atomia::domainreg (
   file { '/etc/cron.d/rotate-domainreg-logs':
     ensure  => present,
     content => "0 0 * * * root lockfile -r0 /var/run/rotate-domainreg-logs && (find /var/log/atomiadomainregistration -mtime +14 -exec rm -f '{}' '+'; rm -f /var/run/rotate-domainreg-logs.lock)",
+  }
+
+  package { 'postgresql-contrib':
+    ensure  => present
+  }
+  if($enable_backups == 1 and !defined(Class['atomia::postgresql_backup'])) {
+    class {'atomia::postgresql_backup':
+      backup_dir         => $backup_dir,
+      cron_schedule_hour => $cron_schedule_hour,
+      backup_user        => $db_username,
+      backup_password    => $db_password
+    }
   }
 }

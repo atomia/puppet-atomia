@@ -7,9 +7,13 @@ language: ruby
 before_install: rm Gemfile.lock || true
 script: 
   - bundle exec rake
-  - bundle exec rspec spec/acceptance/*.pp
+  - bundle exec rake spec
+  - ./spec/acceptance/run_acceptance_tests.sh $TEST_SUITE
 matrix:
   include:
   - rvm: default
     services: docker
-    env: BEAKER_set="ubuntu-14.04-amd64"
+    env: TEST_SUITE=default
+#  - rvm: default
+#    services: docker
+#    env: TEST_SUITE=ubuntu-12-04

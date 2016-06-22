@@ -17,6 +17,7 @@ RSpec.configure do |c|
       # Install dependencies
       on(host, puppet('module', 'install', 'leinaddm-htpasswd'))
       on(host, puppet('module', 'install', 'puppetlabs-postgresql'))
+      on(host, puppet('module', 'install', 'puppetlabs-ntp'))
       # Add more setup code as needed
     end
   end

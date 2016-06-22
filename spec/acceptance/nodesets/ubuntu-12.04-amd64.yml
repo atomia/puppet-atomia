@@ -1,0 +1,9 @@
+HOSTS:
+  ubuntu-12-04:
+    platform: ubuntu-12.04-x64
+    image: andreineculau/ubuntu-12.04
+    hypervisor: docker
+    docker_cmd: /usr/sbin/sshd -D
+CONFIG:
+  type: foss
+  log_level: debug

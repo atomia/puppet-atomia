@@ -1,6 +1,8 @@
 require 'puppetlabs_spec_helper/rake_tasks'
 require 'puppet-lint/tasks/puppet-lint'
 require 'puppet-syntax/tasks/puppet-syntax'
+require 'rake'
+require 'rspec/core/rake_task'
 
 #FIXME: disabling the following checks via disable_checks didn't work
 PuppetLint.configuration.send("disable_autoloader_layout")

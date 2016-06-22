@@ -2,18 +2,26 @@ require 'spec_helper'
 
 describe 'atomia::domainreg' do
 
+	let(:hiera_config) { 'spec/fixtures/hiera/hiera.yaml' }
+
 	# minimum set of default parameters
 	let :params do
 		{
-			#:password		=> 'abc123',
+			:service_password	=> 'abc123',
+			:db_password		=> 'abc123',
+		}
+	end
+
+	let :facts do 
+		{
+			:osfamily		=> 'Debian'
 		}
 	end
 	
-	context 'create a config file with default settings' do
-		it { should contain_file('domainreg.conf.puppet').with_path('/etc/domainreg.conf.puppet') }
-    end
-    
+    it { is_expected.to contain_class('atomia::domainreg') }
 
+    # PostgreSQL dumps
+    it { is_expected.to contain_file('/opt/postgresql_backup/pg_backup_rotated.sh') }
+    it { is_expected.to contain_file('/opt/postgresql_backup/pg_backup.config') } 
 
 end
-
