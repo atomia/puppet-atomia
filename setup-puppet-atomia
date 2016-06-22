@@ -73,6 +73,10 @@ echo "---
 
 :hierarchy:
   - \"%{::atomia_role_1}\"
+  - \"%{::atomia_role_2}\"
+  - \"%{::atomia_role_3}\"
+  - \"%{::atomia_role_4}\"
+  - \"%{::atomia_role_5}\"
   - bootstrap
 
 :logger: console

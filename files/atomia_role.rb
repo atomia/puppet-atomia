@@ -27,6 +27,21 @@ Facter.add('atomia_role_3') do
         end
 end
 
+Facter.add('atomia_role_4') do
+        setcode do
+                serverFQDN = Facter.value(:fqdn)
+                puppetFQDN = getPuppetFQDN()
+                JSON.parse(open("http://#{puppetFQDN}:3000/roles/#{serverFQDN}/json"))["roles"][3]
+        end
+end
+
+Facter.add('atomia_role_5') do
+        setcode do
+                serverFQDN = Facter.value(:fqdn)
+                puppetFQDN = getPuppetFQDN()
+                JSON.parse(open("http://#{puppetFQDN}:3000/roles/#{serverFQDN}/json"))["roles"][4]
+        end
+end
 
 def open(url)
         Net::HTTP.get(URI.parse(url))
