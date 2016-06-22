@@ -5,6 +5,10 @@ class atomia::postgresql_backup (
     $backup_password,
 ) {
 
+    package { 'cron':
+        ensure => present
+    }
+
     file { '/opt/postgresql_backup':
         ensure  => directory,
     }
@@ -42,7 +46,7 @@ class atomia::postgresql_backup (
         user    => 'postgres',
         hour    => $cron_schedule_hour,
         minute  => 0,
-        require => Package['postgresql-contrib']
+        require => [Package['postgresql-contrib'], Package['cron']]
 
     }
 
