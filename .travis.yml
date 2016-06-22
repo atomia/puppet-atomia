@@ -14,6 +14,6 @@ matrix:
   - rvm: default
     services: docker
     env: TEST_SUITE=default
-#  - rvm: default
-#    services: docker
-#    env: TEST_SUITE=ubuntu-12-04
+  - rvm: default
+    services: docker
+    env: TEST_SUITE=ubuntu-12-04
