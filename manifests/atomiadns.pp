@@ -53,7 +53,6 @@ class atomia::atomiadns (
   $enable_backups          = 1,
   $backup_dir              = '/opt/atomia_backups',
   $cron_schedule_hour      = '1'
-  
 ) {
 
   package { 'atomiadns-masterserver':
