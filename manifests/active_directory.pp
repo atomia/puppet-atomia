@@ -78,7 +78,7 @@ class atomia::active_directory (
 
     exec { 'enable-ad-feature':
       command  => 'Install-windowsfeature -name AD-Domain-Services -IncludeManagementTools',
-      onlyif   => 'Import-Module ServerManager; if ((Get-WindowsFeature Ad-Domain-Service).Installed) { exit 1 } else { exit 0 }',
+      onlyif   => 'Import-Module ServerManager; if ((Get-WindowsFeature Ad-Domain-Services).Installed) { exit 1 } else { exit 0 }',
       provider => powershell,
     }
 
@@ -143,7 +143,7 @@ class atomia::active_directory (
   ->
   exec { 'enable-ad-feature':
     command  => 'Install-windowsfeature -name AD-Domain-Services -IncludeManagementTools',
-    onlyif   => 'Import-Module ServerManager; if ((Get-WindowsFeature Ad-Domain-Service).Installed) { exit 1 } else { exit 0 }',
+    onlyif   => 'Import-Module ServerManager; if ((Get-WindowsFeature Ad-Domain-Services).Installed) { exit 1 } else { exit 0 }',
     provider => powershell,
   }
 

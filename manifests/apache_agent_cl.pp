@@ -326,7 +326,6 @@ class atomia::apache_agent_cl (
     content => template('atomia/apache_agent/ve.cfg.erb'),
     require => File['/etc/container']
   }
-  
 
   $maps_to_ensure = [
     "${maps_path}/frmrs.map", "${maps_path}/parks.map", "${maps_path}/phpvr.map", "${maps_path}/redrs.map", "${maps_path}/sspnd.map",
