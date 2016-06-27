@@ -9,7 +9,7 @@
 #### app_password: Password for the Atomia apppooluser
 #### bind_password: Password for the Atomia posixuser
 #### windows_admin_password: Password for the WindowsAdministrator user
-#### is_master: Specify if the server is master or slave
+#### master_ip: The ip address of this server
 
 ### Validations
 ##### netbios_domain_name: ^[a-zA-Z0-9]+$
@@ -18,7 +18,7 @@
 ##### app_password(advanced): %password
 ##### bind_password(advanced): %password
 ##### windows_admin_password(advanced): %password
-##### is_master(advanced): %hide
+##### master_ip(advanced): .*
 
 class atomia::active_directory (
   $domain_name            = '',
@@ -27,7 +27,7 @@ class atomia::active_directory (
   $app_password           = '',
   $bind_password          = '',
   $windows_admin_password = '',
-  $is_master              = 1,
+  $master_ip              = $::ipaddress,
 
 ) {
 
@@ -39,8 +39,6 @@ class atomia::active_directory (
   } else {
     $public_ip = $::ipaddress_eth0
   }
-
-  atomia::adjoin::register{ $::fqdn: content => $::ipaddress, name=> $::fqdn}
 
   if !defined(File['c:/install']) {
     file { 'c:/install':
@@ -54,14 +52,7 @@ class atomia::active_directory (
     require => File['c:/install'],
   }
 
-  if($is_master == 1 and !$::vagrant) {
-    atomia::active_directory::store_ip{ $::fqdn: content => $::ipaddress}
-
-    #@@host { "domain-name-host":
-    #    name		=> "$domain_name",
-    #    ip	=> "${ipaddress}"
-    #}
-
+  if(!$::vagrant) {
     @@bind::zone {'domain-forward':
       zone_contact    => "contact.${domain_name}",
       zone_ns         => ["ns0.${domain_name}"],
@@ -120,65 +111,5 @@ class atomia::active_directory (
       creates => 'C:\install\installed',
       require => File['c:/install/add_users_vagrant.ps1'],
     }
-
-  } else {
-    file { 'C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role_ad.ps1':
-      content => template('atomia/active_directory/atomia_role_active_directory_replica.ps1.erb'),
-    }
-
-    $factfile = 'C:/ProgramData/PuppetLabs/facter/facts.d/domain_controller.txt'
-
-    concat { $factfile:
-      ensure => present,
-    }
-
-    Concat::Fragment <<| tag == 'dc_ip' |>>
-
-    $network_interface_index = hiera('atomia::windows_base::interface_index', '12')
-    exec { 'set-dns':
-      command  => "Set-DNSClientServerAddress -interfaceIndex ${network_interface_index} -ServerAddresses (\"${atomia::active_directory::active_directory_ip}\")",
-      provider => powershell,
-      unless   => "if(Get-DnsClientServerAddress -InterfaceIndex ${network_interface_index} | Where-Object {\$_.ServerAddresses -like \"*${atomia::active_directory::active_directory_ip}*\"}) { exit 1 }",
-    }
-  ->
-  exec { 'enable-ad-feature':
-    command  => 'Install-windowsfeature -name AD-Domain-Services -IncludeManagementTools',
-    onlyif   => 'Import-Module ServerManager; if ((Get-WindowsFeature Ad-Domain-Services).Installed) { exit 1 } else { exit 0 }',
-    provider => powershell,
   }
-
-  #$secpasswd = ConvertTo-SecureString '${windows_admin_password}' -AsPlainText -Force;$credentials = New-Object System.Management.Automation.PSCredential ('${netbios_domain_name\\WindowsAdmin}', $secpasswd);Import-Module ADDSDeployment;
-  exec { 'Install AD replica':
-    command  => template('atomia/active_directory/ad-replica.ps1.erb'),
-    unless   => "if((gwmi WIN32_ComputerSystem).Domain -ne \"${domain_name}\") { exit 1 }",
-    require  => Exec['enable-ad-feature'],
-    provider => powershell,
-  }
-  }
-
-  exec { 'sync-time':
-    command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/sync_time.ps1',
-    require => File['c:/install/sync_time.ps1'],
-  }
-}
-
-define atomia::active_directory::store_ip ($content='', $order='10') {
-  $factfile = 'C:/ProgramData/PuppetLabs/facter/facts.d/domain_controller.txt'
-
-  @@concat::fragment {"active_directory_ip_${::fqdn}":
-    target  => $factfile,
-    content => "active_directory_ip=${content}",
-    tag     => 'dc_ip',
-    order   => 3
-  }
-
-  $factfile_linux= '/etc/facter/facts.d/ad_server.txt'
-
-  @@concat::fragment {"active_directory_ip__linux_${::fqdn}":
-    target  => $factfile_linux,
-    content => "ad_server=${content}",
-    tag     => 'dc_ip_linux',
-    order   => 3
-  }
-
 }

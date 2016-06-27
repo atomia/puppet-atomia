@@ -25,6 +25,8 @@ class atomia::adjoin (
   $bind_user      = 'PosixGuest',
   $bind_password  = hiera('atomia::active_directory::bind_password', ''),
   ) {
+    $active_directory_ip = hiera('atomia::active_directory::master_ip','')
+    $active_directory_replica_ip = hiera('atomia::active_directory_replica::replica_ip','')
     if $::operatingsystem == 'windows' {
 
       $ad_factfile = 'C:/ProgramData/PuppetLabs/facter/facts.d/domain_controller.txt'
@@ -32,13 +34,17 @@ class atomia::adjoin (
         ensure => present,
       }
 
-      Concat::Fragment <<| tag == 'dc_ip' |>>
+      file { 'C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role_ad.ps1':
+          content => template('atomia/active_directory/atomia_role_active_directory_replica.ps1.erb'),
+      }
 
-      $network_interface_index = hiera('atomia::windows_base::interface_index', '12')
+      file {'c:/install/update_dns.ps1':
+          ensure => file,
+          source => 'puppet:///modules/atomia/active_directory/update_dns.ps1',
+      }
       exec { 'set-dns':
-        command  => "Set-DNSClientServerAddress -interfaceIndex ${network_interface_index} -ServerAddresses (\"${atomia::active_directory::active_directory_ip}\")",
-        provider => powershell,
-        unless   => "if(Get-DnsClientServerAddress -InterfaceIndex ${network_interface_index} | Where-Object {\$_.ServerAddresses -like '*${atomia::active_directory::active_directory_ip}*'}) { exit 1 }",
+          command => "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -executionpolicy remotesigned -file c:/install/update_dns.ps1 ${active_directory_ip} ${active_directory_replica_ip}",
+          require => File['c:/install/update_dns.ps1'],
       }
     ->
     Host <<| |>>
@@ -53,36 +59,15 @@ class atomia::adjoin (
   # Join AD on Linux
   $dc=regsubst($domain_name, '\.', ',dc=', 'G')
   $base_dn = "cn=Users,dc=${dc}"
-  # Set ad_servers fact
 
   if $::vagrant {
     $ad_servers = 'ldap://192.168.33.10'
   } else {
-    $factfile = '/etc/facter/facts.d/ad_servers.txt'
-
-    if !defined(File['/etc/facter']) {
-      file { '/etc/facter':
-        ensure => directory,
-      }
-      file { '/etc/facter/facts.d':
-        ensure  => directory,
-        require => File['/etc/facter']
-      }
+    if($active_directory_replica_ip == '') {
+      $ad_servers = "ldap://${active_directory_ip}"
+    } else {
+      $ad_servers = "ldap://${active_directory_ip} ldap://${active_directory_replica_ip}"
     }
-
-    concat { $factfile:
-      ensure  => present,
-      require => File['/etc/facter/facts.d']
-    }
-
-    concat::fragment {'active_directory':
-      target  => $factfile,
-      content => 'ad_servers=',
-      tag     => 'ad_servers',
-      order   => 3
-    } ->
-    Concat::Fragment <<| tag == 'ad_servers' |>>
-
   }
 
   if($::osfamily == 'RedHat') {
@@ -145,17 +130,4 @@ class atomia::adjoin (
   }
 
 }
-  }
-
-
-  define atomia::adjoin::register ($content='', $res_name='', $order='10') {
-    $factfile = '/etc/facter/facts.d/ad_servers.txt'
-
-    @@concat::fragment {"active_directory_${content}_${res_name}":
-      target  => $factfile,
-      content => "ldap://${content} ",
-      tag     => 'ad_servers',
-      order   => 3
-    }
-
-  }
+}

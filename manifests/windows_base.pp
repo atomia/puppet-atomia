@@ -24,7 +24,6 @@
 #### billing_encryption_cert_thumb: The thumbprint for the billing certificate. This should be prefilled by pressing the generate new certificates button.
 #### root_cert_thumb: The thumbprint for the root certificate. This should be prefilled by pressing the generate new certificates button.
 #### signing_cert_thumb: The thumbprint for the signing certificate. This should be prefilled by pressing the generate new certificates button.
-#### interface_index: The interface index of your main network interface, almost always 12
 
 
 ### Validations
@@ -50,7 +49,6 @@
 ##### billing_encryption_cert_thumb(advanced): .*
 ##### root_cert_thumb(advanced): .*
 ##### signing_cert_thumb(advanced): .*
-##### interface_index(advanced): .*
 
 
 
@@ -79,7 +77,6 @@ class atomia::windows_base (
   $is_iis                                  = 0,
   $enable_mssql                            = false,
   $enable_postgresql                       = true,
-  $interface_index                         = 12,
 ){
 
   File { source_permissions => ignore }
