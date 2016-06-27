@@ -261,14 +261,4 @@ class atomia::fsagent (
     content => template('atomia/nagios/atomia.conf.erb'),
     require => Package['atomia-manager']
   }
-
-
-  file { '/root/setup_atomia_account.sh':
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0777',
-    source  => 'puppet:///modules/atomia/nagios/setup_atomia_account.sh',
-    require => [Package['jgrep'],Package['atomia-manager'], Package['python-pkg-resources']],
-    notify  => Exec['/root/setup_atomia_account.sh']
-  }
 }

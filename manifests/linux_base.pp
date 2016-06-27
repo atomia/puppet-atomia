@@ -6,8 +6,6 @@ class atomia::linux_base {
 
   $internal_dns = hiera('atomia::internaldns::ip_address', '')
 
-  $factfile = '/etc/facter/facts.d/ad_server.txt'
-
   if !defined(File['/etc/facter']){
     file { '/etc/facter':
       ensure  => directory,
@@ -21,15 +19,6 @@ class atomia::linux_base {
     }
   }
 
-  if($::atomia_role_1 != 'nagios_server' and $::atomia_role_1 != 'atomia_database'){
-    concat {  $factfile:
-      ensure  => present,
-      force   => true,
-      require => File['/etc/facter/facts.d'],
-    }
-
-    Concat::Fragment <<| tag == 'dc_ip_linux' |>>
-  }
   if $internal_dns != '' {
     if ($::atomia_role_1 != 'glusterfs') and ($::atomia_role_1 != 'glusterfs_replica') {
       class { 'resolv_conf':
@@ -37,9 +26,16 @@ class atomia::linux_base {
       }
     }
     else {
-      if($atomia::active_directory::ad_server){
+      $nameserver1 = hiera('atomia::active_directory::master_ip','')
+      $nameserver2 = hiera('atomia::active_directory_replica::replica_ip','')
+      if($nameserver2 == ''){
         class { 'resolv_conf':
-          nameservers => [$atomia::active_directory::ad_server],
+          nameservers => [$nameserver1],
+        }
+      }
+      else {
+        class { 'resolv_conf':
+          nameservers => [$nameserver1, $nameserver2],
         }
       }
     }
