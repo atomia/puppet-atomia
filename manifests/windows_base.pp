@@ -303,9 +303,10 @@ class atomia::windows_base (
     require => File['c:/install/certificates'],
   }
   exec { 'install-certificates':
-    command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file C:\install\install_certificates.ps1',
-    creates => 'C:\install\install_certificates.txt',
-    require => File['C:\install\install_certificates.ps1'],
+    command  => 'C:\install\install_certificates.ps1',
+    creates  => 'C:\install\install_certificates.txt',
+    provider => powershell,
+    require  => File['C:\install\install_certificates.ps1'],
   }
 
   # Install Atomia Installer
@@ -356,24 +357,24 @@ class atomia::windows_base (
 
   if($::vagrant){
     file { 'c:/install/certificates':
-      source  => 'puppet:///atomiacerts/certificates',
+      source  => 'puppet:///modules/atomiacerts/certificates',
       recurse => true
     }
 
     file { 'C:\inetpub\wwwroot\empty.crl':
       ensure => 'file',
-      source => 'puppet:///atomiacerts/empty.crl',
+      source => 'puppet:///modules/atomiacerts/empty.crl',
     }
   }
   else {
     file { 'c:/install/certificates':
-      source  => 'puppet:///atomiacerts/certificates',
+      source  => 'puppet:///modules/atomiacerts/certificates',
       recurse => true
     }
 
     file { 'C:\inetpub\wwwroot\empty.crl':
       ensure => 'file',
-      source => 'puppet:///atomiacerts/empty.crl'
+      source => 'puppet:///modules/atomiacerts/empty.crl'
     }
 
     file { 'c:/install/install_atomia_application.ps1':
