@@ -46,15 +46,15 @@
 
 class atomia::mailserver (
   $provisioning_host          = '%',
-  $is_master                  = 1,
+  $is_master                  = '1',
   $master_ip                  = $ipaddress,
   $agent_password,
   $slave_password,
-  $install_antispam           = 1,
+  $install_antispam           = '1',
   $cluster_ip                 = '',
   $mail_share_nfs_location    = '',
-  $use_nfs3                   = 1,
-  $skip_mount                 = 0,
+  $use_nfs3                   = '1',
+  $skip_mount                 = '0',
   $mailbox_base               = '/storage/mailcontent',
   $mysql_server_id            = '',
   $mysql_root_password,
@@ -138,7 +138,7 @@ class atomia::mailserver (
 
   package { $required_packages: ensure => installed }
 
-  if $install_antispam == 1 {
+  if $install_antispam == '1' {
 
     package { $required_packages_antispam: ensure => installed }
 
@@ -198,7 +198,7 @@ class atomia::mailserver (
   {
     $mysql_server_id_from_hostname = inline_template('<%= @hostname.scan(/\d+/).first %>')
     if $mysql_server_id_from_hostname == '' {
-      if $is_master == 1 {
+      if $is_master == '1' {
         $mysql_id = '1'
       } else {
         $mysql_id = '2'
@@ -212,7 +212,7 @@ class atomia::mailserver (
     $mysql_id = $mysql_server_id
   }
 
-  if $is_master == 1 {
+  if $is_master == '1' {
     class { 'mysql::server':
       restart                 => true,
       root_password           => $mysql_root_password,
@@ -520,7 +520,7 @@ class atomia::mailserver (
     require    => Group['virtual'],
   }
 
-  if $install_antispam == 1 {
+  if $install_antispam == '1' {
     # Configure Spam and Virus filtering
 
     user { 'clamav':

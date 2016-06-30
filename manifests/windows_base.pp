@@ -74,7 +74,7 @@ class atomia::windows_base (
   $billing_encryption_cert_thumb,
   $root_cert_thumb,
   $signing_cert_thumb,
-  $is_iis                                  = 0,
+  $is_iis                                  = '0',
   $enable_mssql                            = false,
   $enable_postgresql                       = true,
 ){
@@ -91,7 +91,7 @@ class atomia::windows_base (
   $database_server_password   = hiera('atomia::atomia_database::atomia_password','')
   $order_host                 = 'order'
 
-  if( $is_iis == 0 ){
+  if( $is_iis == '0' ){
 
     if($::vagrant) {
       $actiontrail_ip = $::ipaddress

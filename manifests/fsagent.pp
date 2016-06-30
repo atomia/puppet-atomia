@@ -32,9 +32,9 @@ class atomia::fsagent (
   $fsagent_ip                 = $fqdn,
   $content_share_nfs_location = '',
   $config_share_nfs_location  = '',
-  $skip_mount                 = 0,
-  $enable_config_agent        = 0,
-  $create_storage_files       = 1,
+  $skip_mount                 = '0',
+  $enable_config_agent        = '0',
+  $create_storage_files       = '1',
   $allow_ssh_key              = '',
   $fs_add_group               = 33,
 ) {
@@ -84,7 +84,7 @@ class atomia::fsagent (
 
   package { 'atomia-fsagent': ensure => present, require => Package['nodejs'] }
 
-  if $skip_mount == 0 {
+  if $skip_mount == '0' {
 
     $internal_zone = hiera('atomia::internaldns::zone_name','')
 
@@ -146,18 +146,6 @@ class atomia::fsagent (
     }
   }
 
-  if !defined(File['/storage/content']) {
-    file { '/storage/content':
-      ensure => directory,
-    }
-  }
-
-  if !defined(File['/storage/configuration']) {
-    file { '/storage/configuration':
-      ensure => directory,
-    }
-  }
-
   file { '/storage/content/backup':
     ensure  => 'directory',
     owner   => 'root',
@@ -179,7 +167,7 @@ class atomia::fsagent (
     content => "15 * * * * root lockfile -r0 /var/run/clearsession.lock && (find /storage/configuration/php_session_path -mtime +2 -exec rm -f '{}' '+'; rm -f /var/run/clearsession.lock) \n"
   }
 
-  if $enable_config_agent == 1 {
+  if $enable_config_agent == '1' {
     file { '/etc/default/fsagent-ssl':
       ensure  => present,
       owner   => 'root',
@@ -212,13 +200,13 @@ class atomia::fsagent (
     subscribe => [Package['atomia-fsagent'], File['/etc/default/fsagent']],
   }
 
-  if $create_storage_files == 1 {
+  if $create_storage_files == '1' {
     file { '/root/storage.tar.gz':
       ensure => file,
       source => 'puppet:///modules/atomia/fsagent/storage.tar.gz',
     }
 
-    if $skip_mount == 1 {
+    if $skip_mount == '1' {
       exec { 'create-storage-files':
         command => '/bin/tar -xvf /root/storage.tar.gz -C /',
         require => [ File['/storage/content'],  File['/storage/configuration'], File['/root/storage.tar.gz'] ],

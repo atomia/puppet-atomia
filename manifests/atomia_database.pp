@@ -20,7 +20,7 @@
 class atomia::atomia_database (
   $atomia_user      = 'atomia',
   $atomia_password,
-  $enable_backups     = 1,
+  $enable_backups     = '1',
   $server_address     = $fqdn,
   $backup_dir         = '/opt/atomia_backups',
   $cron_schedule_hour = '1'
@@ -53,7 +53,7 @@ class atomia::atomia_database (
     auth_method => 'password',
     notify      => Service['postgresql']
   }
-  if($enable_backups == 1 and !defined(Class['atomia::postgresql_backup'])) {
+  if($enable_backups == '1' and !defined(Class['atomia::postgresql_backup'])) {
     class {'atomia::postgresql_backup':
       backup_dir         => $backup_dir,
       cron_schedule_hour => $cron_schedule_hour,

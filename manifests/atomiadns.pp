@@ -50,7 +50,7 @@ class atomia::atomiadns (
   $ns_group                = 'default',
   $zones_to_add            = expand_default('preview.[[atomia_domain]],mysql.[[atomia_domain]],mssql.[[atomia_domain]],cloud.[[atomia_domain]],postgresql.[[atomia_domain]]'),
   $atomia_dns_extra_config = '',
-  $enable_backups          = 1,
+  $enable_backups          = '1',
   $backup_dir              = '/opt/atomia_backups',
   $cron_schedule_hour      = '1'
 ) {
@@ -127,7 +127,7 @@ class atomia::atomiadns (
     ensure  => present
   }
 
-  if($enable_backups == 1 and !defined(Class['atomia::postgresql_backup'])) {
+  if($enable_backups == '1' and !defined(Class['atomia::postgresql_backup'])) {
     class {'atomia::postgresql_backup':
       backup_dir         => $backup_dir,
       cron_schedule_hour => $cron_schedule_hour,

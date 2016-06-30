@@ -20,11 +20,11 @@
 #
 
 class atomia::rsyslog(
-  $is_server  = 0,
+  $is_server  = '0',
   $server_ip,
 ) {
 
-  if($is_server == 1){
+  if($is_server == '1'){
     file{ '/etc/rsyslog.d/atomia-rsyslog-server.conf':
       ensure  => present,
       content => 'puppet:///modules/atomia/rsyslog/atomia-rsyslog-server.conf',

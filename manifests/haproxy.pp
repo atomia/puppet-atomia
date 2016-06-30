@@ -45,7 +45,7 @@
 class atomia::haproxy (
   $agent_user                      = 'haproxy',
   $agent_password                  = 'default_password',
-  $enable_agent                    = 0,
+  $enable_agent                    = '0',
   $certificate_sync_source         = 'root@fsagent:/storage/content/ssl',
   $certificate_sync_ssh_key        = '',
   $certificate_default_cert        = '',
@@ -186,7 +186,7 @@ class atomia::haproxy (
     }
   }
 
-  if $enable_agent == 1 {
+  if $enable_agent == '1' {
     package { 'atomia-pa-haproxy': ensure => present, }
 
     $haproxy_agent_conf = template('atomia/haproxy/atomia-pa-haproxy.conf.erb')
