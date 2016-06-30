@@ -6,4 +6,4 @@ classes:
    - atomia::glusterfs
    - atomia::nagios::client
 
-atomia::glusterfs::is_first_node: true
+atomia::glusterfs::is_first_node: 1 
