@@ -42,11 +42,11 @@ class atomia::pureftpd (
   $pureftpd_password,
   $ftp_cluster_ip,
   $content_share_nfs_location = '',
-  $is_master                  = 1,
+  $is_master                  = '1',
   $pureftpd_slave_password,
   $mysql_root_password,
-  $ssl_enabled                = 0,
-  $skip_mount                 = 0,
+  $ssl_enabled                = '0',
+  $skip_mount                 = '0',
   $content_mount_point        = '/storage/content',
   $passive_port_range         = '49152 65534'
 ){
@@ -54,7 +54,7 @@ class atomia::pureftpd (
   package { 'pure-ftpd-mysql': ensure => installed }
   package { 'xinetd': ensure => installed }
 
-  if $skip_mount == 0 {
+  if $skip_mount == '0' {
 
     if $content_share_nfs_location == '' {
       $internal_zone = hiera('atomia::internaldns::zone_name','')
@@ -84,7 +84,7 @@ class atomia::pureftpd (
     }
   }
 
-  if $is_master == 1 {
+  if $is_master == '1' {
     $override_options = {
       'mysqld' => {
         'server_id'  => '1',

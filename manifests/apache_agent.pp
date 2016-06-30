@@ -37,15 +37,15 @@
 class atomia::apache_agent (
   $username                   = 'automationserver',
   $password,
-  $atomia_clustered           = 1,
-  $should_have_pa_apache      = 1,
+  $atomia_clustered           = '1',
+  $should_have_pa_apache      = '1',
   $content_share_nfs_location = '',
   $config_share_nfs_location  = '',
-  $use_nfs3                   = 1,
+  $use_nfs3                   = '1',
   $cluster_ip,
   $apache_agent_ip            = $fqdn,
   $maps_path                  = '/storage/configuration/maps',
-  $should_have_php_farm       = 0,
+  $should_have_php_farm       = '0',
   $php_versions               = '5.4.45,5.5.29,5.6.10',
   $php_extension_packages     = 'php5-gd,php5-imagick,php5-sybase,php5-mysql,php5-odbc,php5-curl,php5-pgsql',
   $apache_modules_to_enable   = 'rewrite,userdir,fcgid,suexec,expires,headers,deflate,include'
@@ -63,7 +63,7 @@ class atomia::apache_agent (
     $pa_site_enabled        = '000-default'
   }
 
-  if $should_have_pa_apache == 1 {
+  if $should_have_pa_apache == '1' {
     package { 'atomia-pa-apache':
       ensure  => present,
       require => Package['apache2'],
@@ -139,7 +139,7 @@ class atomia::apache_agent (
     }
   }
 
-  if $should_have_pa_apache == 1 {
+  if $should_have_pa_apache == '1' {
     file { '/usr/local/apache-agent/settings.cfg':
       owner   => 'root',
       group   => 'root',
@@ -286,7 +286,7 @@ class atomia::apache_agent (
     require => [File['/storage/configuration/php.ini'], Package['php5-cgi']],
   }
 
-  if $should_have_pa_apache == 1 {
+  if $should_have_pa_apache == '1' {
     service { 'atomia-pa-apache':
       ensure    => running,
       name      => apache-agent,
@@ -301,7 +301,7 @@ class atomia::apache_agent (
   $php_versions_array = split($php_versions, ',')
   arrayPHP { $php_versions_array: }
 
-  if ($should_have_php_farm == 1) and ($::lsbdistrelease == '14.04') {
+  if ($should_have_php_farm == '1') and ($::lsbdistrelease == '14.04') {
 
     $phpcompilepackages = [
       'git',

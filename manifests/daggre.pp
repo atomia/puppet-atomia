@@ -26,9 +26,9 @@ class atomia::daggre (
   $global_auth_token,
   $content_share_nfs_location   = '',
   $config_share_nfs_location    = '',
-  $use_nfs3                     = 1,
+  $use_nfs3                     = '1',
   $ip_addr                      = $ipaddress,
-  $cloudlinux_database          = 0,
+  $cloudlinux_database          = '0',
   $cloudlinux_database_password = 'atomia123',
   $local_address                = 'localhost'
 ) {
@@ -145,7 +145,7 @@ class atomia::daggre (
     }
   }
 
-  if $cloudlinux_database == 1 {
+  if $cloudlinux_database == '1' {
 
     package { 'atomia-daggre-reporters-cloudlinux':
       ensure  => present,

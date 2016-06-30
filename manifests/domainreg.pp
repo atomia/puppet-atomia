@@ -37,7 +37,7 @@ class atomia::domainreg (
   $db_password               = '',
   $domainreg_global_config   = '',
   $domainreg_tld_config_hash = {},
-  $enable_backups          = 1,
+  $enable_backups          = '1',
   $backup_dir              = '/opt/atomia_backups',
   $cron_schedule_hour      = '1'
 ){
@@ -99,7 +99,7 @@ class atomia::domainreg (
   package { 'postgresql-contrib':
     ensure  => present
   }
-  if($enable_backups == 1 and !defined(Class['atomia::postgresql_backup'])) {
+  if($enable_backups == '1' and !defined(Class['atomia::postgresql_backup'])) {
     class {'atomia::postgresql_backup':
       backup_dir         => $backup_dir,
       cron_schedule_hour => $cron_schedule_hour,

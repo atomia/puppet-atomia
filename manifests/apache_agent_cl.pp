@@ -29,10 +29,10 @@
 class atomia::apache_agent_cl (
   $username                   = 'automationserver',
   $password,
-  $should_have_pa_apache      = 1,
+  $should_have_pa_apache      = '1',
   $content_share_nfs_location = '',
   $config_share_nfs_location  = '',
-  $use_nfs3                   = 1,
+  $use_nfs3                   = '1',
   $cluster_ip,
   $apache_agent_ip            = $::fqdn,
   $maps_path                  = '/storage/configuration/maps',

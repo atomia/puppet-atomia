@@ -18,7 +18,7 @@
 
 class atomia::installatron (
   $license_key,
-  $use_nfs3                   = 1,
+  $use_nfs3                   = '1',
   $content_share_nfs_location = '',
   $installatron_hostname      = $fqdn,
   $authentication_key
