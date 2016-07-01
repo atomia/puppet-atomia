@@ -25,11 +25,17 @@ class atomia::nagios::client(
 
   $atomia_domain   = hiera('atomia::config::atomia_domain')
   $internal_domain = hiera('atomia::internaldns::zone_name','')
-  if $::ec2_public_ipv4 {
-    $ip_address = $::ec2_public_ipv4
-  } else {
-    $ip_address = $public_ip
+  if !$public_ip {
+    if $::ec2_public_ipv4 {
+      $public_ip = $::ec2_public_ipv4
+    } elsif $::ipaddress_eth0 {
+      $public_ip = $::ipaddress_eth0
+    }
+    else {
+      $public_ip = $::ipaddress
+    }
   }
+
 
   # Deploy on Windows.
   if $::operatingsystem == 'windows' {
@@ -201,7 +207,7 @@ class atomia::nagios::client(
       use                => 'generic-host',
       host_name          => $::fqdn,
       alias              => "${::atomia_role_1} - ${::fqdn}",
-      address            => $ip_address,
+      address            => $::ip_address,
       target             => "/usr/local/nagios/etc/servers/${::hostname}_host.cfg",
       hostgroups         => $hostgroup,
       max_check_attempts => '5'

@@ -13,12 +13,16 @@ class atomia::public_apps (
   $repository = 'PublicRepository',){
 
     # Set ip correctly when on ec2
-    if $::ec2_public_ipv4 {
-      $public_ip = $::ec2_public_ipv4
-    } else {
-      $public_ip = $::ipaddress_eth0
+    if !$public_ip {
+      if $::ec2_public_ipv4 {
+        $public_ip = $::ec2_public_ipv4
+      } elsif $::ipaddress_eth0 {
+        $public_ip = $::ipaddress_eth0
+      }
+      else {
+        $public_ip = $::ipaddress
+      }
     }
-
     File { source_permissions => ignore }
 
 
