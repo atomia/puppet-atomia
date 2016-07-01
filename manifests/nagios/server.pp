@@ -18,11 +18,17 @@ class atomia::nagios::server(
 ) {
 
   # Set ip correctly when on ec2
-  if $::ec2_public_ipv4 {
-    $nagios_ip = $::ec2_public_ipv4
-  } else {
-    $nagios_ip = $::ipaddress_eth0
+  if !$public_ip {
+    if $::ec2_public_ipv4 {
+      $public_ip = $::ec2_public_ipv4
+    } elsif $::ipaddress_eth0 {
+      $public_ip = $::ipaddress_eth0
+    }
+    else {
+      $public_ip = $::ipaddress
+    }
   }
+
 
   $admin_pass = hiera('atomia::config::atomia_admin_password')
 
@@ -292,7 +298,7 @@ exec { '/bin/chown -R nagios:nagios /usr/local/nagios/etc/servers':
     ptr       => false,
     hash_data => {
       'nagios' => {
-        owner => $nagios_ip
+        owner => $public_ip
       },
     },
   }
