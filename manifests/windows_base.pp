@@ -368,13 +368,13 @@ class atomia::windows_base (
   }
   else {
     file { 'c:/install/certificates':
-      source  => 'puppet:///modules/atomiacerts/certificates',
+      source  => 'puppet:///atomiacerts/certificates',
       recurse => true
     }
 
     file { 'C:\inetpub\wwwroot\empty.crl':
       ensure => 'file',
-      source => 'puppet:///modules/atomiacerts/empty.crl'
+      source => 'puppet:///atomiacerts/empty.crl'
     }
 
     file { 'c:/install/install_atomia_application.ps1':
