@@ -74,7 +74,7 @@ class atomia::iis(
   exec { 'setup_iis':
     provider => powershell,
     command  => "c:/install/setup_iis.ps1 -Action 'enable' -UNCPath '${realSharePath}' -adminUser '${adDomain}\\WindowsAdmin' -adminPassword '${adminPassword}'",
-    require  => [File['c:/install/setup_iis.ps1'], File['c:/install/IISSharedConfigurationEnabler.exe'], File['c:/install/LsaStorePrivateData.exe'], File['c:/install/RegistryUnlocker.exe']],
+    require  => [Dism[$dism_features_to_enable], File['c:/install/setup_iis.ps1'], File['c:/install/IISSharedConfigurationEnabler.exe'], File['c:/install/LsaStorePrivateData.exe'], File['c:/install/RegistryUnlocker.exe']],
     creates  => 'c:\windows\install\installed'
   }
 
