@@ -29,7 +29,7 @@ class atomia::public_apps (
     if($repository == 'PublicRepository')
     {
       exec {'install-identity':
-        command => 'C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Executionpolicy Unrestricted -File c:/install/install_atomia_application.ps1 -repository PublicRepository -application "Atomia Identity"',
+        command => 'C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Executionpolicy Unrestricted -File c:/install/install_atomia_application.ps1 -repository PublicRepository -application "Atomia Identity WF2"',
         require => [Exec['install-setuptools'],File['unattended.ini']],
         creates => 'C:\Program Files (x86)\Atomia\Identity',
       }
@@ -45,13 +45,18 @@ class atomia::public_apps (
     require => [Exec['install-identity'],File['unattended.ini']],
     creates => 'C:\Program Files (x86)\Atomia\BillingCustomerPanel',
   }
-  ## TODO: Add store when available
+  ->
+  exec {'install-store':
+    command => 'C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Executionpolicy Unrestricted -File c:/install/install_atomia_application.ps1 -repository PublicRepository -application "Atomia Store"',
+    require => [Exec['install-identity'],File['unattended.ini']],
+    creates => 'C:\Program Files (x86)\Atomia\Store',
+  }
 
   }
   else
   {
     exec {'install-identity':
-      command => 'C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Executionpolicy Unrestricted -File c:/install/install_atomia_application.ps1 -repository TestRepository -application "Atomia Identity"',
+      command => 'C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Executionpolicy Unrestricted -File c:/install/install_atomia_application.ps1 -repository TestRepository -application "Atomia Identity WF2"',
       require => [Exec['install-setuptools'],File['unattended.ini']],
       creates => 'C:\Program Files (x86)\Atomia\Identity',
     }
@@ -67,6 +72,12 @@ exec {'install-bcp':
   require => [Exec['install-identity'],File['unattended.ini']],
   creates => 'C:\Program Files (x86)\Atomia\BillingCustomerPanel',
 }
+->
+  exec {'install-store':
+    command => 'C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Executionpolicy Unrestricted -File c:/install/install_atomia_application.ps1 -repository TestRepository -application "Atomia Store"',
+    require => [Exec['install-identity'],File['unattended.ini']],
+    creates => 'C:\Program Files (x86)\Atomia\Store',
+  }
   }
 
   file { 'C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role_public.txt':
