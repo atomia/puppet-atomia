@@ -18,6 +18,7 @@
 #### mail_server_password: The mailserver password
 #### mail_server_use_ssl: Does the mailserver use ssl or not
 #### mail_reply_to: The Reply to email address for all outgoing email
+#### mail_bcc_list: BCC address list for all outgoing email
 #### storage_server_hostname: The hostname of the storage server
 #### mail_dispatcher_interval: The interval to send email at
 #### automationserver_encryption_cert_thumb: The thumbprint for the automation server certificate. This should be prefilled by pressing the generate new certificates button.
@@ -42,6 +43,7 @@
 ##### mail_server_password(advanced): .*
 ##### mail_server_use_ssl(advanced): ^(true|false)+
 ##### mail_reply_to: ^\S+@\S+\.\S+$
+##### mail_bcc_list: ^\S+@\S+\.\S+$
 ##### storage_server_hostname(advanced): ^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z0-9]{1,6}$
 ##### mail_dispatcher_interval(advanced): [0-9]{1,5}
 ##### is_iis(advanced): %hide
@@ -68,6 +70,7 @@ class atomia::windows_base (
   $mail_server_password                    = '',
   $mail_server_use_ssl                     = false,
   $mail_reply_to                           = '',
+  $mail_bcc_list                           = '',
   $storage_server_hostname                 = '',
   $mail_dispatcher_interval                = '30',
   $automationserver_encryption_cert_thumb,
