@@ -104,7 +104,13 @@ class atomia::installatron (
     content => "export KEY=${license_key}",
   }
 
+  file { '/usr/local/installatron/http':
+    ensure => directory,
+    owner  => 'www-user'
+  }
+
   file { '/usr/local/installatron/http/index.php':
-    mode  => '0644',
+    mode    => '0644',
+    require => File['/usr/local/installatron/http']
   }
 }
