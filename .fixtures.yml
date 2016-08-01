@@ -9,6 +9,7 @@ fixtures:
     htpasswd: "https://github.com/leinaddm/puppet-htpasswd.git"
     postgresql: "https://github.com/puppetlabs/puppetlabs-postgresql.git"
     concat: "https://github.com/puppetlabs/puppetlabs-concat.git"
+    fstab: "https://github.com/NERC-CEH/puppet-fstab.git"
 
   symlinks:
     atomia: "#{source_dir}"
