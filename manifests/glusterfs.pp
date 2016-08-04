@@ -8,7 +8,7 @@
 #### mail_volume_size: The size of the volume used for the mail cluster
 #### peers: Hostname/IP of all the peers in the cluster
 #### physical_volume: The physical volume on the server to create storage volumes on
-
+#### vg_name: The name of the volume group to be created for use with Gluster
 
 ### Validations
 ##### web_content_volume_size: ^[0-9]+G$
@@ -16,7 +16,7 @@
 ##### mail_volume_size: ^[0-9]+G$
 ##### peers: .*
 ##### physical_volume: .*
-
+##### vg_name: .*
 
 class atomia::glusterfs (
   $web_content_volume_size   = '100G',
@@ -24,6 +24,7 @@ class atomia::glusterfs (
   $mail_volume_size          = '100G',
   $peers                     = $fqdn,
   $physical_volume           = '/dev/sdb',
+  $vg_name                   = 'gluster',
 ) {
 
   $is_first_node = hiera('atomia::glusterfs::is_first_node', 0)
@@ -87,70 +88,70 @@ class atomia::glusterfs (
   }
 
   exec { 'create-volume-group':
-    command => "/sbin/vgcreate gluster ${physical_volume}",
-    unless  => '/sbin/vgs | /bin/grep gluster  >/dev/null 2>&1',
+    command => "/sbin/vgcreate ${vg_name} ${physical_volume}",
+    unless  => "/sbin/vgs |  awk '{print \$1}' | /bin/egrep ^${vg_name}\$  >/dev/null 2>&1",
     require => Exec['create-physical-volume']
   }
 
 
   exec { 'create-web-lv':
-    command => "/sbin/lvcreate -L ${web_content_volume_size} -n web gluster",
-    creates => '/dev/gluster/web',
+    command => "/sbin/lvcreate -L ${web_content_volume_size} -n web ${vg_name}",
+    creates => "/dev/${vg_name}/web",
     notify  => Exec['mkfs web'],
     require => Exec['create-volume-group']
   }
 
   exec { 'mkfs web':
-    command     => '/sbin/mkfs.xfs -i size=512 /dev/gluster/web',
+    command     => "/sbin/mkfs.xfs -i size=512 /dev/${vg_name}/web",
     require     => [ Package['xfsprogs'], Exec['create-web-lv'] ],
     refreshonly => true,
   }
 
   mount { '/export/web':
     ensure  => mounted,
-    device  => '/dev/gluster/web',
+    device  => "/dev/${vg_name}/web",
     fstype  => 'xfs',
     options => 'defaults',
     require => [ Exec['mkfs web'], File['/export/web'] ],
   }
 
   exec { 'create-mail-lv':
-    command => "/sbin/lvcreate -L ${mail_volume_size} -n mail gluster",
-    creates => '/dev/gluster/mail',
+    command => "/sbin/lvcreate -L ${mail_volume_size} -n mail ${vg_name}",
+    creates => "/dev/${vg_name}/mail",
     notify  => Exec['mkfs mail'],
     require => Exec['create-volume-group']
   }
 
   exec { 'mkfs mail':
-    command     => '/sbin/mkfs.xfs -i size=512 /dev/gluster/mail',
+    command     => "/sbin/mkfs.xfs -i size=512 /dev/${vg_name}/mail",
     require     => [ Package['xfsprogs'], Exec['create-mail-lv'] ],
     refreshonly => true,
   }
 
   mount { '/export/mail':
     ensure  => mounted,
-    device  => '/dev/gluster/mail',
+    device  => "/dev/${vg_name}/mail",
     fstype  => 'xfs',
     options => 'defaults',
     require => [ Exec['mkfs mail'], File['/export/mail'] ],
   }
 
   exec { 'create-config-lv':
-    command => "/sbin/lvcreate -L ${configuration_volume_size} -n config gluster",
-    creates => '/dev/gluster/config',
+    command => "/sbin/lvcreate -L ${configuration_volume_size} -n config ${vg_name}",
+    creates => "/dev/${vg_name}/config",
     notify  => Exec['mkfs config'],
     require => Exec['create-volume-group']
   }
 
   exec { 'mkfs config':
-    command     => '/sbin/mkfs.xfs -i size=512 /dev/gluster/config',
+    command     => "/sbin/mkfs.xfs -i size=512 /dev/${vg_name}/config",
     require     => [ Package['xfsprogs'], Exec['create-config-lv'] ],
     refreshonly => true,
   }
 
   mount { '/export/config':
     ensure  => mounted,
-    device  => '/dev/gluster/config',
+    device  => "/dev/${vg_name}/config",
     fstype  => 'xfs',
     options => 'defaults',
     require => [ Exec['mkfs config'], File['/export/config'] ],
