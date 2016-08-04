@@ -5,14 +5,17 @@
 ### Variable documentation
 #### zone_name: The name of the zone where all servers will be placed (for example atomia.internal)
 #### ip_address: The private ip address of the server
+#### allow_query: Semi colon separated list of ip ranges allowed to query the dns server, if server is publically reachable this should be changed to contain your ip ranges
 
 ### Validations
 ##### zone_name: .*
 ##### ip_address(advanced): .*
+##### allow_query: .*
 
 class atomia::internaldns (
   $zone_name         = '',
-  $ip_address        = $ipaddress
+  $ip_address        = $ipaddress,
+  $allow_query       = 'any;'
 ){
 
 
@@ -21,7 +24,7 @@ class atomia::internaldns (
       'recursion' => 'yes',
     },
     config       => {
-      'allow-query' => '{ any; }',
+      'allow-query' => "{ ${allow_query} }",
     }
   }
 
