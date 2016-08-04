@@ -53,12 +53,12 @@ class atomia::apache_agent (
 
   if $::lsbdistrelease == '14.04' {
     $pa_conf_available_path = '/etc/apache2/conf-available'
-    $pa_conf_file           = 'atomia-pa-apache.conf.ubuntu.1404'
+    $pa_conf_file           = 'atomia-pa-apache.conf'
     $pa_site                = '000-default.conf'
     $pa_site_enabled        = '000-default.conf'
   } else {
     $pa_conf_available_path = '/etc/apache2/conf.d'
-    $pa_conf_file           = 'atomia-pa-apache.conf.ubuntu'
+    $pa_conf_file           = 'atomia-pa-apache.conf'
     $pa_site                = 'default'
     $pa_site_enabled        = '000-default'
   }
