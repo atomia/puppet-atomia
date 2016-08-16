@@ -12,8 +12,8 @@ QuotaSize smallint(5) NOT NULL default '0',
 QuotaFiles int(11) NOT NULL default 0,
 PRIMARY KEY (User),
 UNIQUE KEY User (User)
-) ENGINE=MyISAM;
+) ENGINE=InnoDB;
 
-CREATE TABLE schema_version (version int);
+CREATE TABLE schema_version (version int) ENGINE=InnoDB;
 INSERT INTO schema_version (version) VALUES (1);
 

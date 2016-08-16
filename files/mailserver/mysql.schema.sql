@@ -29,7 +29,7 @@ CREATE TABLE `alias` (
   `type` char(1) default NULL,
   PRIMARY KEY  (`ID`),
   KEY `email` (`email`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -43,7 +43,7 @@ CREATE TABLE `domain` (
   `transport` varchar(50) NOT NULL default 'dovecot',
   `is_forwarded` enum('N','Y') DEFAULT 'N',
   PRIMARY KEY  (`domain`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -57,7 +57,7 @@ CREATE TABLE `domain_alias` (
   `target_domain` varchar(255) NOT NULL,
   KEY `domain` (`domain`),
   KEY `target_domain` (`target_domain`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -68,7 +68,7 @@ SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
 CREATE TABLE `schema_version` (
   `version` int(11) DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -87,7 +87,7 @@ CREATE TABLE `user` (
   `status` varchar(255) NOT NULL default 'active',
   PRIMARY KEY  (`ID`),
   KEY `email` (`email`)
-) ENGINE=MyISAM AUTO_INCREMENT=2352 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2352 DEFAULT CHARSET=latin1;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -103,7 +103,7 @@ CREATE TABLE `vacation` (
   `subject` varchar(100) default NULL,
   `body` varchar(500) default NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2199 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2199 DEFAULT CHARSET=latin1;
 SET character_set_client = @saved_cs_client;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
