@@ -55,8 +55,8 @@ class atomia::apache_agent_cl (
 
     $cloudlinux_database_password = hiera('atomia::daggre::cloudlinux_database_password','atomia123')
     exec { 'update lve-stats connections tring':
-      command => "/usr/bin/sed -i 's#connect_string=.*#connect_string=atomia-lve:${cloudlinux_database_password}@${daggre_ip}/lve#' /etc/sysconfig/lvestats2",
-      unless  => "/usr/bin/grep -c 'connect_string=atomia-lve:${cloudlinux_database_password}@${daggre_ip}/lve' /etc/sysconfig/lvestats2",
+      command => "/usr/bin/sed -i 's#connect_string =.*#connect_string = atomia-lve:${cloudlinux_database_password}@${daggre_ip}/lve#' /etc/sysconfig/lvestats2",
+      unless  => "/usr/bin/grep -c 'connect_string = atomia-lve:${cloudlinux_database_password}@${daggre_ip}/lve' /etc/sysconfig/lvestats2",
       notify  => Service['lvestats'],
       require => Exec['install lve-stats2'],
     }
