@@ -35,7 +35,7 @@ define atomia::nfsmount(
     }
   }
 
-  if $::operatingsystem != 'CloudLinux' {
+  if $::osfamily != 'RedHat' {
     if !defined(Package['nfs-common']) {
       package { 'nfs-common': ensure => present }
     }
