@@ -20,7 +20,7 @@ describe 'atomia::installatron' do
   end
 
   context 'with defaults' do
-    it { is_expected.to contain_file('/usr/local/installatron/http').with_owner('www-user') }
+    it { is_expected.to contain_file('/usr/local/installatron/http').with_owner('www-data') }
   end
 
 end

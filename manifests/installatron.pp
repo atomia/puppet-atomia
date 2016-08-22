@@ -106,7 +106,7 @@ class atomia::installatron (
 
   file { '/usr/local/installatron/http':
     ensure => directory,
-    owner  => 'www-user'
+    owner  => 'www-data'
   }
 
   file { '/usr/local/installatron/http/index.php':
