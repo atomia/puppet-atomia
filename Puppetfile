@@ -56,3 +56,6 @@ mod "ceh/fstab"
 
 mod "windows_sql",
     :git => "git://github.com/insentia/windows_sql.git"
+
+mod "windows_iso"
+    :git => "git://github.com/insentia/windows_isos.git"
