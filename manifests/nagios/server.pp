@@ -53,7 +53,7 @@ class atomia::nagios::server(
     'php5',
     'php5-mcrypt',
     'python-pkg-resources',
-    'ruby1.9.1-dev',
+    'ruby2.0',
   ]:
     ensure => installed,
   }
@@ -67,7 +67,7 @@ class atomia::nagios::server(
   package { ['jgrep']:
     ensure   => installed,
     provider => 'gem',
-    require  => [Package['ruby1.9.1-dev']],
+    require  => [Package['ruby2.0']],
   }
 
   group { 'nagios-group':
