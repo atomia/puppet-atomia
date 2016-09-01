@@ -17,8 +17,8 @@
 class atomia::config (
   $atomia_domain         = '',
   $atomia_admin_password = 'Administrator',
-  $puppet_hostname       = $puppet_host,
-  $puppet_ip             = $puppet_ip,
+  $puppet_hostname       = '%puppet_host',
+  $puppet_ip             = '%puppet_ip',
 ){
 
 }
