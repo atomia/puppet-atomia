@@ -269,13 +269,24 @@ class atomia::haproxy (
     }
 
     if $certificate_default_cert == '' {
-      file { '/etc/haproxy/atomia_certificates/default.pem':
-        ensure  => file,
-        source  => 'puppet:///atomiacerts/certificates/wildcard_with_key.pem',
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0755',
-        require => File['/etc/haproxy/atomia_certificates']
+      if($::vagrant){
+        file { '/etc/haproxy/atomia_certificates/default.pem':
+          ensure  => file,
+          source  => 'puppet:///modules/atomiacerts/certificates/wildcard_with_key.pem',
+          owner   => 'root',
+          group   => 'root',
+          mode    => '0755',
+          require => File['/etc/haproxy/atomia_certificates']
+        }
+      } else {
+        file { '/etc/haproxy/atomia_certificates/default.pem':
+          ensure  => file,
+          source  => 'puppet:///atomiacerts/certificates/wildcard_with_key.pem',
+          owner   => 'root',
+          group   => 'root',
+          mode    => '0755',
+          require => File['/etc/haproxy/atomia_certificates']
+        }
       }
     }
 

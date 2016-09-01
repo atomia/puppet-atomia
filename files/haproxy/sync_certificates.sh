@@ -18,14 +18,16 @@ export RSYNC_CONNECT_PROG='ssh -oStrictHostKeyChecking=false'
 rsync -a --delete "$1"/ "$synced_dir"
 
 # Create symlinks from cert subject to the public cert key for intermediates
-find "$intermediate_dir" -type f | while read intermediate; do
-	intermediate_subject=`openssl x509 -noout -subject -in "$intermediate" |\
-		cut -d "=" -f 2- | sed 's/^[[:space:]]*//' | tr "/" "#"`
-	subject_link="$intermediate_dir/$intermediate_subject"
-	if ! [ -L "$subject_link" ]; then
-		ln -s "$intermediate" "$subject_link"
-	fi
-done
+if [ -d "$intermediate_dir" ]; then
+	find "$intermediate_dir" -type f | while read intermediate; do
+		intermediate_subject=`openssl x509 -noout -subject -in "$intermediate" |\
+			cut -d "=" -f 2- | sed 's/^[[:space:]]*//' | tr "/" "#"`
+		subject_link="$intermediate_dir/$intermediate_subject"
+		if ! [ -L "$subject_link" ]; then
+			ln -s "$intermediate" "$subject_link"
+		fi
+	done
+fi
 
 # Go through all customer certificates with keys and create bundles in the dir haproxy uses
 newcerts_loaded=`mktemp`
