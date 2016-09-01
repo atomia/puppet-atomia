@@ -92,8 +92,8 @@ define limits::conf (
 }
 
 define sysctl::conf ($value) {
-  exec { '/sbin/sysctl -p':
-    alias       => 'sysctl',
+  exec { 'sysctl':
+    command => '/sbin/sysctl -p',
     refreshonly => true,
   }
 
