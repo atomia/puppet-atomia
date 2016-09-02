@@ -13,7 +13,8 @@ mod "chocolatey",
   :git => "git://github.com/chocolatey/puppet-chocolatey.git"
 
 mod "dism",
-  :git => "git://github.com/puppetlabs/puppetlabs-dism.git"
+  :git => "git://github.com/puppetlabs/puppetlabs-dism.git",
+  :ref => "1.2.0"
 
 mod "openssl",
   :git => "git://github.com/camptocamp/puppet-openssl.git"
