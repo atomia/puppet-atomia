@@ -1,0 +1,1 @@
+* * * * * root flock -n /var/lock/acmesync.lock /usr/bin/acmetool_sync.sh "<%= @apache_config_sync_source %>" "<%= @iis_config_sync_source %>" "<%= @preview_domain %>"

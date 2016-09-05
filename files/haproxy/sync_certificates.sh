@@ -14,8 +14,7 @@ mkdir -p "$intermediate_dir"
 mkdir -p "$haproxy_cert_dir"
 
 # Sync all files from /storage/content/ssl to local dir
-export RSYNC_CONNECT_PROG='ssh -oStrictHostKeyChecking=false'
-rsync -a --delete "$1"/ "$synced_dir"
+rsync -a -e "ssh -o StrictHostKeyChecking=no" --delete "$1"/ "$synced_dir"
 
 # Create symlinks from cert subject to the public cert key for intermediates
 if [ -d "$intermediate_dir" ]; then

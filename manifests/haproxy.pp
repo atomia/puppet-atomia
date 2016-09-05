@@ -21,6 +21,13 @@
 #### cluster_ip_deadtime: The value to use for the deadtime Heartbeat configuration option.
 #### cluster_ip_initdead: The value to use for the initdead Heartbeat configuration option.
 #### cluster_ip_keepalive: The value to use for the keepalive Heartbeat configuration option.
+#### ssl_default_bind_options: The default SSL bind options to use in the HAProxy config.
+#### ssl_default_bind_ciphers: The default SSL bind cipher list to use in the HAProxy config.
+#### acme_agreement: The ACME agreement to auto-approve.
+#### acme_endpoint: The URL of the ACME server to use for automatic SSL certificate generation.
+#### preview_domain: The hostname of the website preview zone to ignore for ACME automatic SSL generation.
+#### apache_config_sync_source: A scp path to the apache shared configuration directory to sync to the loadbalancer.
+#### iis_config_sync_source: A scp path to the IIS shared configuration directory to sync to the loadbalancer.
 
 ### Validations
 ##### agent_user(advanced): %username
@@ -41,6 +48,13 @@
 ##### cluster_ip_deadtime(advanced): %int
 ##### cluster_ip_initdead(advanced): %int
 ##### cluster_ip_keepalive(advanced): %int
+##### ssl_default_bind_options(advanced): .
+##### ssl_default_bind_ciphers(advanced): .
+##### acme_agreement(advanced): %url
+##### acme_endpoint(advanced): %url
+##### preview_domain(advanced): %hostname
+##### apache_config_sync_source(advanced): ^.*$
+##### iis_config_sync_source(advanced): ^.*$
 
 class atomia::haproxy (
   $agent_user                      = 'haproxy',
@@ -61,6 +75,13 @@ class atomia::haproxy (
   $cluster_ip_deadtime             = 15,
   $cluster_ip_initdead             = 60,
   $cluster_ip_keepalive            = 2,
+  $ssl_default_bind_options        = 'no-sslv3 no-tls-tickets',
+  $ssl_default_bind_ciphers        = 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA',
+  $acme_agreement                  = "https://letsencrypt.org/documents/LE-SA-v1.1.1-August-1-2016.pdf",
+  $acme_endpoint                   = "https://acme-v01.api.letsencrypt.org/directory",
+  $preview_domain                  = expand_default('preview.[[atomia_domain]]'),
+  $apache_config_sync_source       = 'root@fsagent:/storage/configuration/maps',
+  $iis_config_sync_source          = 'root@fsagent:/storage/configuration/iis'
 ) {
 
   if $haproxy_nodes_hostnames != '' {
@@ -81,6 +102,7 @@ class atomia::haproxy (
     package { [
       'python-software-properties',
       'software-properties-common',
+      'acmetool',
     ]:
       ensure => present,
     }
@@ -186,6 +208,50 @@ class atomia::haproxy (
     }
   }
 
+  $acme_conf_dirs = [ "/var/lib/acme", "/var/lib/acme/conf", "/var/lib/acme/haproxy" ]
+  file { $acme_conf_dirs:
+    ensure => directory,
+    owner  => root,
+    group  => root,
+    mode  => '0755',
+  }
+
+  file { "/usr/lib/stateless_acme_challenge.lua":
+    ensure => present,
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
+  }
+
+  file { "/var/lib/acme/conf/responses":
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
+    content => template('atomia/haproxy/acmetool-quickstart-responses.erb'),
+    require => [ Package['acmetool'], File['/var/lib/acme/conf'], File['/usr/bin/update_acmetool_challenge_script.sh'] ],
+    notify  => Exec['acmetool-quickstart'],
+  }
+
+  file { "/usr/bin/update_acmetool_challenge_script.sh":
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0700',
+    source  => 'puppet:///modules/atomia/haproxy/update_acmetool_challenge_script.sh',
+  }
+
+  file { "/usr/bin/acmetool_sync.sh":
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0700',
+    source  => 'puppet:///modules/atomia/haproxy/acmetool_sync.sh',
+  }
+
+  exec { 'acmetool-quickstart':
+    refreshonly => true,
+    command     => '/usr/bin/acmetool quickstart --batch && /usr/bin/update_acmetool_challenge_script.sh',
+    notify	=> File['/etc/haproxy/haproxy.cfg'],
+  }
+
   if $enable_agent == '1' {
     package { 'atomia-pa-haproxy': ensure => present, }
 
@@ -264,7 +330,17 @@ class atomia::haproxy (
         mode    => '0644',
         content => $sync_certs_cron,
         require => File['/root/.ssh/id_rsa']
+      }
 
+      $sync_acmetool_cron = template('atomia/haproxy/sync_acmetool.cron')
+
+      file { '/etc/cron.d/atomia-sync-acmetool':
+        ensure  => file,
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        content => $sync_acmetool_cron,
+        require => [ File['/root/.ssh/id_rsa'], File['/usr/bin/acmetool_sync.sh'] ]
       }
     }
 
@@ -291,7 +367,7 @@ class atomia::haproxy (
     }
 
     file { '/etc/haproxy/haproxy.cfg':
-      require => [ Package['haproxy'], File['/etc/haproxy/atomia_certificates'] ],
+      require => [ Package['haproxy'], File['/etc/haproxy/atomia_certificates'], File['/usr/lib/stateless_acme_challenge.lua'], File['/var/lib/acme/haproxy'] ],
       notify  => Exec['restart-haproxy'],
       content => $haproxy_conf
     }

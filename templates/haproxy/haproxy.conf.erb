@@ -12,8 +12,11 @@ global
 	stats socket /tmp/haproxy
 
 	# Default ciphers to use on SSL-enabled listening sockets.
-	ssl-default-bind-ciphers kEECDH+aRSA+AES:kRSA+AES:+AES256:RC4-SHA:!kEDH:!LOW:!EXP:!MD5:!aNULL:!eNULL
-	ssl-default-bind-options no-sslv3
+	ssl-default-bind-options <%= @ssl_default_bind_options %>
+	ssl-default-bind-ciphers <%= @ssl_default_bind_ciphers %>
+
+	# stateless acme-challenges
+	lua-load /usr/lib/stateless_acme_challenge.lua
 		
 defaults
 	log global
@@ -29,16 +32,24 @@ defaults
 
 frontend apachecluster
 	bind <%= @apache_cluster_ip %>:80
-	bind <%= @apache_cluster_ip %>:443 ssl crt /etc/haproxy/atomia_certificates/default.pem crt /etc/haproxy/atomia_certificates
+	bind <%= @apache_cluster_ip %>:443 ssl crt /etc/haproxy/atomia_certificates/default.pem crt /etc/haproxy/atomia_certificates crt /var/lib/acme/haproxy
 	option  http-server-close
 	http-request add-header X-Proto https if { ssl_fc }
+
+	acl acme_challenge path_beg /.well-known/acme-challenge/
+        http-request use-service lua.stateless_acme_challenge if acme_challenge
+
 	default_backend apache_servers
 
 frontend iiscluster
 	bind <%= @iis_cluster_ip %>:80
-	bind <%= @iis_cluster_ip %>:443 ssl crt /etc/haproxy/atomia_certificates/default.pem crt /etc/haproxy/atomia_certificates
+	bind <%= @iis_cluster_ip %>:443 ssl crt /etc/haproxy/atomia_certificates/default.pem crt /etc/haproxy/atomia_certificates crt /var/lib/acme/haproxy
 	option  http-server-close
 	http-request add-header X-Proto https if { ssl_fc }
+
+	acl acme_challenge path_beg /.well-known/acme-challenge/
+        http-request use-service lua.stateless_acme_challenge if acme_challenge
+
 	default_backend iis_servers
 
 frontend mailcluster
@@ -57,6 +68,10 @@ backend apache_servers
 	balance roundrobin
 <% @apache_cluster_nodes.split(",").each_with_index do |node, index| -%>
 	server apache<%=index+1 %> <%= node %>:80 check
+
+	acl acme_challenge path_beg /.well-known/acme-challenge/
+        http-request use-service lua.stateless_acme_challenge if acme_challenge
+
 <% end -%>
 
 backend iis_servers
