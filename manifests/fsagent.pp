@@ -50,12 +50,12 @@ class atomia::fsagent (
     package { 'atomia-manager': ensure => present }
   }
   package { 'python-pkg-resources': ensure => present }
-  package { 'ruby1.9.1-dev': ensure => present }
+  package { 'ruby2.0': ensure => present }
 
   package { ['jgrep']:
     ensure   => installed,
     provider => 'gem',
-    require  => [Package['ruby1.9.1-dev']],
+    require  => [Package['ruby2.0']],
   }
   class { 'apt': }
 
