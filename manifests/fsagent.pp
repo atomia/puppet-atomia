@@ -84,6 +84,24 @@ class atomia::fsagent (
 
   package { 'atomia-fsagent': ensure => present, require => Package['nodejs'] }
 
+  if !defined(File['/storage']) {
+    file { '/storage':
+      ensure => directory,
+    }
+  }
+
+  if !defined(File['/storage/content']) {
+    file { '/storage/content':
+      ensure => directory,
+    }
+  }
+
+  if !defined(File['/storage/configuration']) {
+    file { '/storage/configuration':
+      ensure => directory,
+    }
+  }
+
   if $skip_mount == '0' {
 
     $internal_zone = hiera('atomia::internaldns::zone_name','')
@@ -125,24 +143,6 @@ class atomia::fsagent (
         mount_point  => '/storage/configuration',
         nfs_location => $config_share_nfs_location
       }
-      if !defined(File['/storage/content']) {
-        file { '/storage/content':
-          ensure  => directory,
-          require => File['/storage'],
-        }
-      }
-
-      file { '/storage/configuration':
-        ensure  => directory,
-        mode    => '0711',
-        require => File['/storage'],
-      }
-    }
-  }
-
-  if !defined(File['/storage']) {
-    file { '/storage':
-      ensure => directory,
     }
   }
 
