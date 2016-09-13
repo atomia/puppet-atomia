@@ -5,8 +5,9 @@ require 'rake'
 require 'rspec/core/rake_task'
 
 #FIXME: disabling the following checks via disable_checks didn't work
-PuppetLint.configuration.send("disable_autoloader_layout")
-PuppetLint.configuration.send("disable_puppet_url_without_modules")
+PuppetLint.configuration.send('disable_autoloader_layout')
+PuppetLint.configuration.send('disable_puppet_url_without_modules')
+PuppetLint.configuration.send('disable_parameter_order')
 
 exclude_paths = [
   "pkg/**/*",
@@ -23,6 +24,7 @@ PuppetLint::RakeTask.new :lint do |config|
   config.fail_on_warnings = true
   config.disable_checks = [
     "80chars",
+    "140chars",
     "class_inherits_from_params_class",
     "documentation",
     "parameter_defaults",

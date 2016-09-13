@@ -31,15 +31,15 @@ class atomia::resource_transformations (
   $atomiadns_username        = hiera('atomia::atomiadns::agent_user', '')
   $atomiadns_password        = hiera('atomia::atomiadns::agent_password', '')
   $atomiadns_nameservers     = hiera('atomia::atomiadns::nameservers', '')
-  $atomiadns_nameserverGroup = hiera('atomia::atomiadns::ns_group', '')
+  $atomiadns_nameservergroup = hiera('atomia::atomiadns::ns_group', '')
   file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.Atomiadns.xml' :
     ensure  => 'file',
     content => template('atomia/resource_transformations/Resources.Atomiadns.erb'),
     require => File['C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/'],
   }
 
-  $activedirectory_domainName      = hiera('atomia::active_directory::domain_name','')
-  $activedirectory_shortDomainName = hiera('atomia::active_directory::netbios_domain_name','')
+  $activedirectory_domainname      = hiera('atomia::active_directory::domain_name','')
+  $activedirectory_shortdomainname = hiera('atomia::active_directory::netbios_domain_name','')
   $activedirectory_username        = 'WindowsAdmin'
   $activedirectory_password        = hiera('atomia::active_directory::windows_admin_password','')
   file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.ActiveDirectory.xml' :
@@ -48,7 +48,7 @@ class atomia::resource_transformations (
     require => File['C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/'],
   }
 
-  $cronagent_baseUrl = hiera('atomia::cronagent::base_url', '')
+  $cronagent_baseurl = hiera('atomia::cronagent::base_url', '')
   $cronagent_token   = hiera('atomia::cronagent::global_auth_token', '')
   file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.CronAgent.xml' :
     ensure  => 'file',
@@ -56,7 +56,7 @@ class atomia::resource_transformations (
     require => File['C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/'],
   }
 
-  $mysql_serverIps = hiera('atomia::mysql::server_ips', '')
+  $mysql_serverips = hiera('atomia::mysql::server_ips', '')
   $mysql_user      = hiera('atomia::mysql::mysql_username', '')
   $mysql_password  = hiera('atomia::mysql::mysql_password', '')
   file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.MySQL.xml' :
@@ -92,14 +92,14 @@ class atomia::resource_transformations (
     require => File['C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/'],
   }
 
-  $pureftp_databaseHost    = hiera('atomia::pureftpd::master_ip','')
+  $pureftp_databasehost    = hiera('atomia::pureftpd::master_ip','')
   $pureftp_username        = hiera('atomia::pureftpd::agent_user','')
   $pureftp_password        = hiera('atomia::pureftpd::pureftpd_password','')
-  $pureftp_clusterIp       = hiera('atomia::pureftpd::ftp_cluster_ip','')
-  $pureftp_fsAgentUrl      = $fsagent_url
-  $pureftp_fsagentUsername = $fsagent_username
-  $pureftp_fsagentPassword = $fsagent_password
-  $pureftp_storageRoot     = hiera('atomia::pureftpd::content_mount_point','')
+  $pureftp_clusterip       = hiera('atomia::pureftpd::ftp_cluster_ip','')
+  $pureftp_fsagenturl      = $fsagent_url
+  $pureftp_fsagentusername = $fsagent_username
+  $pureftp_fsagentpassword = $fsagent_password
+  $pureftp_storageroot     = hiera('atomia::pureftpd::content_mount_point','')
   file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.PureFTPD.xml' :
     ensure  => 'file',
     content => template('atomia/resource_transformations/Resources.PureFTPD.erb'),
@@ -109,16 +109,16 @@ class atomia::resource_transformations (
   $apache_url       = hiera('atomia::apache_agent::apache_agent_ip', '')
   $apache_username  = hiera('atomia::apache_agent::username', '')
   $apache_password  = hiera('atomia::apache_agent::password', '')
-  $apache_clusterIp = hiera('atomia::apache_agent::cluster_ip', '')
+  $apache_clusterip = hiera('atomia::apache_agent::cluster_ip', '')
   file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.ApacheAgent.xml' :
     ensure  => 'file',
     content => template('atomia/resource_transformations/Resources.ApacheAgent.erb'),
     require => File['C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/'],
   }
 
-  $postfix_databaseHost = hiera('atomia::mailserver::master_ip','')
+  $postfix_databasehost = hiera('atomia::mailserver::master_ip','')
   $postfix_password     = hiera('atomia::mailserver::agent_password','')
-  $postfix_clusterIp    = hiera('atomia::mailserver::cluster_ip','')
+  $postfix_clusterip    = hiera('atomia::mailserver::cluster_ip','')
   file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.MailServer.xml' :
     ensure  => 'file',
     content => template('atomia/resource_transformations/Resources.PostfixAndDovecot.erb'),
@@ -141,14 +141,14 @@ class atomia::resource_transformations (
   }
 
   $iis_ip        = hiera('atomia::iis::first_node','')
-  $iis_clusterIp = hiera('atomia::iis::cluster_ip','')
+  $iis_clusterip = hiera('atomia::iis::cluster_ip','')
   file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.IIS.xml' :
     ensure  => 'file',
     content => template('atomia/resource_transformations/Resources.IIS.erb'),
     require => File['C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/'],
   }
 
-  $mssql_serverIps = ''
+  $mssql_serverips = ''
   $mssql_username  = ''
   $mssql_password  = ''
   file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.MSSQL.xml' :

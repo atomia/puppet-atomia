@@ -77,8 +77,8 @@ class atomia::haproxy (
   $cluster_ip_keepalive            = 2,
   $ssl_default_bind_options        = 'no-sslv3 no-tls-tickets',
   $ssl_default_bind_ciphers        = 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA',
-  $acme_agreement                  = "https://letsencrypt.org/documents/LE-SA-v1.1.1-August-1-2016.pdf",
-  $acme_endpoint                   = "https://acme-v01.api.letsencrypt.org/directory",
+  $acme_agreement                  = 'https://letsencrypt.org/documents/LE-SA-v1.1.1-August-1-2016.pdf',
+  $acme_endpoint                   = 'https://acme-v01.api.letsencrypt.org/directory',
   $preview_domain                  = expand_default('preview.[[atomia_domain]]'),
   $apache_config_sync_source       = 'root@fsagent:/storage/configuration/maps',
   $iis_config_sync_source          = 'root@fsagent:/storage/configuration/iis'
@@ -208,22 +208,22 @@ class atomia::haproxy (
     }
   }
 
-  $acme_conf_dirs = [ "/var/lib/acme", "/var/lib/acme/conf", "/var/lib/acme/haproxy" ]
+  $acme_conf_dirs = [ '/var/lib/acme', '/var/lib/acme/conf', '/var/lib/acme/haproxy' ]
   file { $acme_conf_dirs:
     ensure => directory,
     owner  => root,
     group  => root,
-    mode  => '0755',
+    mode   => '0755',
   }
 
-  file { "/usr/lib/stateless_acme_challenge.lua":
+  file { '/usr/lib/stateless_acme_challenge.lua':
     ensure => present,
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0644',
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0644',
   }
 
-  file { "/var/lib/acme/conf/responses":
+  file { '/var/lib/acme/conf/responses':
     owner   => 'root',
     group   => 'root',
     mode    => '0644',
@@ -232,24 +232,24 @@ class atomia::haproxy (
     notify  => Exec['acmetool-quickstart'],
   }
 
-  file { "/usr/bin/update_acmetool_challenge_script.sh":
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0700',
-    source  => 'puppet:///modules/atomia/haproxy/update_acmetool_challenge_script.sh',
+  file { '/usr/bin/update_acmetool_challenge_script.sh':
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0700',
+    source => 'puppet:///modules/atomia/haproxy/update_acmetool_challenge_script.sh',
   }
 
-  file { "/usr/bin/acmetool_sync.sh":
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0700',
-    source  => 'puppet:///modules/atomia/haproxy/acmetool_sync.sh',
+  file { '/usr/bin/acmetool_sync.sh':
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0700',
+    source => 'puppet:///modules/atomia/haproxy/acmetool_sync.sh',
   }
 
   exec { 'acmetool-quickstart':
     refreshonly => true,
     command     => '/usr/bin/acmetool quickstart --batch && /usr/bin/update_acmetool_challenge_script.sh',
-    notify	=> File['/etc/haproxy/haproxy.cfg'],
+    notify      => File['/etc/haproxy/haproxy.cfg'],
   }
 
   if $enable_agent == '1' {
@@ -357,7 +357,7 @@ class atomia::haproxy (
       } else {
         file { '/etc/haproxy/atomia_certificates/default.pem':
           ensure  => file,
-          source  => 'puppet:///atomiacerts/certificates/wildcard_with_key.pem',
+          source  => 'puppet:///modules/atomiacerts/certificates/wildcard_with_key.pem',
           owner   => 'root',
           group   => 'root',
           mode    => '0755',
