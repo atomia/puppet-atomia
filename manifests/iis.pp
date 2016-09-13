@@ -8,19 +8,19 @@
 #### first_node: The hostname of the first node in the cluster
 
 ### Validations
-##### sharePath(advanced): .*
+##### sharepath(advanced): .*
 ##### cluster_ip: %ip
 ##### first_node(advanced): .*
 
 class atomia::iis(
-  $sharePath  = '',
+  $sharepath  = '',
   $cluster_ip = '',
   $first_node = $fqdn
 ){
 
-  $adminUser     = 'WindowsAdmin'
-  $adminPassword = hiera('atomia::active_directory::windows_admin_password', '')
-  $adDomain      = hiera('atomia::active_directory::domain_name', '')
+  $adminuser     = 'WindowsAdmin'
+  $adminpassword = hiera('atomia::active_directory::windows_admin_password', '')
+  $addomain      = hiera('atomia::active_directory::domain_name', '')
 
   $dism_features_to_enable = [
     'NetFx3', 'IIS-WebServerRole', 'IIS-WebServer', 'IIS-CommonHttpFeatures', 'IIS-Security', 'IIS-RequestFiltering',
@@ -62,18 +62,18 @@ class atomia::iis(
     require => File['c:/install'],
   }
 
-  if $sharePath == '' {
+  if $sharepath == '' {
     $internal_zone = hiera('atomia::internaldns::zone_name','')
-    $realSharePath = '\\gluster' + $internal_zone + '\configshare\iis'
+    $realsharepath = '\\gluster' + $internal_zone + '\configshare\iis'
   }
   else
   {
-    $realSharePath = $sharePath
+    $realsharepath = $sharepath
   }
 
   exec { 'setup_iis':
     provider => powershell,
-    command  => "c:/install/setup_iis.ps1 -Action 'enable' -UNCPath '${realSharePath}' -adminUser '${adDomain}\\WindowsAdmin' -adminPassword '${adminPassword}'",
+    command  => "c:/install/setup_iis.ps1 -Action 'enable' -UNCPath '${realsharepath}' -adminUser '${addomain}\\WindowsAdmin' -adminPassword '${adminpassword}'",
     require  => [Dism[$dism_features_to_enable], File['c:/install/setup_iis.ps1'], File['c:/install/IISSharedConfigurationEnabler.exe'], File['c:/install/LsaStorePrivateData.exe'], File['c:/install/RegistryUnlocker.exe']],
     creates  => 'c:\windows\install\installed'
   }
