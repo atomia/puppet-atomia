@@ -84,21 +84,24 @@ class atomia::fsagent (
 
   package { 'atomia-fsagent': ensure => present, require => Package['nodejs'] }
 
-  if !defined(File['/storage']) {
-    file { '/storage':
-      ensure => directory,
-    }
-  }
+  if $::vagrant {
 
-  if !defined(File['/storage/content']) {
-    file { '/storage/content':
-      ensure => directory,
+    if !defined(File['/storage']) {
+      file { '/storage':
+        ensure => directory,
+      }
     }
-  }
-
-  if !defined(File['/storage/configuration']) {
-    file { '/storage/configuration':
-      ensure => directory,
+  
+    if !defined(File['/storage/content']) {
+      file { '/storage/content':
+        ensure => directory,
+      }
+    }
+  
+    if !defined(File['/storage/configuration']) {
+      file { '/storage/configuration':
+        ensure => directory,
+      }
     }
   }
 
