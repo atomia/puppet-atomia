@@ -50,12 +50,23 @@ class atomia::fsagent (
     package { 'atomia-manager': ensure => present }
   }
   package { 'python-pkg-resources': ensure => present }
-  package { 'ruby2.0': ensure => present }
+
+  package { 'ruby2.0':
+    ensure => present,
+    notify => Exec["set-gem-symlink"],
+  }
+
+  exec { 'set-gem-symlink':
+    command => 'ln -fs /usr/bin/gem2.0 /usr/bin/gem',
+    require => Package['ruby2.0'],
+    path   => '/usr/bin:/usr/sbin:/bin',
+    unless => 'test -L /usr/bin/gem && ls -l /usr/bin/gem | grep gem2.0 > /dev/null'
+  }
 
   package { ['jgrep']:
     ensure   => installed,
     provider => 'gem',
-    require  => [Package['ruby2.0']],
+    require  => [Package['ruby2.0'], Exec['set-gem-symlink']],
   }
   class { 'apt': }
 
