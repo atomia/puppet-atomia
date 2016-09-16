@@ -85,7 +85,15 @@ class atomia::apache_agent_cl (
     }
 
     # Install alt-php
-    #package { 'lvemanager': ensure => installed }
+    package { 'lvemanager': ensure => installed }
+
+    file {'/storage/configuration/cloudlinux/lve_packages':
+      ensure  => 'present',
+      replace => 'no',
+      content => '#lve packages',
+      mode    => '0644',
+      require => [Package['lvemanager'],File['/storage']],
+    }
 
     exec { 'install altphp':
         command => '/usr/bin/yum -y groupinstall alt-php',
