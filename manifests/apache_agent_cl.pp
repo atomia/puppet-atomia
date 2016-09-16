@@ -95,6 +95,18 @@ class atomia::apache_agent_cl (
       require => [Package['lvemanager'],File['/storage']],
     }
 
+    file {'/storage/configuration/cloudlinux/lve_packages.sh':
+      ensure  => 'present',
+      source  => 'puppet:///modules/atomia/apache_agent/lve_packages.sh',
+      mode    => '0755',
+      require => [Package['lvemanager'],File['/storage']],
+    }
+
+    exec {'enable lve package lookup':
+      command => '/usr/bin/echo "CUSTOM_GETPACKAGE_SCRIPT=/storage/configuration/cloudlinux/lve_packages.sh" >> /etc/sysconfig/cloudlinux',
+      unless  => '/bin/grep -c "/storage/configuration/cloudlinux/lve_packages.sh" /etc/sysconfig/cloudlinux'
+    }
+
     exec { 'install altphp':
         command => '/usr/bin/yum -y groupinstall alt-php',
         timeout => 1800,
