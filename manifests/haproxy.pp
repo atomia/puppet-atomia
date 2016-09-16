@@ -99,9 +99,6 @@ class atomia::haproxy (
   class { 'apt': }
 
   if $::operatingsystem == 'Ubuntu' {
-
-    apt::ppa { 'ppa:hlandau/rhea':}
-
     package { [
       'python-software-properties',
       'software-properties-common',
