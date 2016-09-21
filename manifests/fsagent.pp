@@ -102,13 +102,13 @@ class atomia::fsagent (
         ensure => directory,
       }
     }
-  
+
     if !defined(File['/storage/content']) {
       file { '/storage/content':
         ensure => directory,
       }
     }
-  
+
     if !defined(File['/storage/configuration']) {
       file { '/storage/configuration':
         ensure => directory,
