@@ -35,6 +35,4 @@ end
 desc 'Validate syntax for all manifests.'
 PuppetSyntax.exclude_paths = exclude_paths
 
-#only check for syntax and lint for now, add spec testing later
-#task :default => [:spec, :syntax, :lint]
-task :default => [:syntax, :lint]
+task :default => [:spec, :syntax, :lint]
