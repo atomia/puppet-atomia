@@ -7,7 +7,6 @@ language: ruby
 before_install: rm Gemfile.lock || true
 script: 
   - bundle exec rake
-  - bundle exec rake spec
 #  - ./spec/acceptance/run_acceptance_tests.sh $TEST_SUITE
 matrix:
   include:
