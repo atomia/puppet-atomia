@@ -7,18 +7,20 @@ describe 'atomia::atomiadns' do
   # minimum set of default parameters
   let :params do
     {
-      :nameserver1    => 'ns1.atomia.com',
-      :registry       => 'registry.atomia.com',
-      :nameservers    => '[ns1.atomia.com, ns2.atomia.com]',
       :agent_password => 'abc123',
       :db_password    => 'abc123',
+      :nameserver1    => 'ns1.atomia.com',
+      :nameservers    => '[ns1.atomia.com, ns2.atomia.com]',
+      :registry       => 'registry.atomia.com',
       :zones_to_add   => 'preview.atomia.com, mysql.atomia.com',
     }
   end
 
   let :facts do
     {
-      :osfamily => 'Debian',
+      :lsbdistrelease    => '14.04',
+      :lsbmajdistrelease => '14.04',
+      :osfamily          => 'Debian',
     }
   end
 

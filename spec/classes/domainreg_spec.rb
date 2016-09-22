@@ -7,14 +7,16 @@ describe 'atomia::domainreg' do
   # minimum set of default parameters
   let :params do
     {
-      :service_password => 'abc123',
       :db_password      => 'abc123',
+      :service_password => 'abc123',
     }
   end
 
   let :facts do
     {
-      :osfamily => 'Debian',
+      :lsbdistrelease    => '14.04',
+      :lsbmajdistrelease => '14.04',
+      :osfamily          => 'Debian',
     }
   end
 

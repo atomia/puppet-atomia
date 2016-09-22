@@ -4,18 +4,20 @@ describe 'atomia::installatron' do
 
   let(:facts) do
     {
-      :lsbdistid              => 'Ubuntu',
-      :operatingsystem        => 'Ubuntu',
-      :osfamily               => 'Debian',
       :lsbdistcodename        => 'trusty',
-      :puppetversion          => Puppet.version,
+      :lsbdistid              => 'Ubuntu',
+      :lsbdistrelease         => '14.04',
+      :lsbmajdistrelease      => '14.04',
+      :operatingsystem        => 'Ubuntu',
       :operatingsystemrelease => '14.04',
+      :osfamily               => 'Debian',
+      :puppetversion          => Puppet.version,
     }
   end
   let :params do
     {
-      :license_key        => 'abc123',
       :authentication_key => 'abc123',
+      :license_key        => 'abc123',
     }
   end
 
