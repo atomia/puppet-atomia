@@ -19,28 +19,28 @@
 ##### processes(advanced): %int
 
 class atomia::libcloud (
-  $service_hostname               = "${::fqdn}",
-  $service_port          = '6789',
-  $ssl_cert_file 			= '',
-  $ssl_key_file 			= '',
-  $use_debugger 		= 'true',
-  $processes 				= '4' 
+  $service_hostname = $::fqdn,
+  $service_port     = '6789',
+  $ssl_cert_file    = '',
+  $ssl_key_file     = '',
+  $use_debugger     = true,
+  $processes        = '4'
 ){
 
-  package { 'python-backports.ssl-match-hostname': 
+  package { 'python-backports.ssl-match-hostname':
     ensure  => present
   }
 
-  package { 'python-libcloud': 
-    ensure => present ,
+  package { 'python-libcloud':
+    ensure  => present ,
     require => [ Package['python-backports.ssl-match-hostname'] ]
   }
-  
-  package { 'atomialibcloudagent': 
-    ensure => present ,
+
+  package { 'atomialibcloudagent':
+    ensure  => present ,
     require => [ Package['python-libcloud'] ]
   }
-  
+
   file { '/etc/atomialibcloudagent.conf':
     path    => '/etc/atomialibcloudagent.conf',
     owner   => 'root',
@@ -52,7 +52,7 @@ class atomia::libcloud (
 
   service { 'atomialibcloudagent':
     ensure  => running,
-    enable  => true,	
+    enable  => true,
     require => [ Package['atomialibcloudagent'] ],
   }
 
