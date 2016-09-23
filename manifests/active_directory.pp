@@ -8,7 +8,7 @@
 #### restore_password: Password used for Active Directory restore
 #### app_password: Password for the Atomia apppooluser
 #### bind_password: Password for the Atomia posixuser
-#### windows_admin_password: Password for the WindowsAdministrator user
+#### windows_admin_password: Password for the WindowsAdmin user
 #### master_ip: The ip address of this server
 
 ### Validations

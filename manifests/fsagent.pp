@@ -95,24 +95,23 @@ class atomia::fsagent (
 
   package { 'atomia-fsagent': ensure => present, require => Package['nodejs'] }
 
-  if $::vagrant {
-
-    if !defined(File['/storage']) {
-      file { '/storage':
-        ensure => directory,
-      }
+  if !defined(File['/storage']) {
+    file { '/storage':
+      ensure => directory,
     }
+  }
 
-    if !defined(File['/storage/content']) {
-      file { '/storage/content':
-        ensure => directory,
-      }
+  if !defined(File['/storage/content']) {
+    file { '/storage/content':
+      ensure => directory,
+      require => File['/storage'],
     }
+  }
 
-    if !defined(File['/storage/configuration']) {
-      file { '/storage/configuration':
-        ensure => directory,
-      }
+  if !defined(File['/storage/configuration']) {
+    file { '/storage/configuration':
+      ensure  => directory,
+      require => File['/storage'],
     }
   }
 
@@ -130,18 +129,20 @@ class atomia::fsagent (
       }
 
       fstab::mount { '/storage/content':
-        ensure  => 'mounted',
-        device  => "gluster.${internal_zone}:/web_volume",
-        options => 'defaults,_netdev',
-        fstype  => 'glusterfs',
-        require => [Package['glusterfs-client'],File['/storage']],
+        ensure     => 'mounted',
+        manage_dir => false,
+        device     => "gluster.${internal_zone}:/web_volume",
+        options    => 'defaults,_netdev',
+        fstype     => 'glusterfs',
+        require    => [Package['glusterfs-client'],File['/storage']],
       }
       fstab::mount { '/storage/configuration':
-        ensure  => 'mounted',
-        device  => "gluster.${internal_zone}:/config_volume",
-        options => 'defaults,_netdev',
-        fstype  => 'glusterfs',
-        require => [ Package['glusterfs-client'],File['/storage']],
+        ensure     => 'mounted',
+        manage_dir => false,
+        device     => "gluster.${internal_zone}:/config_volume",
+        options    => 'defaults,_netdev',
+        fstype     => 'glusterfs',
+        require    => [ Package['glusterfs-client'],File['/storage']],
       }
     }
     else
