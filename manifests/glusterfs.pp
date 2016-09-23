@@ -44,24 +44,28 @@ class atomia::glusterfs (
 
   $netbios_domain_name = hiera('atomia::active_directory::netbios_domain_name')
   $domain_name         = hiera('atomia::active_directory::domain_name')
-  $zone_name           = hiera('atomia::internaldns::zone_name')
   $ad_password         = hiera('atomia::active_directory::windows_admin_password')
-  $internal_zone       = hiera('atomia::internaldns::zone_name')
+
   host { 'domain-member-host':
     name => "${::hostname}.${domain_name}",
     ip   => $::ipaddress_eth0
   }
 
-  @@bind::a { "${fqdn}-gluster-dns":
-    ensure    => 'present',
-    zone      => $internal_zone,
-    ptr       => false,
-    hash_data => {
-      'gluster' => {
-        owner => $::ipaddress },
-    },
+  if !$::vagrant {
+    $internal_zone       = hiera('atomia::internaldns::zone_name')
+    $gluster_hostname    = "gluster.${internal_zone}"
+    @@bind::a { "${fqdn}-gluster-dns":
+      ensure    => 'present',
+      zone      => $internal_zone,
+      ptr       => false,
+      hash_data => {
+        'gluster' => {
+          owner => $::ipaddress },
+      },
+    }
+  } else {
+    $gluster_hostname    = '192.168.33.38'
   }
-
 
   $peers_arr = split($peers,',')
   $peers_size = size($peers_arr)
@@ -180,43 +184,36 @@ class atomia::glusterfs (
     ensure  => directory,
   }
 
-  if($peers_size > 1)
-  {
-    if($is_first_node == 1) {
-      exec { 'gluster volume create /export/web':
-        command => template('atomia/glusterfs/create_web_volume.erb'),
-        creates => '/var/lib/glusterd/vols/web_volume',
-        require => [ Class['glusterfs::server'], File['/export/web/vol1'] ],
-        unless  => "/usr/bin/test `/usr/sbin/gluster peer status | /bin/grep -c Hostname` -eq ${peers_size};",
-        notify  => Exec['start web volume'],
-      }
-    }
-
-    fstab::mount { '/storage/content':
-      ensure  => 'mounted',
-      device  => "gluster.${internal_zone}:/web_volume",
-      options => 'defaults,_netdev',
-      fstype  => 'glusterfs',
-      require => [Exec['start web volume'], File['/storage']],
-    }
-
-    exec { 'start web volume':
-      command     => '/usr/sbin/gluster volume start web_volume',
-      refreshonly => true
+  if($is_first_node == 1) {
+    exec { 'gluster volume create /export/web':
+      command => template('atomia/glusterfs/create_web_volume.erb'),
+      creates => '/var/lib/glusterd/vols/web_volume',
+      require => [ Class['glusterfs::server'], File['/export/web/vol1'] ],
+      unless  => "/usr/bin/test `/usr/sbin/gluster peer status | /bin/grep -c Hostname` -eq ${peers_size};",
+      notify  => Exec['start web volume'],
     }
   }
 
+  fstab::mount { '/storage/content':
+    ensure  => 'mounted',
+    device  => "${gluster_hostname}:/web_volume",
+    options => 'defaults,_netdev',
+    fstype  => 'glusterfs',
+    require => [Exec['start web volume'], File['/storage']],
+  }
 
-  if($peers_size > 1)
-  {
-    if($is_first_node == 1) {
-      exec { 'gluster volume create /export/mail':
-        command => template('atomia/glusterfs/create_mail_volume.erb'),
-        creates => '/var/lib/glusterd/vols/mail_volume',
-        require => [ Class['glusterfs::server'], File['/export/mail/vol1'] ],
-        unless  => "/usr/bin/test `/usr/sbin/gluster peer status | /bin/grep -c Hostname` -eq ${peers_size};",
-        notify  => Exec['start mail volume'],
-      }
+  exec { 'start web volume':
+    command     => '/usr/sbin/gluster volume start web_volume',
+    refreshonly => true
+  }
+
+  if($is_first_node == 1) {
+    exec { 'gluster volume create /export/mail':
+      command => template('atomia/glusterfs/create_mail_volume.erb'),
+      creates => '/var/lib/glusterd/vols/mail_volume',
+      require => [ Class['glusterfs::server'], File['/export/mail/vol1'] ],
+      unless  => "/usr/bin/test `/usr/sbin/gluster peer status | /bin/grep -c Hostname` -eq ${peers_size};",
+      notify  => Exec['start mail volume'],
     }
   }
 
@@ -225,35 +222,33 @@ class atomia::glusterfs (
     refreshonly => true
   }
 
-  if($peers_size > 1)
-  {
-    if($is_first_node == 1) {
-      exec { 'gluster volume create /export/config':
-        command => template('atomia/glusterfs/create_config_volume.erb'),
-        creates => '/var/lib/glusterd/vols/config_volume',
-        require => [ Class['glusterfs::server'], File['/export/config/vol1'] ],
-        unless  => "/usr/bin/test `/usr/sbin/gluster peer status | /bin/grep -c Hostname` -eq ${peers_size};",
-        notify  => Exec['start config volume'],
-      }
-    }
-
-    exec { 'start config volume':
-      command     => '/usr/sbin/gluster volume start config_volume',
-      refreshonly => true
-    }
-
-    fstab::mount { '/storage/configuration':
-      ensure  => 'mounted',
-      device  => "gluster.${internal_zone}:/config_volume",
-      options => 'defaults,_netdev',
-      fstype  => 'glusterfs',
-      require => [Exec['start config volume'], File['/storage']],
+  if($is_first_node == 1) {
+    exec { 'gluster volume create /export/config':
+      command => template('atomia/glusterfs/create_config_volume.erb'),
+      creates => '/var/lib/glusterd/vols/config_volume',
+      require => [ Class['glusterfs::server'], File['/export/config/vol1'] ],
+      unless  => "/usr/bin/test `/usr/sbin/gluster peer status | /bin/grep -c Hostname` -eq ${peers_size};",
+      notify  => Exec['start config volume'],
     }
   }
 
+  exec { 'start config volume':
+    command     => '/usr/sbin/gluster volume start config_volume',
+    refreshonly => true
+  }
 
+  fstab::mount { '/storage/configuration':
+    ensure  => 'mounted',
+    device  => "${gluster_hostname}:/config_volume",
+    options => 'defaults,_netdev',
+    fstype  => 'glusterfs',
+    require => [Exec['start config volume'], File['/storage']],
+  }
 
   # Configure Samba
+  # TODO: Investigate why on vagrant when accessing the share you get ACCESS_DENIED for \lsarpc before you 
+  # TODO: add lsarpc to the domain controller Computer Configuration\Windows Settings\Security Settings\Local Policies\Security Options
+  # TODO: policy and then gpupdate /force
   file { '/etc/samba/smb.conf':
     content => template('atomia/glusterfs/smb.conf.erb'),
     require => Package['samba']
@@ -265,10 +260,15 @@ class atomia::glusterfs (
     require => Package['samba'],
   }
 
+  if $::vagrant {
+    $windows_admin_username = 'Administrator'
+  } else {
+    $windows_admin_username = 'WindowsAdmin'
+  }
+
   exec {'samba-join-domain':
-    command => "/usr/bin/net ads join -U \"WindowsAdmin%${ad_password}\"",
-    unless  => "/usr/bin/net ads status -U \"WindowsAdmin%${ad_password}\"  >/dev/null 2>&1",
+    command => "/usr/bin/net ads join -U \"${windows_admin_username}%${ad_password}\"",
+    unless  => "/usr/bin/net ads status -U \"${windows_admin_username}%${ad_password}\"  >/dev/null 2>&1",
     require => [File['/etc/samba/smb.conf'], File['/etc/samba/smbusers']]
   }
-  #WindowsAdmin
-  }
+}
