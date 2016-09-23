@@ -51,7 +51,7 @@ class atomia::glusterfs (
     ip   => $::ipaddress_eth0
   }
 
-  if !$::vagrant { 
+  if !$::vagrant {
     $internal_zone       = hiera('atomia::internaldns::zone_name')
     $gluster_hostname    = "gluster.${internal_zone}"
     @@bind::a { "${fqdn}-gluster-dns":
@@ -64,7 +64,7 @@ class atomia::glusterfs (
       },
     }
   } else {
-    $gluster_hostname    = "192.168.33.38"
+    $gluster_hostname    = '192.168.33.38'
   }
 
   $peers_arr = split($peers,',')
@@ -261,9 +261,9 @@ class atomia::glusterfs (
   }
 
   if $::vagrant {
-    $windows_admin_username = "Administrator"
+    $windows_admin_username = 'Administrator'
   } else {
-    $windows_admin_username = "WindowsAdmin"
+    $windows_admin_username = 'WindowsAdmin'
   }
 
   exec {'samba-join-domain':

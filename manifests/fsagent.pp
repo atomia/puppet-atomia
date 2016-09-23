@@ -103,7 +103,7 @@ class atomia::fsagent (
 
   if !defined(File['/storage/content']) {
     file { '/storage/content':
-      ensure => directory,
+      ensure  => directory,
       require => File['/storage'],
     }
   }
