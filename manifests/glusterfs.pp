@@ -289,12 +289,12 @@ class atomia::glusterfs (
 
   if $quota_management_ssh_key != '' {
     user { 'quotamgmt':
-      ensure     => present,
-      uid        => 2250,
-      gid        => 'nogroup',
-      home       => '/home/quotamgmt',
-      comment    => '',
-      shell      => '/bin/sh'
+      ensure  => present,
+      uid     => 2250,
+      gid     => 'nogroup',
+      home    => '/home/quotamgmt',
+      comment => '',
+      shell   => '/bin/sh'
     }
 
     file { '/home/quotamgmt':
