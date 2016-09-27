@@ -9,6 +9,7 @@
 #### peers: Hostname/IP of all the peers in the cluster
 #### physical_volume: The physical volume on the server to create storage volumes on
 #### vg_name: The name of the volume group to be created for use with Gluster
+#### quota_management_ssh_key: The SSH key to allow quota management for
 
 ### Validations
 ##### web_content_volume_size: ^[0-9]+G$
@@ -17,6 +18,7 @@
 ##### peers: .*
 ##### physical_volume: .*
 ##### vg_name: .*
+##### quota_management_ssh_key: (^$|^ssh-rsa )
 
 class atomia::glusterfs (
   $web_content_volume_size   = '100G',
@@ -25,6 +27,7 @@ class atomia::glusterfs (
   $peers                     = $fqdn,
   $physical_volume           = '/dev/sdb',
   $vg_name                   = 'gluster',
+  $quota_management_ssh_key  = '',
 ) {
 
   $is_first_node = hiera('atomia::glusterfs::is_first_node', 0)
@@ -204,6 +207,12 @@ class atomia::glusterfs (
 
   exec { 'start web volume':
     command     => '/usr/sbin/gluster volume start web_volume',
+    refreshonly => true,
+    notify      => Exec['enable web quota']
+  }
+
+  exec { 'enable web quota':
+    command     => '/usr/sbin/gluster volume quota web_volume enable',
     refreshonly => true
   }
 
@@ -219,6 +228,12 @@ class atomia::glusterfs (
 
   exec { 'start mail volume':
     command     => '/usr/sbin/gluster volume start mail_volume',
+    refreshonly => true,
+    notify      => Exec['enable mail quota']
+  }
+
+  exec { 'enable mail quota':
+    command     => '/usr/sbin/gluster volume quota mail_volume enable',
     refreshonly => true
   }
 
@@ -246,7 +261,7 @@ class atomia::glusterfs (
   }
 
   # Configure Samba
-  # TODO: Investigate why on vagrant when accessing the share you get ACCESS_DENIED for \lsarpc before you 
+  # TODO: Investigate why on vagrant when accessing the share you get ACCESS_DENIED for \lsarpc before you
   # TODO: add lsarpc to the domain controller Computer Configuration\Windows Settings\Security Settings\Local Policies\Security Options
   # TODO: policy and then gpupdate /force
   file { '/etc/samba/smb.conf':
@@ -270,5 +285,67 @@ class atomia::glusterfs (
     command => "/usr/bin/net ads join -U \"${windows_admin_username}%${ad_password}\"",
     unless  => "/usr/bin/net ads status -U \"${windows_admin_username}%${ad_password}\"  >/dev/null 2>&1",
     require => [File['/etc/samba/smb.conf'], File['/etc/samba/smbusers']]
+  }
+
+  if $quota_management_ssh_key != '' {
+    user { 'quotamgmt':
+      ensure     => present,
+      uid        => 2250,
+      gid        => 'nogroup',
+      home       => '/home/quotamgmt',
+      comment    => '',
+      shell      => '/bin/sh'
+    }
+
+    file { '/home/quotamgmt':
+      ensure  => directory,
+      owner   => 'quotamgmt',
+      group   => 'nogroup',
+      mode    => '0700',
+      require => User['quotamgmt'],
+    }
+
+    file { '/home/quotamgmt/.ssh':
+      ensure  => directory,
+      owner   => 'quotamgmt',
+      group   => 'nogroup',
+      mode    => '0700',
+      require => File['/home/quotamgmt'],
+    }
+
+    file { '/home/quotamgmt/.ssh/authorized_keys2':
+      ensure  => file,
+      owner   => 'quotamgmt',
+      group   => 'nogroup',
+      mode    => '0600',
+      content => template('atomia/glusterfs/authorized_keys.erb'),
+      require => File['/home/quotamgmt/.ssh'],
+    }
+
+    file { '/opt/atomia':
+      ensure  => directory,
+      owner   => 'quotamgmt',
+      group   => 'nogroup',
+      mode    => '0700',
+      require => User['quotamgmt'],
+    }
+
+    file { '/opt/atomia/quotamgmt.sh':
+      ensure  => directory,
+      owner   => 'quotamgmt',
+      group   => 'nogroup',
+      mode    => '0700',
+      source  => 'puppet:///modules/atomia/glusterfs/quotamgmt.sh',
+      require => File['/opt/atomia'],
+    }
+
+    file { '/etc/sudoers.d/20_quotamgmt':
+      ensure  => directory,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0440',
+      source  => 'puppet:///modules/atomia/glusterfs/20_quotamgmt',
+      require => Package['sudo'],
+    }
   }
 }

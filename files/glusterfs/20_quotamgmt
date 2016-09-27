@@ -1,0 +1,1 @@
+quotamgmt ALL=(ALL) NOPASSWD: /opt/atomia/quotamgmt.sh
