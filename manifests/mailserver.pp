@@ -378,6 +378,15 @@ class atomia::mailserver (
     notify  => Service['postfix'],
   }
 
+  file { '/etc/postfix/mysql_virtual_alias_domains.cf':
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0444',
+    content => template('atomia/mailserver/mysql_virtual_alias_domains.cf.erb'),
+    require => Package[$postfix_mysql_package],
+    notify  => Service['postfix'],
+  }
+
   file { '/etc/postfix/mysql_virtual_alias_maps.cf':
     owner   => 'root',
     group   => 'root',

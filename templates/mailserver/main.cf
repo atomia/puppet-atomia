@@ -25,7 +25,7 @@ smtpd_sender_restrictions = reject_unknown_address
 dovecot_destination_recipient_limit = 1
 transport_maps = mysql:/etc/postfix/mysql_virtual_transport.cf
 relay_domains = mysql:/etc/postfix/mysql_relay_domains_maps.cf
-virtual_alias_maps = mysql:/etc/postfix/mysql_virtual_alias_maps.cf
+virtual_alias_maps = mysql:/etc/postfix/mysql_virtual_alias_domains.cf,mysql:/etc/postfix/mysql_virtual_alias_maps.cf
 virtual_gid_maps = static:2000
 
 virtual_mailbox_base = <%= @mailbox_base %> 
