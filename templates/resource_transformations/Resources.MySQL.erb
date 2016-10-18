@@ -1,5 +1,5 @@
 <% require 'yaml' %>
-<% server_ips = @mysql_serverIps.split(',') %>
+<% server_ips = @mysql_server_ips.split(',') %>
 <resourceDescription xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
   <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.MySql.MySql'])" xdt:Transform="Replace">
       <moduleList>

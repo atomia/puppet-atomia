@@ -56,7 +56,7 @@ class atomia::resource_transformations (
     require => File['C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/'],
   }
 
-  $mysql_serverips = hiera('atomia::mysql::server_ips', '')
+  $mysql_server_ips = hiera('atomia::mysql::server_ips', '')
   $mysql_user      = hiera('atomia::mysql::mysql_username', '')
   $mysql_password  = hiera('atomia::mysql::mysql_password', '')
   file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.MySQL.xml' :
@@ -148,7 +148,7 @@ class atomia::resource_transformations (
     require => File['C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/'],
   }
 
-  $mssql_serverips = ''
+  $mssql_server_ips = ''
   $mssql_username  = ''
   $mssql_password  = ''
   file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.MSSQL.xml' :

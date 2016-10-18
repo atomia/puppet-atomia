@@ -21,9 +21,9 @@
 
 ### Validations
 ##### atomia_dns_url(advanced): %url
-##### nameserver1(advanced): %hostname
-##### registry(advanced): %hostname
-##### nameservers(advanced): ^\[([a-z0-9.-]+,)*[a-z0-9.-]+\]$
+##### nameserver1(advanced): %fdqn
+##### registry(advanced): %fqdn
+##### nameservers(advanced): ^\[\s?([a-z0-9.-]+,\s?)*[a-z0-9.-]+\s?\]$
 ##### agent_user(advanced): %username
 ##### agent_password(advanced): %password
 ##### db_hostname(advanced): %hostname
