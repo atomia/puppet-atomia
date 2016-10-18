@@ -13,7 +13,7 @@ class atomia::mongodb {
   }
 
   exec { 'add keyserver':
-    command     => '/usr/bin/apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10;apt-get update',
+    command     => '/usr/bin/apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10;apt-get update',
     onlyif      => ['/usr/bin/test -f /etc/apt/sources.list.d/10gen.list'],
     subscribe   => File['/etc/apt/sources.list.d/10gen.list'],
     refreshonly => true
