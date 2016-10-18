@@ -13,7 +13,7 @@
 #### local_address: Local address for the agent
 
 ### Validations
-##### ip_addr(advanced): %password
+##### ip_addr(advanced): .*
 ##### global_auth_token(advanced): %password
 ##### content_share_nfs_location(advanced): %nfs_share
 ##### config_share_nfs_location(advanced): %nfs_share
