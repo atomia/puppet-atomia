@@ -12,7 +12,7 @@ PublicHost = <%= @appdomain %>
 EnableMsSqlDeployment = <%= @enable_mssql %>
 EnablePostgreSqlDeployment = <%= @enable_postgresql %>
 <% if @enable_postgresql == 'true' || @enable_postgresql == true %>
-AddtConnectionString = Server=<%= @database_server_host %>;database=postgres;user id=<%= @database_server_username %>;password=<%= @database_server_password %>;
+AddtConnectionString = Server=<%= @database_server_host %>;database=postgres;user id=<%= @database_server_username %>;password=<%= @database_server_password %>;CommandTimeout=0;
 ActionTrailConnectionString = Server=<%= @database_server_host %>;database=atomiaactiontrail;user id=<%= @database_server_username %>;password=<%= @database_server_password %>;
 AutomaionServerConnectionString = Server=<%= @database_server_host %>;database=atomiaprovisioning2;user id=<%= @database_server_username %>;password=<%= @database_server_password %>;
 AccountConnectionString = Server=<%= @database_server_host %>;database=atomiaaccount;user id=<%= @database_server_username %>;password=<%= @database_server_password %>;
