@@ -84,7 +84,7 @@ class atomia::haproxy (
   $iis_config_sync_source          = 'root@fsagent:/storage/configuration/iis'
 ) {
 
-  if $haproxy_nodes_hostnames != '' {
+  if $haproxy_nodes_hostnames == '' {
     # TODO: Figure out way to get comma separated list of hostname for all servers with this class, in reliable order.
     $haproxy_nodes = $::hostname
   } else {
