@@ -9,7 +9,7 @@ global
 	daemon
 	maxconn 30000
 	tune.ssl.default-dh-param 2048
-	stats socket /tmp/haproxy
+	stats socket /var/run/haproxy
 
 	# Default ciphers to use on SSL-enabled listening sockets.
 	ssl-default-bind-options <%= @ssl_default_bind_options %>
@@ -87,6 +87,7 @@ backend mail_servers
 <% end -%>
 
 backend ftp_servers
+	mode tcp
 	option httpchk
 	balance roundrobin
 <% @ftp_cluster_nodes.split(",").each_with_index do |node, index| -%>
