@@ -53,6 +53,7 @@ frontend iiscluster
 	default_backend iis_servers
 
 frontend mailcluster
+	mode tcp
 	bind <%= @mail_cluster_ip %>:25
 	bind <%= @mail_cluster_ip %>:110
 	bind <%= @mail_cluster_ip %>:143
@@ -81,6 +82,7 @@ backend iis_servers
 <% end -%>
 
 backend mail_servers
+	mode tcp
 	balance roundrobin
 <% @mail_cluster_nodes.split(",").each_with_index do |node, index| -%>
 	server mail<%=index+1 %> <%= node %>
