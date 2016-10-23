@@ -15,10 +15,11 @@ if [ -f "$basedir/zones_to_add.txt" ]; then
 			echo "$domain not added, will try to restore"
 			atomiadnsclient --method AddZone --arg "$domain" --arg 3600 --arg "$2" --arg "$4" --arg 10800 --arg 3600 --arg 604800 --arg 86400 --arg "$3" --arg "$1" 
 			if [ $? != 0 ]; then
-				echo "error adding, zone, ignoring - it will re-add later anyway"
-				exit 0
+				echo "error adding zone"
+				echo "command executed: atomiadnsclient --method AddZone --arg \"$domain\" --arg 3600 --arg \"$2\" --arg \"$4\" --arg 10800 --arg 3600 --arg 604800 --arg 86400 --arg \"$3\" --arg \"$1\""
+				exit 1
 			else
-				touch /usr/share/doc/atomiadns-masterserver/sync_zones_done.txt
+				touch "$basedir/sync_zones_done.txt"
 			fi
 		fi
 	done
