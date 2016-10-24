@@ -70,7 +70,7 @@ mod "hosts",
   :commit => "3e700e4614cdc63db917b122e34f2e33445aca09"
 
 mod "fstab"
-  :git => "git@github.com:NERC-CEH/puppet-fstab.git"
+  :git => "git://git@github.com:NERC-CEH/puppet-fstab.git"
   :commit => "65a589af52662c8b7ad0b8dab9bb0c07bc3b1b05"
 
 mod "windows_sql",
