@@ -104,11 +104,11 @@ class atomia::windows_base (
     else
     {
       $factfile = 'C:/ProgramData/PuppetLabs/facter/facts.d/actiontrail_ip.txt'
+      $actiontrail_ip = "${actiontrail_host}.${appdomain}"
 
       # TODO: Get these from hiera
       $database_server = ''
       $mirror_database_server = ''
-      $actiontrail_ip = ''
     }
 
     dism { 'NetFx3':
