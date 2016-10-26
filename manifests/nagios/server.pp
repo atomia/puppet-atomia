@@ -3,9 +3,8 @@
 ### Deploys and configures a Nagios server for monitoring of an Atomia environment
 
 ### Variable documentation
-#### username: The URL of the Atomia Domain Registration service.
-#### password: The username to require for accessing the service.
-#### admin_pass: The password to require for accessing the service.
+#### username: The username for accessing the Nagios GUI
+#### password: The password for accessing the Nagios GUI
 
 ### Validations
 ##### username(advanced):^[a-z]+$
