@@ -97,9 +97,9 @@ class atomia::active_directory (
       require => [File['c:/install/add_users.ps1'], Exec['Install AD forest']],
     }
 
-    $test_env = hiera('atomia::config::test_env', 'false')
+    $test_env = hiera('atomia::config::test_env', false)
 
-    if($test_env == 'false') {
+    if($test_env == false) {
       $internal_zone = hiera('atomia::internaldns::zone_name')
       $internal_ip = hiera('atomia::internaldns::ip_address')
 
