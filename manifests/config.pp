@@ -21,7 +21,7 @@ class atomia::config (
   $atomia_admin_password = 'Administrator',
   $puppet_hostname       = '%puppet_host',
   $puppet_ip             = '%puppet_ip',
-  $test_env              = 'false',
+  $test_env              = false,
 ){
 
 }
