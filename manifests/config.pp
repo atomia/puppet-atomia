@@ -7,18 +7,21 @@
 #### atomia_admin_password: Password used to log in to Atomia Admin Panel
 #### puppet_hostname: The hostname of the Puppet master
 #### puppet_ip: The ip address of the Puppet master
+#### test_env: Set this to true if you are installing a test environment
 
 ### Validations
 ##### atomia_domain: %hostname
 ##### atomia_admin_password(advanced): %password
 ##### puppet_hostname: %puppet_host
 ##### puppet_ip: $puppet_ip
+##### test_env: .*
 
 class atomia::config (
   $atomia_domain         = '',
   $atomia_admin_password = 'Administrator',
   $puppet_hostname       = '%puppet_host',
   $puppet_ip             = '%puppet_ip',
+  $test_env              = 'false',
 ){
 
 }
