@@ -1,10 +1,7 @@
-wget https://apt.puppetlabs.com/puppetlabs-release-trusty.deb
-sudo dpkg -i puppetlabs-release-trusty.deb
 sudo apt-get update
 
 apt-get install -y puppetmaster puppet git apache2-utils curl rubygems-integration build-essential libmysqlclient-dev ruby-dev
 echo "127.0.0.1 puppet" >> /etc/hosts
-echo "127.0.0.1 puppetdb" >> /etc/hosts
 
 puppet agent --enable
 puppet agent --test
@@ -24,18 +21,6 @@ SERVER_FQDN=`facter fqdn`
 mysql --defaults-file=/etc/mysql/debian.cnf -e "GRANT USAGE ON *.* TO 'hierauser'@'localhost'; DROP USER 'hierauser'@'localhost';"
 
 mysql --defaults-file=/etc/mysql/debian.cnf -e "CREATE USER 'hierauser'@'localhost' IDENTIFIED BY '${HIERA_USER_PASSWORD}'; GRANT ALL PRIVILEGES ON hiera.* TO 'hierauser'@'localhost';FLUSH PRIVILEGES;"
-
-## Setup PuppetDB
-
-echo "[main]
-server = ${SERVER_FQDN}
-port = 8081
-soft_write_failure = false" > /etc/puppet/puppetdb.conf
-
-sudo puppet resource package puppetdb ensure=latest
-sudo puppet resource service puppetdb ensure=running enable=true
-
-sudo apt-get install puppetdb-terminus
 
 mkdir -p /etc/puppet/atomia/service_files
 
@@ -99,13 +84,9 @@ factpath=$vardir/lib/facter
 parser = future
 
 [master]
-# These are needfed when the puppetmaster is run by passenger
-# and can safely be removed if webrick is used.
 ssl_client_header = SSL_CLIENT_S_DN
 ssl_client_verify_header = SSL_CLIENT_VERIFY
 autosign = true
-storeconfigs = true
-storeconfigs_backend = puppetdb
 reports = store,puppetdb" > /etc/puppet/puppet.conf
 
 mv modules/atomia/examples/hieradata/ /etc/puppet/hieradata/
