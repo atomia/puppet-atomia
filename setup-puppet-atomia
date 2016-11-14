@@ -87,7 +87,7 @@ parser = future
 ssl_client_header = SSL_CLIENT_S_DN
 ssl_client_verify_header = SSL_CLIENT_VERIFY
 autosign = true
-reports = store,puppetdb" > /etc/puppet/puppet.conf
+reports = store" > /etc/puppet/puppet.conf
 
 mv modules/atomia/examples/hieradata/ /etc/puppet/hieradata/
 
