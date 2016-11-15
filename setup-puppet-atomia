@@ -20,7 +20,7 @@ fi
 SERVER_FQDN=`facter fqdn`
 mysql --defaults-file=/etc/mysql/debian.cnf -e "GRANT USAGE ON *.* TO 'hierauser'@'localhost'; DROP USER 'hierauser'@'localhost';"
 
-mysql --defaults-file=/etc/mysql/debian.cnf -e "CREATE USER 'hierauser'@'localhost' IDENTIFIED BY '${HIERA_USER_PASSWORD}'; GRANT ALL PRIVILEGES ON hiera.* TO 'hierauser'@'localhost';FLUSH PRIVILEGES;"
+mysql --defaults-file=/etc/mysql/debian.cnf -e "CREATE USER 'hierauser'@'localhost' IDENTIFIED BY '${HIERA_USER_PASSWORD}'; GRANT ALL PRIVILEGES ON puppet_atomia.* TO 'hierauser'@'localhost';FLUSH PRIVILEGES;"
 
 mkdir -p /etc/puppet/atomia/service_files
 
@@ -51,9 +51,9 @@ echo "---
   :host: localhost
   :user: hierauser
   :pass: ${HIERA_USER_PASSWORD}
-  :database: hiera
+  :database: puppet_atomia
 
-  :query: SELECT val FROM configuration WHERE var='%{key}'
+  :query: SELECT val FROM configuration WHERE var='%{key}' AND env='%{env}'
 
 
 :hierarchy:
