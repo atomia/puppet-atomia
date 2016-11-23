@@ -1,6 +1,8 @@
 MONGO_HOST=localhost
 MONGO_PORT=27017
-MONGO_DBNAME=cronagent
+MONGO_DBNAME=<%= @mongo_db_name %>
+MONGO_USER=<%= @mongo_cron_user %>
+MONGO_PASS=<%= @mongo_cron_pass %>
 CRON_LISTEN_PORT=10101
 CRON_GLOBAL_AUTH_TOKEN=<%= @global_auth_token %>
 MIN_PART=<%= @min_part %>
