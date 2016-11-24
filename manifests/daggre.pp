@@ -11,6 +11,11 @@
 #### cloudlinux_database: Enable if server is to be used in conjunction with CloudLinux web servers
 #### cloudlinux_database_password: The CloudLinux database server password
 #### local_address: Local address for the agent
+#### mongo_admin_user: The admin username for the MongoDB.
+#### mongo_admin_pass: The admin password for the MongoDB.
+#### mongo_daggre_user: The username that the cronagent will use to connect to MongoDB.
+#### mongo_daggre_pass: The password that the cronagent will use to connect to MongoDB.
+#### mongo_db_name: The database name that the cronagent will use.
 
 ### Validations
 ##### ip_addr(advanced): .*
@@ -21,6 +26,11 @@
 ##### cloudlinux_database(advanced): %int_boolean
 ##### cloudlinux_database_password(advanced): %password
 ##### local_address(advanced): .*
+##### mongo_admin_user(advanced): ^[^[[:space:]]]+$
+##### mongo_admin_pass(advanced): %password
+##### mongo_daggre_user(advanced): ^[^[[:space:]]]+$
+##### mongo_daggre_pass(advanced): %password
+##### mongo_db_name(advanced): .*
 
 class atomia::daggre (
   $global_auth_token,
@@ -30,12 +40,27 @@ class atomia::daggre (
   $ip_addr                      = $ipaddress,
   $cloudlinux_database          = '0',
   $cloudlinux_database_password = 'atomia123',
-  $local_address                = 'localhost'
+  $local_address                = 'localhost',
+  $mongo_admin_user             = 'admin',
+  $mongo_admin_pass             = '',
+  $mongo_daggre_user            = 'daggre',
+  $mongo_daggre_pass            = '',
+  $mongo_db_name                = 'daggre'
 ) {
 
-  include atomia::mongodb
-
   class { 'apt': }
+
+  class {'::mongodb::globals':
+    manage_package_repo => true
+  } ->
+  class {'::mongodb::client': } ->
+  class {'::mongodb::server':
+    auth           => true,
+    create_admin   => true,
+    store_creds    => true,
+    admin_username => $mongo_admin_user,
+    admin_password => $mongo_admin_pass,
+  }
 
   if $::operatingsystem == 'Ubuntu' {
     apt::source { 'nodesource_0.12':
@@ -66,7 +91,7 @@ class atomia::daggre (
 
   package { 'daggre':
     ensure  => present,
-    require => [Package['mongodb-10gen'], Package['nodejs']],
+    require => [Class['mongodb::server'], Package['nodejs']],
   }
 
   package { 'atomia-daggre-reporters-disk':
@@ -78,6 +103,16 @@ class atomia::daggre (
     ensure  => present,
     require => Package['daggre']
   }
+
+  mongodb_user { $mongo_daggre_user:
+    ensure        => present,
+    name          => $mongo_daggre_user,
+    password_hash => mongodb_password($mongo_daggre_user, $mongo_daggre_pass),
+    database      => $mongo_db_name,
+    roles         => [ 'readWrite', 'dbAdmin' ],
+    require       => Package['daggre']
+  }
+
 
   file { '/etc/default/daggre':
     owner   => 'root',
@@ -104,9 +139,10 @@ class atomia::daggre (
     subscribe => File['/etc/default/daggre'],
   }
 
-  $internal_zone = hiera('atomia::internaldns::zone_name','')
+  $test_env = hiera('atomia::config::test_env', '0')
 
-  if $content_share_nfs_location == '' {
+  if ($test_env == '0') and ($content_share_nfs_location == '') {
+    $internal_zone = hiera('atomia::internaldns::zone_name','')
     package { 'glusterfs-client': ensure => present, }
 
     if !defined(File['/storage']) {
@@ -130,7 +166,7 @@ class atomia::daggre (
       require => [ Package['glusterfs-client'],File['/storage']],
     }
   }
-  else
+  elsif($test_env == '0')
   {
     atomia::nfsmount { 'mount_content':
       use_nfs3     => 1,
@@ -142,6 +178,26 @@ class atomia::daggre (
       use_nfs3     => 1,
       mount_point  => '/storage/configuration',
       nfs_location => $config_share_nfs_location
+    }
+  }
+  else
+  {
+    $dirs = [
+      '/storage',
+      '/storage/content/',
+      '/storage/configuration'
+    ]
+
+    file { $dirs:
+      ensure => 'directory',
+    } ->
+    file { '/root/storage.tar.gz':
+      ensure => file,
+      source => 'puppet:///modules/atomia/fsagent/storage.tar.gz'
+    } ->
+    exec { 'create-storage-files':
+      command => '/bin/tar -xvf /root/storage.tar.gz -C /',
+      unless  => '/usr/bin/test -d /storage/content/00'
     }
   }
 
@@ -183,5 +239,4 @@ class atomia::daggre (
       auth_method => 'password',
     }
   }
-
 }
