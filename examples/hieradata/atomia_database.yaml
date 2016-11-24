@@ -2,4 +2,3 @@
 classes:
    - atomia::linux_base
    - atomia::atomia_database
-   - atomia::nagios::client

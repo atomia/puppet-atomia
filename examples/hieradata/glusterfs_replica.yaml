@@ -4,4 +4,3 @@ classes:
    - atomia::linux_base
    - atomia::atomiarepository
    - atomia::glusterfs
-   - atomia::nagios::client

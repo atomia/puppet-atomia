@@ -2,4 +2,3 @@
 classes:
    - atomia::adjoin
    - atomia::iis
-   - atomia::nagios::client

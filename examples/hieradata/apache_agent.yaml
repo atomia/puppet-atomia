@@ -4,4 +4,3 @@ classes:
    - atomia::atomiarepository
    - atomia::adjoin
    - atomia::apache_agent
-   - atomia::nagios::client

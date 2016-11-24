@@ -89,7 +89,7 @@ ssl_client_verify_header = SSL_CLIENT_VERIFY
 autosign = true
 reports = store" > /etc/puppet/puppet.conf
 
-mv modules/atomia/examples/hieradata/ /etc/puppet/hieradata/
+cp -r modules/atomia/examples/hieradata/ /etc/puppet/hieradata/
 
 /etc/init.d/puppetmaster restart
 

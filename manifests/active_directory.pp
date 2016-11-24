@@ -97,20 +97,6 @@ class atomia::active_directory (
       require => [File['c:/install/add_users.ps1'], Exec['Install AD forest']],
     }
 
-    $test_env = hiera('atomia::config::test_env', '0')
-
-    if($test_env == '0') {
-      $internal_zone = hiera('atomia::internaldns::zone_name')
-      $internal_ip = hiera('atomia::internaldns::ip_address')
-
-      exec { 'add-conditional-forwarder-internaldns':
-        command  => "Add-DnsServerConditionalForwarderZone -Name ${internal_zone} -MasterServers ${internal_ip}",
-        provider => powershell,
-        require  => Exec['Install AD forest'],
-        onlyif   => "if((Get-DnsServerZone -Name ${internal_zone}).ZoneName -Match '${internal_zone}') {exit 1}",
-      }
-    }
-
   } elsif($::vagrant) {
     file { 'c:/install/add_users_vagrant.ps1':
       ensure  => 'file',
