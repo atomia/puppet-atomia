@@ -88,9 +88,9 @@ class atomia::cronagent (
   }
 
   mongodb_user { $mongo_cron_user:
+    ensure        => present,
     name          => $mongo_cron_user,
     password_hash => mongodb_password($mongo_cron_user, $mongo_cron_pass),
-    ensure        => present,
     database      => $mongo_db_name,
     roles         => [ 'readWrite', 'dbAdmin' ],
     require       => Package['atomia-cronagent']
