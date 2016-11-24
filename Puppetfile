@@ -79,3 +79,7 @@ mod "windows_sql",
 mod "windows_iso",
     :git => "git://github.com/insentia/windows_isos.git",
     :ref => "cab09db8c0dabb2868374ac4224b5f2a2a00a869"
+
+mod "mongodb",
+    :git => "git://github.com/puppetlabs/puppetlabs-mongodb.git",
+    :ref => "2cef851409852134f00153eb9bb171179f4359d7"

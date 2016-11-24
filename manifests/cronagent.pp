@@ -13,6 +13,11 @@
 #### mail_from: The sender email to set for the mails sent by the cron service.
 #### base_url: The base URL for the cron agent API.
 #### mail_ssl: Use SSL for email
+#### mongo_admin_user: The admin username for the MongoDB.
+#### mongo_admin_pass: The admin password for the MongoDB.
+#### mongo_cron_user: The username that the cronagent will use to connect to MongoDB.
+#### mongo_cron_pass: The password that the cronagent will use to connect to MongoDB.
+#### mongo_db_name: The database name that the cronagent will use.
 
 ### Validations
 ##### mail_from: %email
@@ -25,6 +30,11 @@
 ##### mail_pass(advanced): .*
 ##### base_url(advanced): %url
 ##### mail_ssl(advanced): [0-1]
+##### mongo_admin_user(advanced): ^[^[[:space:]]]+$
+##### mongo_admin_pass(advanced): %password
+##### mongo_cron_user(advanced): ^[^[[:space:]]]+$
+##### mongo_cron_pass(advanced): %password
+##### mongo_db_name(advanced): .*
 
 class atomia::cronagent (
   $global_auth_token,
@@ -36,22 +46,29 @@ class atomia::cronagent (
   $mail_from          = '',
   $mail_user          = '',
   $mail_pass          = '',
-  $base_url           = "http://${::fqdn}:10101"
+  $base_url           = "http://${::fqdn}:10101",
+  $mongo_admin_user   = 'admin',
+  $mongo_admin_pass   = '',
+  $mongo_cron_user    = 'cronagent',
+  $mongo_cron_pass    = '',
+  $mongo_db_name      = 'cronagent'
 ){
-
-  include atomia::mongodb
+  class {'::mongodb::globals':
+    manage_package_repo => true
+  } ->
+  class {'::mongodb::client': } ->
+  class {'::mongodb::server':
+    auth           => true,
+    create_admin   => true,
+    store_creds    => true,
+    admin_username => $mongo_admin_user,
+    admin_password => $mongo_admin_pass,
+  }
 
   package { 'atomia-cronagent':
     ensure  => present,
-    require => Package['mongodb-10gen']
+    require => Class['mongodb::server']
   }
-
-  if $mail_host == 'localhost' or $mail_host == '127.0.0.1' {
-    package { 'postfix' :
-      ensure => present,
-    }
-  }
-
 
   file { '/etc/default/cronagent':
     owner   => 'root',
@@ -69,4 +86,20 @@ class atomia::cronagent (
     require   => [ Package['atomia-cronagent'], File['/etc/default/cronagent'] ],
     subscribe => File['/etc/default/cronagent'],
   }
+
+  mongodb_user { $mongo_cron_user:
+    ensure        => present,
+    name          => $mongo_cron_user,
+    password_hash => mongodb_password($mongo_cron_user, $mongo_cron_pass),
+    database      => $mongo_db_name,
+    roles         => [ 'readWrite', 'dbAdmin' ],
+    require       => Package['atomia-cronagent']
+  }
+
+  if $mail_host == 'localhost' or $mail_host == '127.0.0.1' {
+    package { 'postfix' :
+      ensure => present,
+    }
+  }
+
 }
