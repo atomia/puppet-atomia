@@ -1,19 +1,21 @@
 #!/usr/bin/env ruby
 require 'fileutils'
 
-if ARGV.size < 5
-        p "Usage: <appdomain> <login> <order> <billing> <hcp>"
-        p "Example: ruby generate_certificates.rb mydomain.com login order billing my"
+if ARGV.size < 6 
+        p "Usage: <appdomain> <login> <order> <billing> <hcp> <environment>"
+        p "Example: ruby generate_certificates.rb mydomain.com login order billing my my_environment"
         exit
 end
 
 
-certpath = "/etc/puppet/atomiacerts/"
 appdomain = ARGV[0]
 login = ARGV[1]
 order = ARGV[2]
 billing = ARGV[3]
 hcp = ARGV[4]
+puppet_environment = ARGV[5]
+certpath = "/etc/puppet/atomiacerts/"
+newcertpath = "/etc/puppet/atomiacerts/#{puppet_environment}"
 actiontrail = "actiontrail"
 admin = "admin"
 automationserver = "automationserver"
@@ -29,8 +31,12 @@ billingencrypt = "Billing Data Encryption Certificate"
 guicert = "Atomia GUI cert"
 atomiadns = "atomiadns.#{appdomain}"
 
+system("rm -rf #{newcertpath}")
 unless File.directory?(certpath)
   FileUtils.mkdir_p(certpath)
+end
+unless File.directory?(newcertpath)
+  FileUtils.mkdir_p(newcertpath)
 end
 
 unless File.directory?("#{certpath}/certificates")
@@ -50,7 +56,7 @@ ca_name="Atomia #{appdomain} Root Cert"
 
 # Generate CA certificate
 system("openssl genrsa -out #{certpath}private/ca.key 4096")
-system("openssl req -new -x509 -days 7304 -subj \"/CN=#{ca_name}\" -key \"#{certpath}private/ca.key\" -out #{certpath}ca.crt -config ca.cnf")
+system("openssl req -new -x509 -days 7304 -subj \"/CN=#{ca_name}\" -key \"#{certpath}private/ca.key\" -out #{certpath}ca.crt -config /etc/puppet/modules/atomia/files/certificates/ca.cnf")
 system("openssl pkcs12 -export -in #{certpath}ca.crt -inkey #{certpath}private/ca.key  -name \"#{ca_name}\" -out #{certpath}certificates/root.pfx -passout pass:\"\" ")
 #system("openssl req -new -x509 -days 7304 -subj \"/C=/ST=/L=/O=/CN=#{ca_name}\" -key \"#{certpath}private/ca.key\" -out ca.crt")
 #system("openssl pkcs12 -export -in ca.crt -inkey #{certpath}private/ca.key  -name \"#{ca_name}\" -out #{certpath}certificates/root.pfx -passout pass:\"\" ")
@@ -98,7 +104,7 @@ system("openssl req -new -key \"#{certpath}private/atomiadns.key\" -subj \"/C=/S
 
 def sign_certificate(file_name,certname,cert_path)
 
-    system("openssl x509 -req -days 3650 -in \"#{cert_path}csr/#{file_name}.csr\" -CA #{cert_path}ca.crt -CAkey \"#{cert_path}private/ca.key\" -set_serial \"" + rand(100000000).to_s + "\" -extfile \"mycrl.cnf\" -extensions v3_custom -out \"#{cert_path}certificates/#{file_name}.crt\"")
+    system("openssl x509 -req -days 3650 -in \"#{cert_path}csr/#{file_name}.csr\" -CA #{cert_path}ca.crt -CAkey \"#{cert_path}private/ca.key\" -set_serial \"" + rand(100000000).to_s + "\" -extfile \"/etc/puppet/modules/atomia/files/certificates/mycrl.cnf\" -extensions v3_custom -out \"#{cert_path}certificates/#{file_name}.crt\"")
     system("openssl pkcs12 -export -in \"#{cert_path}certificates/#{file_name}.crt\" -inkey \"#{cert_path}private/#{file_name}.key\" -name \"#{certname}\" -out \"#{cert_path}certificates/#{file_name}.pfx\" -passout pass:\"\" ")
 
 end
@@ -123,4 +129,12 @@ sign_certificate("billingencrypt",billingencrypt,certpath)
 sign_certificate("guicert",guicert,certpath)
 sign_certificate("atomiadns",atomiadns,certpath)
 
-system("openssl ca -config ca.cnf -gencrl -out #{certpath}empty.crl")
+system("openssl ca -config /etc/puppet/modules/atomia/files/certificates/ca.cnf -gencrl -out #{certpath}empty.crl")
+
+system("mv -f #{certpath}certificates* #{newcertpath}")
+system("mv -f #{certpath}private #{newcertpath}")
+system("mv -f #{certpath}csr #{newcertpath}")
+system("mv -f #{certpath}empty.crl #{newcertpath}")
+system("mv -f #{certpath}ca.crt #{newcertpath}")
+
+

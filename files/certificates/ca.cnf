@@ -39,7 +39,7 @@ default_ca             = CA_default
 dir                    = "/etc/puppet/atomiacerts"
 certs                  = "/etc/puppet/atomiacerts/certificates"
 crl_dir                = ""
-database               = index.txt
+database               = "/etc/puppet/modules/atomia/files/certificates/index.txt"
 new_certs_dir          = "/etc/puppet/atomiacerts/certificates"
 certificate            = "/etc/puppet/atomiacerts/ca.crt"
 serial                 = serial
@@ -47,8 +47,8 @@ crl                    = crl.pem
 private_key            = "/etc/puppet/atomiacerts/private/ca.key"
 RANDFILE               = .rand
 x509_extensions        = usr_cert
-default_days           = 3650
-default_crl_days       = 10000
+default_days           = 36500
+default_crl_days       = 100000
 # IMPORTANT: The next must no longer be md5, if used with
 # Debian's OpenLDAP package being compiled against libgnutls.
 default_md             = sha1

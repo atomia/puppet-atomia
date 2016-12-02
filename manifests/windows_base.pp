@@ -29,13 +29,13 @@
 
 ### Validations
 ##### appdomain: ^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$
-##### actiontrail_host: ^[a-zA-Z0-9]+
-##### login_host: ^[a-zA-Z0-9]+
-##### store_host: ^[a-zA-Z0-9]+
-##### billing_host: ^[a-zA-Z0-9]+
-##### admin_host: ^[a-zA-Z0-9]+
-##### hcp_host: ^[a-zA-Z0-9]+
-##### automationserver_host: ^[a-zA-Z0-9]+
+##### actiontrail_host(advanced): ^[a-zA-Z0-9]+
+##### login_host(advanced): ^[a-zA-Z0-9]+
+##### store_host(advanced): ^[a-zA-Z0-9]+
+##### billing_host(advanced): ^[a-zA-Z0-9]+
+##### admin_host(advanced): ^[a-zA-Z0-9]+
+##### hcp_host(advanced): ^[a-zA-Z0-9]+
+##### automationserver_host(advanced): ^[a-zA-Z0-9]+
 ##### mail_sender_address: ^\S+@\S+\.\S+$
 ##### mail_server_host(advanced): ^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z0-9]{1,6}$
 ##### mail_server_port(advanced): [0-9]{1,3}
@@ -377,7 +377,7 @@ class atomia::windows_base (
 
     file { 'C:\inetpub\wwwroot\empty.crl':
       ensure => 'file',
-      source => 'puppet:///atomiacerts/empty.crl'
+      source => "puppet:///atomiacerts/${::environment}/empty.crl"
     }
 
     file { 'c:/install/install_atomia_application.ps1':
