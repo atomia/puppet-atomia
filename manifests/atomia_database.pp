@@ -16,14 +16,15 @@
 ##### enable_backups(advanced): %int_boolean
 ##### backup_dir(advanced): .*
 ##### cron_schedule_hour(advanced): ^[0-9]{1,2}$
+##### server_address(advanced): %hostname
 
 class atomia::atomia_database (
   $atomia_user      = 'atomia',
   $atomia_password,
   $enable_backups     = '1',
-  $server_address     = $fqdn,
+  $server_address     = '',
   $backup_dir         = '/opt/atomia_backups',
-  $cron_schedule_hour = '1'
+  $cron_schedule_hour = '2'
 ){
 
   package { 'postgresql-contrib':

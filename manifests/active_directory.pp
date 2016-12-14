@@ -12,13 +12,13 @@
 #### master_ip: The ip address of this server
 
 ### Validations
-##### netbios_domain_name: ^[a-zA-Z0-9]+$
-##### domain_name: %hostname
+##### netbios_domain_name: ^(?!:\\/*\?"<>\|)[a-zA-Z0-9]{1,15}$
+##### domain_name: ^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$
 ##### restore_password(advanced): %password
 ##### app_password(advanced): %password
 ##### bind_password(advanced): %password
 ##### windows_admin_password(advanced): %password
-##### master_ip(advanced): .*
+##### master_ip(advanced): %ipaddress
 
 class atomia::active_directory (
   $domain_name            = '',
@@ -27,7 +27,7 @@ class atomia::active_directory (
   $app_password           = '',
   $bind_password          = '',
   $windows_admin_password = '',
-  $master_ip              = $::ipaddress,
+  $master_ip              = '',
 
 ) {
 
@@ -73,6 +73,27 @@ class atomia::active_directory (
       content => template('atomia/active_directory/atomia_role_active_directory.ps1.erb'),
     }
 
+#    class {'windows_ad':
+#      install                => present,
+#      installmanagementtools => true,
+#      restart                => true,
+#      installflag            => true,
+#      configure              => present,
+#      configureflag          => true,
+#      domain                 => 'forest',
+#      domainname             => $domain_name,
+#      netbiosdomainname      => $netbios_domain_name,
+#      domainlevel            => '6',
+#      forestlevel            => '6',
+#      databasepath           => 'c:\\windows\\ntds',
+#      logpath                => 'c:\\windows\\ntds',
+#      sysvolpath             => 'c:\\windows\\sysvol',
+#      installtype            => 'domain',
+#      dsrmpassword           => $restore_password,
+#      installdns             => 'yes',
+#      localadminpassword     => '',
+#    }
+
     exec { 'enable-ad-feature':
       command  => 'Install-windowsfeature -name AD-Domain-Services -IncludeManagementTools',
       onlyif   => 'Import-Module ServerManager; if ((Get-WindowsFeature Ad-Domain-Services).Installed) { exit 1 } else { exit 0 }',
@@ -80,16 +101,19 @@ class atomia::active_directory (
     }
 
     exec { 'Install AD forest':
-      command  => "Import-Module ADDSDeployment; Install-ADDSForest -DomainName ${domain_name} -DomainMode Win2008 -DomainNetBIOSName ${netbios_domain_name} -ForestMode Win2008 -SafeModeAdministratorPassword (convertto-securestring '${restore_password}' -asplaintext -force) -InstallDns -Force",
+      command  => "Import-Module ADDSDeployment; Install-ADDSForest -DomainName ${domain_name} -DomainMode Win2008 -DomainNetBIOSName ${netbios_domain_name} -ForestMode Win2008 -SafeModeAdministratorPassword (convertto-securestring '${restore_password}' -asplaintext -force) -InstallDNS -Force",
       provider => powershell,
+      timeout => 1000,
       onlyif   => "if((gwmi WIN32_ComputerSystem).Domain -eq '${domain_name}'){exit 1}",
-      require  => Exec['enable-ad-feature']
+      require  => Exec['enable-ad-feature'],
+      logoutput => true
     }
+
+
 
     file { 'c:/install/add_users.ps1':
       ensure  => 'file',
-      content => template('atomia/active_directory/add_users.ps1.erb'),
-      require => Exec['Install AD forest']
+      content => template('atomia/active_directory/add_users.ps1.erb')
     }
     exec { 'add-ad-users':
       command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/add_users.ps1',

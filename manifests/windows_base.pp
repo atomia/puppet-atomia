@@ -25,7 +25,7 @@
 #### billing_encryption_cert_thumb: The thumbprint for the billing certificate. This should be prefilled by pressing the generate new certificates button.
 #### root_cert_thumb: The thumbprint for the root certificate. This should be prefilled by pressing the generate new certificates button.
 #### signing_cert_thumb: The thumbprint for the signing certificate. This should be prefilled by pressing the generate new certificates button.
-
+#### test_env: Set this to true if you are installing a test environment
 
 ### Validations
 ##### appdomain: ^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$
@@ -51,6 +51,8 @@
 ##### billing_encryption_cert_thumb(advanced): .*
 ##### root_cert_thumb(advanced): .*
 ##### signing_cert_thumb(advanced): .*
+##### test_env(advanced): %int_boolean
+
 
 
 
@@ -80,6 +82,7 @@ class atomia::windows_base (
   $is_iis                                  = '0',
   $enable_mssql                            = false,
   $enable_postgresql                       = true,
+  $test_env                                = '0',
 ){
 
   File { source_permissions => ignore }
@@ -371,7 +374,7 @@ class atomia::windows_base (
   }
   else {
     file { 'c:/install/certificates':
-      source  => 'puppet:///atomiacerts/certificates',
+      source  => "puppet:///atomiacerts/${::environment}/certificates",
       recurse => true
     }
 
