@@ -4,6 +4,7 @@
 
 ### Variable documentation
 #### appdomain: The domain name to use for all your Atomia applications, atomia.com would mean your applications would get the url hcp.atomia.com, login.atomia.com etc
+#### license_key: The license key you received from Atomia
 #### actiontrail_host: The subdomain to use for Atomia Actiontrail
 #### login_host: The subdomain to use for Atomia Identity
 #### store_host: The subdomain to use for Atomia Store
@@ -29,6 +30,7 @@
 
 ### Validations
 ##### appdomain: ^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$
+##### license_key: ^[0-9A-Fa-f]{8}-([0-9A-Fa-f]{4}-){3}[0-9A-Fa-f]{12}$
 ##### actiontrail_host: ^[a-zA-Z0-9]+
 ##### login_host: ^[a-zA-Z0-9]+
 ##### store_host: ^[a-zA-Z0-9]+
@@ -56,6 +58,7 @@
 
 class atomia::windows_base (
   $appdomain                               = '',
+  $license_key                             = '00000000-0000-0000-0000-000000000000',
   $actiontrail_host                        = 'actiontrail',
   $login_host                              = 'login',
   $store_host                              = 'store',
