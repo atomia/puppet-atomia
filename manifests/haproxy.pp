@@ -102,18 +102,21 @@ class atomia::haproxy (
     package { [
       'python-software-properties',
       'software-properties-common',
-      'acmetool',
     ]:
       ensure => present,
+      
+      apt::ppa { 'ppa:hlandau/rhea':
+          require => Package['acmetool']
+      }
     }
 
-    apt::ppa { 'ppa:vbernat/haproxy-1.5':
+    apt::ppa { 'ppa:vbernat/haproxy-1.7':
       require => Package['python-software-properties']
     }
 
     package { 'haproxy':
       ensure  => present,
-      require => [ Apt::Ppa['ppa:vbernat/haproxy-1.5'] ]
+      require => [ Apt::Ppa['ppa:vbernat/haproxy-1.7'] ]
     }
 
     if $virtual_ips_interface_to_manage != '' {
@@ -357,7 +360,7 @@ class atomia::haproxy (
       } else {
         file { '/etc/haproxy/atomia_certificates/default.pem':
           ensure  => file,
-          source  => 'puppet:///modules/atomiacerts/certificates/wildcard_with_key.pem',
+          source  => 'puppet:///atomiacerts/certificates/wildcard_with_key.pem',
           owner   => 'root',
           group   => 'root',
           mode    => '0755',
