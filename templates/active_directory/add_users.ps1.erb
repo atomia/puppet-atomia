@@ -130,10 +130,16 @@ if(! (UserExists "apppooluser")){
         GrantLogonService "apppooluser"
     }
 }
+else {
+  Unlock-ADAccount -Identity apppooluser
+}
 
 # Add PosixGuest
 if(! (UserExists "PosixGuest")){
     AddUserToActiveDirectory "PosixGuest" "<%= @bind_password %>"
+}
+else {
+  Unlock-ADAccount -Identity PosixGuest
 }
 
 # Add WindowsAdmin
@@ -141,4 +147,7 @@ if(! (UserExists "WindowsAdmin")){
     if(AddUserToActiveDirectory "WindowsAdmin" "<%= @windows_admin_password %>"){
         Add-ADGroupMember "Domain Admins" "WindowsAdmin"
     }
+}
+else {
+  Unlock-ADAccount -Identity WindowsAdmin 
 }

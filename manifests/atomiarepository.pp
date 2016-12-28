@@ -65,7 +65,8 @@ class atomia::atomiarepository {
 
     exec { 'apt-update':
       command => '/usr/bin/apt-get update',
-      require => File['/etc/apt/apt.conf.d/80atomiaupdate', '/etc/apt/ATOMIA-GPG-KEY.pub', '/etc/apt/sources.list.d/atomia.list']
+      require => File['/etc/apt/apt.conf.d/80atomiaupdate', '/etc/apt/ATOMIA-GPG-KEY.pub', '/etc/apt/sources.list.d/atomia.list'],
+      refreshonly => true
     }
 
     Exec['apt-update'] -> Package <| |>

@@ -50,6 +50,7 @@ class atomia::public_apps (
     command => 'C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Executionpolicy Unrestricted -File c:/install/install_atomia_application.ps1 -repository PublicRepository -application "Atomia Store"',
     require => [Exec['install-identity'],File['unattended.ini']],
     creates => 'C:\Program Files (x86)\Atomia\Store',
+    notify  => Exec['app-pool-settings']
   }
 
   }
@@ -77,11 +78,22 @@ exec {'install-bcp':
     command => 'C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Executionpolicy Unrestricted -File c:/install/install_atomia_application.ps1 -repository TestRepository -application "Atomia Store"',
     require => [Exec['install-identity'],File['unattended.ini']],
     creates => 'C:\Program Files (x86)\Atomia\Store',
+    notify  => Exec['app-pool-settings']
   }
+  }
+
+  file { 'c:/install/app-pool-settings.ps1':
+    ensure => 'file',
+    source => 'puppet:///modules/atomia/windows_base/app-pool-settings.ps1'
+  }
+
+  exec { 'app-pool-settings':
+    command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/app-pool-settings.ps1',
+    require => File['c:/install/app-pool-settings.ps1'],
+    refreshonly => true
   }
 
   file { 'C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role_public.txt':
     content => 'atomia_role_1=atomia_public_apps',
   }
   }
-

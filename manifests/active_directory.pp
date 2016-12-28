@@ -52,12 +52,6 @@ class atomia::active_directory (
     }
   }
 
-  file { 'c:/install/sync_time.ps1':
-    ensure  => 'file',
-    content => template('atomia/active_directory/sync_time.ps1.erb'),
-    require => File['c:/install'],
-  }
-
   if(!$::vagrant) {
     @@bind::zone {'domain-forward':
       zone_contact    => "contact.${domain_name}",
@@ -69,57 +63,47 @@ class atomia::active_directory (
       zone_forwarders => $::ip_address,
     }
 
-    file { 'C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role_ad.ps1':
-      content => template('atomia/active_directory/atomia_role_active_directory.ps1.erb'),
-    }
-
-#    class {'windows_ad':
-#      install                => present,
-#      installmanagementtools => true,
-#      restart                => true,
-#      installflag            => true,
-#      configure              => present,
-#      configureflag          => true,
-#      domain                 => 'forest',
-#      domainname             => $domain_name,
-#      netbiosdomainname      => $netbios_domain_name,
-#      domainlevel            => '6',
-#      forestlevel            => '6',
-#      databasepath           => 'c:\\windows\\ntds',
-#      logpath                => 'c:\\windows\\ntds',
-#      sysvolpath             => 'c:\\windows\\sysvol',
-#      installtype            => 'domain',
-#      dsrmpassword           => $restore_password,
-#      installdns             => 'yes',
-#      localadminpassword     => '',
-#    }
-
+    dism { 'DNS-Server-Full-Role':
+      ensure => present,
+      all    => true,
+    } ->
+    dism { 'DNS-Server-Tools':
+      ensure => present,
+      all    => true,
+    } ->
     exec { 'enable-ad-feature':
       command  => 'Install-windowsfeature -name AD-Domain-Services -IncludeManagementTools',
       onlyif   => 'Import-Module ServerManager; if ((Get-WindowsFeature Ad-Domain-Services).Installed) { exit 1 } else { exit 0 }',
       provider => powershell,
-    }
-
+    } ->
     exec { 'Install AD forest':
-      command  => "Import-Module ADDSDeployment; Install-ADDSForest -DomainName ${domain_name} -DomainMode Win2008 -DomainNetBIOSName ${netbios_domain_name} -ForestMode Win2008 -SafeModeAdministratorPassword (convertto-securestring '${restore_password}' -asplaintext -force) -InstallDNS -Force",
+      command  => "Import-Module ADDSDeployment; Install-ADDSForest -DomainName ${domain_name} -DomainMode 7 -DomainNetBIOSName ${netbios_domain_name} -ForestMode 7 -SafeModeAdministratorPassword (convertto-securestring '${restore_password}' -asplaintext -force) -Force",
       provider => powershell,
       timeout => 1000,
       onlyif   => "if((gwmi WIN32_ComputerSystem).Domain -eq '${domain_name}'){exit 1}",
       require  => Exec['enable-ad-feature'],
       logoutput => true
-    }
-
-
-
+    } ->
     file { 'c:/install/add_users.ps1':
       ensure  => 'file',
       content => template('atomia/active_directory/add_users.ps1.erb')
-    }
+    } ->
     exec { 'add-ad-users':
       command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/add_users.ps1',
       creates => 'C:\install\installed',
       require => [File['c:/install/add_users.ps1'], Exec['Install AD forest']],
     }
+
+    if $::ec2_public_ipv4 {
+      $ec2_hostnames = split($ec2_hostname,'[.]')
+      $host_1 = $ec2_hostnames[-3]
+      $ec2_domain = "${ec2_hostnames[-3]}.${ec2_hostnames[-2]}.${ec2_hostnames[-1]}"
+      exec { 'add-forward-zone':
+        command => "Add-DnsServerConditionalForwarderZone -Name ${ec2_domain} -MasterServers 10.0.0.2",
+        provider => powershell,
+        require => Exec['Install AD forest']
+      }
+  }
 
   } elsif($::vagrant) {
     file { 'c:/install/add_users_vagrant.ps1':

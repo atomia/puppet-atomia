@@ -106,17 +106,11 @@ class atomia::windows_base (
     }
     else
     {
-      $factfile = 'C:/ProgramData/PuppetLabs/facter/facts.d/actiontrail_ip.txt'
       $actiontrail_ip = "${actiontrail_host}.${appdomain}"
 
       # TODO: Get these from hiera
       $database_server = ''
       $mirror_database_server = ''
-    }
-
-    dism { 'NetFx3':
-      ensure => present,
-      all    => true,
     }
 
     # 6.1 is 2008 R2, so this matches 2012 and forward
@@ -152,26 +146,10 @@ class atomia::windows_base (
         all    => true,
       }
 
-      dism { 'WCF-HTTP-Activation':
-        ensure => present,
-        all    => true,
-      }
-
       dism { 'WCF-HTTP-Activation45':
         ensure => present,
         all    => true,
       }
-
-      file { 'c:/install/app-pool-settings.ps1':
-        ensure => 'file',
-        source => 'puppet:///modules/atomia/windows_base/app-pool-settings.ps1'
-      }
-
-      exec { 'app-pool-settings':
-        command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/app-pool-settings.ps1',
-        require => File['c:/install/app-pool-settings.ps1']
-      }
-
     }
 
     dism { 'MSMQ-Server':
@@ -191,16 +169,6 @@ class atomia::windows_base (
     }
 
     dism { 'IIS-ISAPIExtensions':
-      ensure => present,
-      all    => true,
-    }
-
-    dism { 'IIS-NetFxExtensibility':
-      ensure => present,
-      all    => true,
-    }
-
-    dism { 'IIS-ASPNET':
       ensure => present,
       all    => true,
     }
@@ -261,13 +229,15 @@ class atomia::windows_base (
   exec { 'install-chocolatey':
     command  => "iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))",
     provider => powershell,
-    onlyif   => 'Test-Path C:\ProgramData\Chocolatey'
+    onlyif   => 'if (Test-Path "C:\ProgramData\Chocolatey") { exit 1;}  else { exit 0; }',
+    notify   => Exec['set-chocolatey-path']
   }
 
   exec { 'set-chocolatey-path':
     command => 'c:\windows\system32\cmd.exe /c SET PATH=%PATH%;%systemdrive%\ProgramData\chocolatey\bin',
     creates => 'c:/install/chocolatey_installed.txt',
     require => Exec['install-chocolatey'],
+    refreshonly => true
   }
 
   package { 'GoogleChrome':
