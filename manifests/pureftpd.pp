@@ -21,7 +21,7 @@
 ### Validations
 ##### agent_user(advanced): %username
 ##### agent_password(advanced): %password
-##### master_ip(advanced): %ip
+##### master_ip: %ip
 ##### provisioning_host: ^[0-9.a-z%-]+$
 ##### pureftpd_password(advanced): %password
 ##### ftp_cluster_ip: %ip
@@ -37,7 +37,7 @@
 class atomia::pureftpd (
   $agent_user                 = 'automationserver',
   $agent_password,
-  $master_ip                  = $ipaddress,
+  $master_ip                  = '',
   $provisioning_host          = '%',
   $pureftpd_password,
   $ftp_cluster_ip,

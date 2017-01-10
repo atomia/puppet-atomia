@@ -27,7 +27,7 @@
 ##### config_share_nfs_location(advanced): %nfs_share
 ##### use_nfs3(advanced): %int_boolean
 ##### cluster_ip: %ip
-##### apache_agent_ip(advanced): %ip_or_hostname
+##### apache_agent_ip: %ip_or_hostname
 ##### maps_path(advanced): %path
 ##### should_have_php_farm(advanced): %int_boolean
 ##### php_versions(advanced): ^[0-9]+\.[0-9]+\.[0-9]+(,[0-9]+\.[0-9]+\.[0-9]+)*$
@@ -43,15 +43,15 @@ class atomia::apache_agent (
   $config_share_nfs_location  = '',
   $use_nfs3                   = '1',
   $cluster_ip,
-  $apache_agent_ip            = $fqdn,
+  $apache_agent_ip            = '',
   $maps_path                  = '/storage/configuration/maps',
   $should_have_php_farm       = '0',
-  $php_versions               = '5.4.45,5.5.29,5.6.10',
-  $php_extension_packages     = 'php5-gd,php5-imagick,php5-sybase,php5-mysql,php5-odbc,php5-curl,php5-pgsql',
+  $php_versions               = '5.4.45,5.5.29',
+  $php_extension_packages     = 'php-gd,php-imagick,php-sybase,php-mysql,php-odbc,php-curl,php-pgsql',
   $apache_modules_to_enable   = 'rewrite,userdir,fcgid,suexec,expires,headers,deflate,include'
 ) {
 
-  if $::lsbdistrelease == '14.04' {
+  if $::lsbdistrelease == '14.04' or $::lsbdistrelease == '16.04' {
     $pa_conf_available_path = '/etc/apache2/conf-available'
     $pa_conf_file           = 'atomia-pa-apache.conf'
     $pa_site                = '000-default.conf'
@@ -79,14 +79,54 @@ class atomia::apache_agent (
       'atomiastatisticscopy', 'httpd'
     ]
   } else {
-    $packages_to_install = [
-      'apache2-suexec-custom-cgroups-atomia',
-      'atomiastatisticscopy',
-      'cgroup-bin',
-      'libapache2-mod-fcgid-atomia',
-      'libexpat1',
-      'php5-cgi',
-    ]
+    if  $::lsbdistrelease == '16.04' {
+      $packages_to_install = [
+        'apache2-suexec-custom-cgroups-atomia',
+        'atomiastatisticscopy',
+        'cgroup-bin',
+        'libapache2-mod-fcgid-atomia',
+        'libexpat1',
+        'php-cgi',
+      ]
+
+      file { '/storage/configuration/php_session_path':
+        ensure  => directory,
+        owner   => 'root',
+        group   => 'root',
+        mode    => '1733',
+        require => Package['php-cgi'],
+      }
+      file { '/etc/php/7.0/cgi/php.ini':
+        ensure  => link,
+        target  => '/storage/configuration/php.ini',
+        require => [File['/storage/configuration/php.ini'], Package['php-cgi']],
+      }
+
+    }
+    else {
+      $packages_to_install = [
+        'apache2-suexec-custom-cgroups-atomia',
+        'atomiastatisticscopy',
+        'cgroup-bin',
+        'libapache2-mod-fcgid-atomia',
+        'libexpat1',
+        'php5-cgi',
+      ]
+
+      file { '/storage/configuration/php_session_path':
+        ensure  => directory,
+        owner   => 'root',
+        group   => 'root',
+        mode    => '1733',
+        require => Package['php5-cgi'],
+      }
+      file { '/etc/php5/cgi/php.ini':
+        ensure  => link,
+        target  => '/storage/configuration/php.ini',
+        require => [File['/storage/configuration/php.ini'], Package['php5-cgi']],
+      }
+
+    }
 
     if !defined(Package['apache2']) {
       package { 'apache2': ensure => present }
@@ -99,7 +139,7 @@ class atomia::apache_agent (
   package { $php_package_array: ensure => installed }
 
   if $content_share_nfs_location == '' {
-    $internal_zone = hiera('atomia::internaldns::zone_name','')
+    $gluster_hostname = hiera('atomia::glusterfs::gluster_hostname','')
 
     package { 'glusterfs-client': ensure => present, }
 
@@ -111,14 +151,14 @@ class atomia::apache_agent (
 
     fstab::mount { '/storage/content':
       ensure  => 'mounted',
-      device  => "gluster.${internal_zone}:/web_volume",
+      device  => "${gluster_hostname}:/web_volume",
       options => 'defaults,_netdev',
       fstype  => 'glusterfs',
       require => [Package['glusterfs-client'],File['/storage']],
     }
     fstab::mount { '/storage/configuration':
       ensure  => 'mounted',
-      device  => "gluster.${internal_zone}:/config_volume",
+      device  => "${gluster_hostname}:/config_volume",
       options => 'defaults,_netdev',
       fstype  => 'glusterfs',
       require => [ Package['glusterfs-client'],File['/storage']],
@@ -147,13 +187,22 @@ class atomia::apache_agent (
       content => template('atomia/apache_agent/settings.erb'),
       require => Package['atomia-pa-apache'],
     }
-  }
 
-  file { "${pa_conf_available_path}/${pa_conf_file}":
-    ensure  => present,
-    content => template('atomia/apache_agent/atomia-pa-apache.conf.erb'),
-    require => [Package['atomia-pa-apache']],
-    notify  => Service['apache2'],
+    file { "${pa_conf_available_path}/${pa_conf_file}":
+      ensure  => present,
+      content => template('atomia/apache_agent/atomia-pa-apache.conf.erb'),
+      require => [Package['atomia-pa-apache']],
+      notify  => Service['apache2'],
+    }
+
+    file { '/etc/apache2/conf/phpversions.conf':
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      content => template('atomia/apache_agent/phpversions.erb'),
+      require => [Package['atomia-pa-apache']],
+      notify  => Service['apache2'],
+    }
   }
 
   file { '/etc/statisticscopy.conf':
@@ -237,7 +286,7 @@ class atomia::apache_agent (
     notify  => Service['apache2'],
   }
 
-  if $::lsbdistrelease == '14.04' {
+  if $::lsbdistrelease == '14.04' or $::lsbdistrelease == '16.04' {
     file { '/etc/apache2/conf-enabled/001-custom-errors.conf':
       ensure  => link,
       target  => '../conf-available/001-custom-errors',
@@ -263,14 +312,6 @@ class atomia::apache_agent (
     require => [Package['cgroup-bin']],
   }
 
-  file { '/storage/configuration/php_session_path':
-    ensure  => directory,
-    owner   => 'root',
-    group   => 'root',
-    mode    => '1733',
-    require => Package['php5-cgi'],
-  }
-
   file { '/storage/configuration/php.ini':
     ensure  => present,
     replace => 'no',
@@ -280,11 +321,6 @@ class atomia::apache_agent (
     mode    => '0644',
   }
 
-  file { '/etc/php5/cgi/php.ini':
-    ensure  => link,
-    target  => '/storage/configuration/php.ini',
-    require => [File['/storage/configuration/php.ini'], Package['php5-cgi']],
-  }
 
   if $should_have_pa_apache == '1' {
     service { 'atomia-pa-apache':
@@ -301,7 +337,7 @@ class atomia::apache_agent (
   $php_versions_array = split($php_versions, ',')
   arrayPHP { $php_versions_array: }
 
-  if ($should_have_php_farm == '1') and ($::lsbdistrelease == '14.04') {
+  if ($should_have_php_farm == '1') and ($::lsbdistrelease == '14.04') or $::lsbdistrelease == '16.04' {
 
     $phpcompilepackages = [
       'git',
@@ -316,19 +352,28 @@ class atomia::apache_agent (
       'libssl-dev',
       'libxml2',
       'libxml2-dev',
-      'php5-dev',
       'pkg-config',
     ]
+
+    if $::lsbdistrelease == '16.04' {
+      package {'php-dev': ensure => present }
+      exec { 'clone_phpfarm_repo' :
+        command => '/usr/bin/git clone git://git.code.sf.net/p/phpfarm/code /opt/phpfarm',
+        unless  => '/usr/bin/test -f /opt/phpfarm/src/options.sh',
+        require => [Package['libapache2-mod-fcgid-atomia'], Package['php-dev'], Package['git']],
+      }
+    } else {
+      package {'php5-dev': ensure => present }
+      exec { 'clone_phpfarm_repo' :
+        command => '/usr/bin/git clone git://git.code.sf.net/p/phpfarm/code /opt/phpfarm',
+        unless  => '/usr/bin/test -f /opt/phpfarm/src/options.sh',
+        require => [Package['libapache2-mod-fcgid-atomia'], Package['php5-dev'], Package['git']],
+      }
+    }
 
     package { $phpcompilepackages:
       ensure  => 'installed',
       require => Package['libapache2-mod-fcgid-atomia'],
-    }
-
-    exec { 'clone_phpfarm_repo' :
-      command => '/usr/bin/git clone git://git.code.sf.net/p/phpfarm/code /opt/phpfarm',
-      unless  => '/usr/bin/test -f /opt/phpfarm/src/options.sh',
-      require => [Package['libapache2-mod-fcgid-atomia'], Package['php5-dev'], Package['git']],
     }
 
     file { '/opt/phpfarm/src/options.sh':
@@ -341,14 +386,6 @@ class atomia::apache_agent (
 
     $php_branches_array = extract_major_minor($php_versions_array)
 
-    file { '/etc/apache2/conf/phpversions.conf':
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
-      content => template('atomia/apache_agent/phpversions.erb'),
-      require => [Package['atomia-pa-apache']],
-      notify  => Service['apache2'],
-    }
   }
 
   if !defined(Service['apache2']) {

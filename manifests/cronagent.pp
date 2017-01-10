@@ -63,11 +63,22 @@ class atomia::cronagent (
     store_creds    => true,
     admin_username => $mongo_admin_user,
     admin_password => $mongo_admin_pass,
+    dbpath_fix     => false
   }
 
+  if $::lsbdistrelease == '16.04' {
+    file {'/etc/systemd/system/mongod.service':
+       source => 'puppet:///modules/atomia/mongodb/mongod.service',
+       ensure => present
+    }
+  }
+
+  package { 'nodejs':
+    ensure  => present
+  }
   package { 'atomia-cronagent':
     ensure  => present,
-    require => Class['mongodb::server']
+    require => [Class['mongodb::server'], Package['nodejs']]
   }
 
   file { '/etc/default/cronagent':

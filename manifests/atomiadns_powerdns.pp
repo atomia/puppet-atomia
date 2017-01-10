@@ -47,6 +47,10 @@ class atomia::atomiadns_powerdns (
   }
 
   if $::lsbdistrelease == '16.04' {
+    package { 'libdbi-perl':
+      ensure => present
+    }
+
     file { '/etc/apt/sources.list.d/pdns.list':
       ensure  => present,
       content => 'deb [arch=amd64] http://repo.powerdns.com/ubuntu xenial-auth-40 main'

@@ -22,7 +22,7 @@
 ##### skip_mount(advanced): %int_boolean
 ##### ssl_cert_key(advanced): .*
 ##### ssl_cert_file(advanced): .*
-##### server_ip(advanced): .*
+##### server_ip(advanced): %ipaddress
 
 class atomia::awstats (
   $agent_user                       = 'awstats',
@@ -33,7 +33,7 @@ class atomia::awstats (
   $ssl_cert_key                     = '',
   $ssl_cert_file                    = '',
   $skip_mount                       = '0',
-  $server_ip                        = $ipaddress
+  $server_ip                        = ''
 ) {
 
   package { 'atomia-pa-awstats': ensure => present }
@@ -42,14 +42,18 @@ class atomia::awstats (
   package { 'awstats': ensure => installed }
   package { 'procmail': ensure => installed }
 
-  if !defined(Package['apache2-mpm-worker']) and !defined(Package['apache2-mpm-prefork']) and !defined(Package['apache2']) {
-    package { 'apache2-mpm-worker': ensure => installed }
+  if $::lsbdistrelease != '16.04' {
+    if !defined(Package['apache2-mpm-worker']) and !defined(Package['apache2-mpm-prefork']) and !defined(Package['apache2']) {
+      package { 'apache2-mpm-worker': ensure => installed }
+    }
+  } else {
+    package { 'apache2': ensure => installed }
   }
 
   if $skip_mount == '0' {
 
 
-    $internal_zone = hiera('atomia::internaldns::zone_name','')
+    $gluster_hostname = hiera('atomia::glusterfs::gluster_hostname','')
 
     if $content_share_nfs_location == '' {
       package { 'glusterfs-client': ensure => present, }
@@ -62,14 +66,14 @@ class atomia::awstats (
 
       fstab::mount { '/storage/content':
         ensure  => 'mounted',
-        device  => "gluster.${internal_zone}:/web_volume",
+        device  => "${gluster_hostname}:/web_volume",
         options => 'defaults,_netdev',
         fstype  => 'glusterfs',
         require => [Package['glusterfs-client'],File['/storage']],
       }
       fstab::mount { '/storage/configuration':
         ensure  => 'mounted',
-        device  => "gluster.${internal_zone}:/config_volume",
+        device  => "${gluster_hostname}:/config_volume",
         options => 'defaults,_netdev',
         fstype  => 'glusterfs',
         require => [ Package['glusterfs-client'],File['/storage']],
@@ -209,7 +213,6 @@ class atomia::awstats (
   if !defined(Exec['/usr/sbin/a2enmod rewrite']) {
     exec { '/usr/sbin/a2enmod rewrite':
       unless  => '/usr/bin/test -f /etc/apache2/mods-enabled/rewrite.load',
-      require => Package['apache2-mpm-worker'],
       notify  => Exec['force-reload-apache'],
     }
   }
@@ -220,4 +223,3 @@ class atomia::awstats (
   }
 
 }
-

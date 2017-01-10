@@ -13,7 +13,7 @@
 ##### mysql_username(advanced): %username
 ##### mysql_password(advanced): %password
 ##### mysql_root_password(advanced): %password
-##### provisioning_host(advanced): ^[0-9.a-z%-]+$
+##### provisioning_host: ^[0-9.a-z%-]+$
 ##### server_ips: .*
 
 class atomia::mysql (

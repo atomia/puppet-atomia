@@ -209,7 +209,6 @@ class atomia::glusterfs (
       command => template('atomia/glusterfs/create_web_volume.erb'),
       creates => '/var/lib/glusterd/vols/web_volume',
       require => [ Package['glusterfs-server'], File['/export/web/vol1'] ],
-      unless  => "/usr/bin/test `/usr/sbin/gluster peer status | /bin/grep -c Hostname` -eq ${peers_size};",
       notify  => Exec['start web volume'],
     }
   }
@@ -238,7 +237,6 @@ class atomia::glusterfs (
       command => template('atomia/glusterfs/create_mail_volume.erb'),
       creates => '/var/lib/glusterd/vols/mail_volume',
       require => [ Package['glusterfs-server'], File['/export/mail/vol1'] ],
-      unless  => "/usr/bin/test `/usr/sbin/gluster peer status | /bin/grep -c Hostname` -eq ${peers_size};",
       notify  => Exec['start mail volume'],
     }
   }
@@ -259,7 +257,6 @@ class atomia::glusterfs (
       command => template('atomia/glusterfs/create_config_volume.erb'),
       creates => '/var/lib/glusterd/vols/config_volume',
       require => [ Package['glusterfs-server'], File['/export/config/vol1'] ],
-      unless  => "/usr/bin/test `/usr/sbin/gluster peer status | /bin/grep -c Hostname` -eq ${peers_size};",
       notify  => Exec['start config volume'],
     }
   }

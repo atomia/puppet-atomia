@@ -6,10 +6,10 @@
 #### replica_ip: The ip address of this server
 
 ### Validations
-##### replica_ip(advanced): .*
+##### replica_ip(advanced): %ipaddress
 
 class atomia::active_directory_replica (
-  $replica_ip             = $::ipaddress,
+  $replica_ip             = '',
 ) {
 
     $domain_name = hiera(atomia::active_directory::domain_name)
