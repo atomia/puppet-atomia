@@ -2,16 +2,16 @@
   <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.PostfixAndDovecot.PostfixAndDovecot'])">
     <resourceList>
       <resource name="PostfixAndDovecot" xdt:Transform="Insert">
-        <property name="DatabaseHost"><%= @postfix_databaseHost %></property>
+        <property name="DatabaseHost"><%= @postfix_databasehost %></property>
         <property name="DatabaseName">vmail</property>
         <property name="Username">postfix_agent</property>
         <property name="Password"><%= @postfix_password %></property>
-        <property name="MailIpAddress"><%= @postfix_clusterIp %></property>
-        <property name="Mail2IpAddress"><%= @postfix_clusterIp %></property>
-        <property name="SmtpIpAddress"><%= @postfix_clusterIp %></property>
-        <property name="ImapIpAddress"><%= @postfix_clusterIp %></property>
-        <property name="PopIpAddress"><%= @postfix_clusterIp %></property>
-        <property name="WebmailIpAddress"><%= @postfix_clusterIp %></property>
+        <property name="MailIpAddress"><%= @postfix_clusterip %></property>
+        <property name="Mail2IpAddress"><%= @postfix_clusterip %></property>
+        <property name="SmtpIpAddress"><%= @postfix_clusterip %></property>
+        <property name="ImapIpAddress"><%= @postfix_clusterip %></property>
+        <property name="PopIpAddress"><%= @postfix_clusterip %></property>
+        <property name="WebmailIpAddress"><%= @postfix_clusterip %></property>
       </resource>
     </resourceList>
   </bindings>

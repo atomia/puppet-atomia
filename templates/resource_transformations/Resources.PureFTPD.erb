@@ -2,16 +2,16 @@
   <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.PureFTPD.PureFTPD'])">
     <resourceList>
       <resource name="PureFTPD" xdt:Transform="Insert">
-        <property name="DatabaseHost"><%= @pureftp_databaseHost %></property>
+        <property name="DatabaseHost"><%= @pureftp_databasehost %></property>
         <property name="DatabaseName">pureftpd</property>
         <property name="Username"><%= @pureftp_username %></property>
         <property name="Password"><%= @pureftp_password %></property>
         <property name="EncryptionMethod">md5</property>
-        <property name="ClusterIpAddress"><%= @pureftp_clusterIp %></property>
-        <property name="FileSystemAgentUrl">http://<%= @pureftp_fsAgentUrl %>:10201/</property>
-        <property name="FileSystemAgentUsername"><%= @pureftp_fsagentUsername %></property>
-        <property name="FileSystemAgentPassword"><%= @pureftp_fsagentPassword %></property>
-        <property name="StorageRoot"><%= @pureftp_storageRoot %></property>
+        <property name="ClusterIpAddress"><%= @pureftp_clusterip %></property>
+        <property name="FileSystemAgentUrl">http://<%= @pureftp_fsagenturl %>:10201/</property>
+        <property name="FileSystemAgentUsername"><%= @pureftp_fsagentusername %></property>
+        <property name="FileSystemAgentPassword"><%= @pureftp_fsagentpassword %></property>
+        <property name="StorageRoot"><%= @pureftp_storageroot %></property>
       </resource>
     </resourceList>
   </bindings>

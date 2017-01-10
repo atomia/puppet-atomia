@@ -20,9 +20,10 @@ exclude_paths = [
 Rake::Task[:lint].clear
 PuppetLint::RakeTask.new :lint do |config|
   config.ignore_paths = exclude_paths
-  config.log_format = '%{path}:%{linenumber}:%{check}:%{KIND}:%{message}'
+  config.log_format = '%{path}:%{line}:%{check}:%{KIND}:%{message}'
   config.fail_on_warnings = true
   config.disable_checks = [
+    "names_containing_uppercase",
     "80chars",
     "140chars",
     "class_inherits_from_params_class",
