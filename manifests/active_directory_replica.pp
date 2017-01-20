@@ -27,7 +27,7 @@ class atomia::active_directory_replica (
             ensure => 'directory',
         }
     }
-
+    if ($::domain != $domain_name) {
     file { 'c:/install/sync_time.ps1':
         ensure  => 'file',
         content => template('atomia/active_directory/sync_time.ps1.erb'),
@@ -65,5 +65,6 @@ class atomia::active_directory_replica (
     exec { 'sync-time':
         command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/sync_time.ps1',
         require => File['c:/install/sync_time.ps1'],
+    }
     }
 }

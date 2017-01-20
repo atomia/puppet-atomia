@@ -33,6 +33,12 @@ class atomia::active_directory (
 
   File { source_permissions => ignore }
 
+  if($::operatingsystemrelease == '2012 R2') {
+    $domain_mode = 4
+  } else {
+    $domain_mode = 7
+  }
+
   # Set ip correctly when on ec2
   if !$public_ip {
     if $::ec2_public_ipv4 {
@@ -77,7 +83,7 @@ class atomia::active_directory (
       provider => powershell,
     } ->
     exec { 'Install AD forest':
-      command  => "Import-Module ADDSDeployment; Install-ADDSForest -DomainName ${domain_name} -DomainMode 7 -DomainNetBIOSName ${netbios_domain_name} -ForestMode 7 -SafeModeAdministratorPassword (convertto-securestring '${restore_password}' -asplaintext -force) -Force",
+      command  => "Import-Module ADDSDeployment; Install-ADDSForest -DomainName ${domain_name} -DomainMode ${domain_mode} -DomainNetBIOSName ${netbios_domain_name} -ForestMode ${domain_mode} -SafeModeAdministratorPassword (convertto-securestring '${restore_password}' -asplaintext -force) -Force",
       provider => powershell,
       timeout => 1000,
       onlyif   => "if((gwmi WIN32_ComputerSystem).Domain -eq '${domain_name}'){exit 1}",

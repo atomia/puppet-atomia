@@ -53,7 +53,7 @@ echo "---
   :pass: ${HIERA_USER_PASSWORD}
   :database: puppet_atomia
 
-  :query: SELECT val FROM configuration WHERE var='%{key}' AND env='%{env}'
+  :query: SELECT val FROM configuration WHERE var='%{key}' AND env='%{environment}'
 
 
 :hierarchy:
@@ -62,7 +62,6 @@ echo "---
   - \"%{::atomia_role_3}\"
   - \"%{::atomia_role_4}\"
   - \"%{::atomia_role_5}\"
-  - bootstrap
 
 :logger: console
 " > /etc/puppet/hiera.yaml

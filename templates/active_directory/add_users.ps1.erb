@@ -121,7 +121,7 @@ SeServiceLogonRight = $($currentSetting)
 Write-Host "Done." -ForegroundColor DarkCyan
 }
 
-
+New-Item -ItemType Directory -Force -Path C:\install\installed
 # Add apppooluser
 
 if(! (UserExists "apppooluser")){
@@ -129,6 +129,7 @@ if(! (UserExists "apppooluser")){
         Add-ADGroupMember "Domain Admins" "apppooluser"
         GrantLogonService "apppooluser"
     }
+    Remove-Item C:\install\installed
 }
 else {
   Unlock-ADAccount -Identity apppooluser
@@ -137,6 +138,7 @@ else {
 # Add PosixGuest
 if(! (UserExists "PosixGuest")){
     AddUserToActiveDirectory "PosixGuest" "<%= @bind_password %>"
+    Remove-Item C:\install\installed
 }
 else {
   Unlock-ADAccount -Identity PosixGuest
@@ -146,8 +148,9 @@ else {
 if(! (UserExists "WindowsAdmin")){
     if(AddUserToActiveDirectory "WindowsAdmin" "<%= @windows_admin_password %>"){
         Add-ADGroupMember "Domain Admins" "WindowsAdmin"
+        Remove-Item C:\install\installed
     }
 }
 else {
-  Unlock-ADAccount -Identity WindowsAdmin 
+  Unlock-ADAccount -Identity WindowsAdmin
 }
