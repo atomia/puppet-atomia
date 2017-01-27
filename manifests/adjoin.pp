@@ -62,7 +62,7 @@ class atomia::adjoin (
     # Join AD on Linux
     $dc=regsubst($domain_name, '\.', ',dc=', 'G')
     $base_dn = "cn=Users,dc=${dc}"
-  
+
     if $::vagrant {
       $ad_servers = 'ldap://192.168.33.10'
     } else {
@@ -72,9 +72,9 @@ class atomia::adjoin (
         $ad_servers = "ldap://${active_directory_ip} ldap://${active_directory_replica_ip}"
       }
     }
-  
+
     if($::osfamily == 'RedHat' or $use_nss_pam_ldapd == '1') {
-  
+
       if($::osfamily == 'RedHat') {
         $nss_package_name = 'nss-pam-ldapd'
         $nss_group = 'ldap'
@@ -82,9 +82,9 @@ class atomia::adjoin (
         $nss_package_name = 'libpam-ldapd'
         $nss_group = 'nslcd'
       }
-  
+
       package { $nss_package_name: ensure => present }
-  
+
       file { '/etc/nslcd.conf':
         ensure  => file,
         owner   => 'nslcd',
@@ -94,17 +94,17 @@ class atomia::adjoin (
         require => Package[$nss_package_name],
         notify  => Service['nslcd'],
       }
-  
+
       service { 'nslcd':
         ensure  => running,
         enable  => true,
         require => [ Package[$nss_package_name], File['/etc/nslcd.conf'] ],
       }
-    }
-    else {
-  
+
+    } else {
+
       package { 'libpam-ldap': ensure => present }
-  
+
       file { '/etc/ldap.conf':
         ensure  => file,
         owner   => 'root',
@@ -113,7 +113,7 @@ class atomia::adjoin (
         content => template('atomia/adjoin/ldap.conf.erb'),
       }
     }
-  
+
     file { '/etc/pam.d/common-account':
       ensure => file,
       owner  => 'root',
@@ -121,7 +121,7 @@ class atomia::adjoin (
       mode   => '0644',
       source => 'puppet:///modules/atomia/adjoin/common-account',
     }
-  
+
     file { '/etc/nsswitch.conf':
       ensure => file,
       owner  => 'root',
@@ -129,8 +129,7 @@ class atomia::adjoin (
       mode   => '0644',
       source => 'puppet:///modules/atomia/adjoin/nsswitch.conf',
     }
-  
-  
+
     file { '/etc/pam.d/common-auth':
       ensure => file,
       owner  => 'root',
@@ -138,7 +137,7 @@ class atomia::adjoin (
       mode   => '0644',
       source => 'puppet:///modules/atomia/adjoin/common-auth',
     }
-  
+
     file { '/etc/pam.d/common-session':
       ensure => file,
       owner  => 'root',
