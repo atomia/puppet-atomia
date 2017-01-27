@@ -140,9 +140,8 @@ class atomia::daggre (
 
   service { 'daggre':
     ensure    => running,
-    name      => 'daggre',
     enable    => true,
-    pattern   => '.*/usr/bin/daggre.*',
+    status    => 'test `ps aux | grep /usr/bin/daggre | grep -v grep | wc -l` -eq 1',
     require   => [Package['daggre'], File['/etc/default/daggre']],
     subscribe => File['/etc/default/daggre'],
   }

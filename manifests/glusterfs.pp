@@ -91,7 +91,7 @@ class atomia::glusterfs (
   }
 
   if $is_first_node == 1 {
-    $peers_arr.each |String $p| {
+    $peers_arr.each | $p| {
         exec { "/usr/sbin/gluster peer probe $p":
           unless  => "/bin/egrep '^hostname.+=${p}$' /var/lib/glusterd/peers/*",
           require => Service['glusterfs-server'],
