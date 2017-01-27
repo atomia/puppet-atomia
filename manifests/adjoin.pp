@@ -8,6 +8,7 @@
 #### admin_password: The password fpr the admin user
 #### bind_user: User to use when connectiong to ldap
 #### bind_password: Password for the ldap user
+#### use_nss_pam_ldapd: Use nss-pam-ldapd instead of nss_ldap if joining a Linux server where the distribution supports this.
 
 ### Validations
 ##### domain_name(advanced): %url
@@ -15,15 +16,17 @@
 ##### admin_password(advanced): %hostname
 ##### bind_user(advanced): %username
 ##### bind_password(advanced): %password
+##### use_nss_pam_ldapd(advanced): %int_boolean
 
 
 class atomia::adjoin (
   # AD domain name
-  $domain_name    = hiera('atomia::active_directory::domain_name', ''),
-  $admin_user     = 'WindowsAdmin',
-  $admin_password = hiera('atomia::active_directory::windows_admin_password', ''),
-  $bind_user      = 'PosixGuest',
-  $bind_password  = hiera('atomia::active_directory::bind_password', ''),
+  $domain_name       = hiera('atomia::active_directory::domain_name', ''),
+  $admin_user        = 'WindowsAdmin',
+  $admin_password    = hiera('atomia::active_directory::windows_admin_password', ''),
+  $bind_user         = 'PosixGuest',
+  $bind_password     = hiera('atomia::active_directory::bind_password', ''),
+  $use_nss_pam_ldapd = '1',
   ) {
     $active_directory_ip = hiera('atomia::active_directory::master_ip','')
     $active_directory_replica_ip = hiera('atomia::active_directory_replica::replica_ip','')
@@ -70,17 +73,32 @@ class atomia::adjoin (
     }
   }
 
-  if($::osfamily == 'RedHat') {
+  if($::osfamily == 'RedHat' or $use_nss_pam_ldapd == '1') {
 
-    package { 'nss-pam-ldapd': ensure => present }
+    if($::osfamily == 'RedHat') {
+      $nss_package_name = 'nss-pam-ldapd'
+      $nss_group = 'ldap'
+    } else {
+      $nss_package_name = 'libpam-ldapd'
+      $nss_group = 'nslcd'
+    }
+
+    package { $nss_package_name: ensure => present }
 
     file { '/etc/nslcd.conf':
       ensure  => file,
       owner   => 'nslcd',
-      group   => 'ldap',
+      group   => $nss_group,
       mode    => '0600',
       content => template('atomia/adjoin/nslcd.conf.erb'),
-      require => Package['nss-pam-ldapd'],
+      require => Package[$nss_package_name],
+      notify  => Service['nslcd'],
+    }
+
+    service { 'nslcd':
+      ensure  => running,
+      enable  => true,
+      require => [ Package[$nss_package_name], File['/etc/nslcd.conf'] ],
     }
   }
   else {
