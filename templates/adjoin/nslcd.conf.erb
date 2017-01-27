@@ -17,6 +17,6 @@ map    shadow shadowLastChange pwdLastSet
 filter group  (objectClass=group)
 
 uid nslcd
-gid ldap
+gid <%= @nss_group %>
 tls_cacertdir /etc/openldap/cacerts
 idle_timelimit 120
