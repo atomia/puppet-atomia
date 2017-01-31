@@ -20,6 +20,7 @@ BillingConnectionString = Server=<%= @database_server_host %>;database=atomiabil
 IdentityConnectionString = Server=<%= @database_server_host %>;database=atomiaidentity;user id=<%= @database_server_username %>;password=<%= @database_server_password %>;
 UserManagementConnectionString = Server=<%= @database_server_host %>;database=atomiausermanagement;user id=<%= @database_server_username %>;password=<%= @database_server_password %>;
 ActionTrailLogDataAccessorType = Atomia.ActionTrail.Data.LogDataAccessorPostgreSql, Atomia.ActionTrail.Data
+ActionTrailAuditActionTypesDataAccessorType = Atomia.ActionTrail.Data.AuditActionTypesDataAccessorPostgreSql, Atomia.ActionTrail.Data
 IdentityProviderName = 
 UserManagementProviderName = 
 MembershipProviderType = pgProvider.pgMembershipProvider, pgProvider
