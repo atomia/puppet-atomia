@@ -103,20 +103,24 @@ class atomia::internal_apps (
       notify  => Exec['app-pool-settings']
     }
   }
-
-  file { 'c:/install/app-pool-settings.ps1':
-    ensure => 'file',
-    source => 'puppet:///modules/atomia/windows_base/app-pool-settings.ps1'
+  if(!defined(File['c:/install/app-pool-settings.ps1'])) {
+    file { 'c:/install/app-pool-settings.ps1':
+      ensure => 'file',
+      source => 'puppet:///modules/atomia/windows_base/app-pool-settings.ps1'
+    }
   }
 
-  exec { 'app-pool-settings':
-    command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/app-pool-settings.ps1',
-    require => File['c:/install/app-pool-settings.ps1'],
-    refreshonly => true
+  if(!defined(Exec['app-pool-settings'])) {
+    exec { 'app-pool-settings':
+      command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/app-pool-settings.ps1',
+      require => File['c:/install/app-pool-settings.ps1'],
+      refreshonly => true
+    }
   }
-
-  file { 'C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role_internal.txt':
-    content => 'atomia_role_1=internal_apps',
+  if ($::atomia_role_1 != 'test_environment') {
+    file { 'C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role_internal.txt':
+      content => 'atomia_role_1=internal_apps',
+    }
   }
 
   # Automation Server default transformations

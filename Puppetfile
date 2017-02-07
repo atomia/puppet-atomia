@@ -83,3 +83,7 @@ mod "windows_iso",
 mod "mongodb",
     :git => "git://github.com/puppetlabs/puppetlabs-mongodb.git",
     :ref => "2cef851409852134f00153eb9bb171179f4359d7"
+
+mod "acl",
+    :git => "git://github.com/puppetlabs/puppetlabs-acl.git",
+    :ref => "bec0f1634035785b5f9837b64c9adfe62546e7cb"

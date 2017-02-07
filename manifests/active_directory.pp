@@ -96,7 +96,7 @@ class atomia::active_directory (
     } ->
     exec { 'add-ad-users':
       command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/add_users.ps1',
-      creates => 'C:\install\installed',
+    #  creates => 'C:\install\installed',
       require => [File['c:/install/add_users.ps1'], Exec['Install AD forest']],
     }
 

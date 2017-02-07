@@ -286,7 +286,7 @@ class atomia::windows_base (
   }
   # End IIS and modules
 
-  if !defined(File['c:/install']) {
+  if (!defined(File['c:/install']) and $::atomia_role_1 != 'test_environment') {
     file { 'c:/install': ensure => 'directory' }
   }
 
