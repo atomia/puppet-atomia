@@ -2,4 +2,3 @@
 classes:
    - atomia::linux_base
    - atomia::mysql
-   - atomia::nagios::client

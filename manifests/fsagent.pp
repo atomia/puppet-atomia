@@ -17,7 +17,7 @@
 ### Validations
 ##### username(advanced): %username
 ##### password(advanced): %password
-##### fsagent_ip(advanced): %ip_or_hostname
+##### fsagent_ip(advanced): %hostname
 ##### content_share_nfs_location(advanced): %nfs_share
 ##### config_share_nfs_location(advanced): %nfs_share
 ##### skip_mount(advanced): %int_boolean
@@ -29,7 +29,7 @@
 class atomia::fsagent (
   $username                   = 'fsagent',
   $password,
-  $fsagent_ip                 = $fqdn,
+  $fsagent_ip                 = '',
   $content_share_nfs_location = '',
   $config_share_nfs_location  = '',
   $skip_mount                 = '0',
@@ -51,22 +51,23 @@ class atomia::fsagent (
   }
   package { 'python-pkg-resources': ensure => present }
 
-  package { 'ruby2.0':
-    ensure => present,
-    notify => Exec['set-gem-symlink'],
+  if $::lsbdistrelease != '16.04' {
+    package { 'ruby2.0':
+      ensure => present,
+      notify => Exec['set-gem-symlink'],
+    }
+    exec { 'set-gem-symlink':
+      command => 'ln -fs /usr/bin/gem2.0 /usr/bin/gem',
+      require => Package['ruby2.0'],
+      path    => '/usr/bin:/usr/sbin:/bin',
+      unless  => 'test -L /usr/bin/gem && ls -l /usr/bin/gem | grep gem2.0 > /dev/null'
+    }
   }
 
-  exec { 'set-gem-symlink':
-    command => 'ln -fs /usr/bin/gem2.0 /usr/bin/gem',
-    require => Package['ruby2.0'],
-    path    => '/usr/bin:/usr/sbin:/bin',
-    unless  => 'test -L /usr/bin/gem && ls -l /usr/bin/gem | grep gem2.0 > /dev/null'
-  }
 
   package { ['jgrep']:
     ensure   => installed,
-    provider => 'gem',
-    require  => [Package['ruby2.0'], Exec['set-gem-symlink']],
+    provider => 'gem'
   }
   class { 'apt': }
 
@@ -117,7 +118,7 @@ class atomia::fsagent (
 
   if $skip_mount == '0' {
 
-    $internal_zone = hiera('atomia::internaldns::zone_name','')
+    $gluster_hostname = hiera('atomia::glusterfs::gluster_hostname','')
 
     if $content_share_nfs_location == '' {
       package { 'glusterfs-client': ensure => present, }
@@ -131,7 +132,7 @@ class atomia::fsagent (
       fstab::mount { '/storage/content':
         ensure     => 'mounted',
         manage_dir => false,
-        device     => "gluster.${internal_zone}:/web_volume",
+        device     => "${gluster_hostname}:/web_volume",
         options    => 'defaults,_netdev',
         fstype     => 'glusterfs',
         require    => [Package['glusterfs-client'],File['/storage']],
@@ -139,7 +140,7 @@ class atomia::fsagent (
       fstab::mount { '/storage/configuration':
         ensure     => 'mounted',
         manage_dir => false,
-        device     => "gluster.${internal_zone}:/config_volume",
+        device     => "${gluster_hostname}:/config_volume",
         options    => 'defaults,_netdev',
         fstype     => 'glusterfs',
         require    => [ Package['glusterfs-client'],File['/storage']],

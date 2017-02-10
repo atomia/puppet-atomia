@@ -175,7 +175,7 @@ class atomia::mailserver (
     if $::osfamily == 'Redhat' {
       warning('RedHat-based servers with glusterfs are not supported yet')
     } else {
-      $internal_zone = hiera('atomia::internaldns::zone_name','')
+      $gluster_hostname = hiera('atomia::glusterfs::gluster_hostname','')
       package { 'glusterfs-client': ensure => present, }
 
       if !defined(File['/storage']) {
@@ -184,9 +184,9 @@ class atomia::mailserver (
         }
       }
 
-      fstab::mount { '/storage/content':
+      fstab::mount { '/storage/mailcontent':
         ensure  => 'mounted',
-        device  => "gluster.${internal_zone}:/mail_volume",
+        device  => "${gluster_hostname}:/mail_volume",
         options => 'defaults,_netdev',
         fstype  => 'glusterfs',
         require => [Package['glusterfs-client'],File['/storage']],

@@ -4,4 +4,3 @@ classes:
    - atomia::windows_base
    - atomia::internal_apps
    - atomia::resource_transformations
-   - atomia::nagios::client

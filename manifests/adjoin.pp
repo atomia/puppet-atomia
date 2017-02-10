@@ -32,32 +32,32 @@ class atomia::adjoin (
   $active_directory_replica_ip = hiera('atomia::active_directory_replica::replica_ip','')
   if $::operatingsystem == 'windows' {
 
-    $ad_factfile = 'C:/ProgramData/PuppetLabs/facter/facts.d/domain_controller.txt'
-    concat { $ad_factfile:
-      ensure => present,
-    }
+      file {'c:/install/update_dns.ps1':
+          ensure => file,
+          source => 'puppet:///modules/atomia/active_directory/update_dns.ps1',
+      }
+      if ($::domain != $domain_name) {
+        exec { 'set-dns':
+            command => "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -executionpolicy remotesigned -file c:/install/update_dns.ps1 ${active_directory_ip} ${active_directory_replica_ip}",
+            require => File['c:/install/update_dns.ps1'],
+        }
+        ->
+        Host <<| |>>
+        ->
+        exec { 'join-domain':
+          command  => "netdom join ${::hostname} /Domain:${domain_name}  /UserD:${admin_user} /PasswordD:\"${admin_password}\" /REBoot:5",
+          unless   => "if((gwmi WIN32_ComputerSystem).Domain -ne \"${domain_name}\") { exit 1 }",
+          provider => powershell
+        }
+      }
 
-    file { 'C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role_ad.ps1':
-        content => template('atomia/active_directory/atomia_role_active_directory_replica.ps1.erb'),
-    }
+} else {
+  # Join AD on Linux
+  $dc=regsubst($domain_name, '\.', ',dc=', 'G')
+  $base_dn = "cn=Users,dc=${dc}"
 
-    file {'c:/install/update_dns.ps1':
-        ensure => file,
-        source => 'puppet:///modules/atomia/active_directory/update_dns.ps1',
-    }
-
-    exec { 'set-dns':
-        command => "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -executionpolicy remotesigned -file c:/install/update_dns.ps1 ${active_directory_ip} ${active_directory_replica_ip}",
-        require => File['c:/install/update_dns.ps1'],
-    }
-    ->
-    Host <<| |>>
-    ->
-    exec { 'join-domain':
-      command  => "netdom join ${::hostname} /Domain:${domain_name}  /UserD:${admin_user} /PasswordD:\"${admin_password}\" /REBoot:5",
-      unless   => "if((gwmi WIN32_ComputerSystem).Domain -ne \"${domain_name}\") { exit 1 }",
-      provider => powershell
-    }
+  if $::vagrant {
+    $ad_servers = 'ldap://192.168.33.10'
   } else {
     # Join AD on Linux
     $dc=regsubst($domain_name, '\.', ',dc=', 'G')

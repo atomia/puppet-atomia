@@ -3,4 +3,3 @@ classes:
    - atomia::linux_base
    - atomia::atomiarepository   
    - atomia::haproxy
-   - atomia::nagios::client

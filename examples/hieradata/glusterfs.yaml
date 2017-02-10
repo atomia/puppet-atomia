@@ -4,6 +4,5 @@ classes:
    - atomia::linux_base
    - atomia::atomiarepository
    - atomia::glusterfs
-   - atomia::nagios::client
 
 atomia::glusterfs::is_first_node: 1 

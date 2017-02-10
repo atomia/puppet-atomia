@@ -42,7 +42,7 @@ mod "htpasswd",
 
 mod "powershell",
   :git => "git://github.com/puppetlabs/puppetlabs-powershell.git",
-  :ref => "0919218e926eef02bbc1da9ce5a5d6afaf78aae0"
+  :ref => "37b4883c12619cb9493e8216648ff91f52eb69e3"
 
 mod "postgresql",
   :git => "git://github.com/puppetlabs/puppetlabs-postgresql.git",
@@ -83,3 +83,7 @@ mod "windows_iso",
 mod "mongodb",
     :git => "git://github.com/puppetlabs/puppetlabs-mongodb.git",
     :ref => "2cef851409852134f00153eb9bb171179f4359d7"
+
+mod "acl",
+    :git => "git://github.com/puppetlabs/puppetlabs-acl.git",
+    :ref => "bec0f1634035785b5f9837b64c9adfe62546e7cb"

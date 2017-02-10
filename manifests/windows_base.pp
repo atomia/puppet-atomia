@@ -26,6 +26,7 @@
 #### billing_encryption_cert_thumb: The thumbprint for the billing certificate. This should be prefilled by pressing the generate new certificates button.
 #### root_cert_thumb: The thumbprint for the root certificate. This should be prefilled by pressing the generate new certificates button.
 #### signing_cert_thumb: The thumbprint for the signing certificate. This should be prefilled by pressing the generate new certificates button.
+#### test_env: Set this to true if you are installing a test environment
 #### grpc_account_api_listen_address: The IP address to listen on, default is to listen on all interfaces.
 #### grpc_account_api_listen_port: The port to listen on for the gRPC Account API endpoint.
 #### grpc_account_api_whitelist: Semicolon separated list of ip addresses and ip ranges that should be able to connect to the gRPC endpoint. To disable whitelisting just leave this empty.
@@ -57,13 +58,13 @@
 ### Validations
 ##### appdomain: ^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$
 ##### license_key: ^[0-9A-Fa-f]{8}-([0-9A-Fa-f]{4}-){3}[0-9A-Fa-f]{12}$
-##### actiontrail_host: ^[a-zA-Z0-9]+
-##### login_host: ^[a-zA-Z0-9]+
-##### store_host: ^[a-zA-Z0-9]+
-##### billing_host: ^[a-zA-Z0-9]+
-##### admin_host: ^[a-zA-Z0-9]+
-##### hcp_host: ^[a-zA-Z0-9]+
-##### automationserver_host: ^[a-zA-Z0-9]+
+##### actiontrail_host(advanced): ^[a-zA-Z0-9]+
+##### login_host(advanced): ^[a-zA-Z0-9]+
+##### store_host(advanced): ^[a-zA-Z0-9]+
+##### billing_host(advanced): ^[a-zA-Z0-9]+
+##### admin_host(advanced): ^[a-zA-Z0-9]+
+##### hcp_host(advanced): ^[a-zA-Z0-9]+
+##### automationserver_host(advanced): ^[a-zA-Z0-9]+
 ##### mail_sender_address: ^\S+@\S+\.\S+$
 ##### mail_server_host(advanced): ^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z0-9]{1,6}$
 ##### mail_server_port(advanced): [0-9]{1,3}
@@ -79,6 +80,7 @@
 ##### billing_encryption_cert_thumb(advanced): .*
 ##### root_cert_thumb(advanced): .*
 ##### signing_cert_thumb(advanced): .*
+##### test_env(advanced): %int_boolean
 ##### grpc_account_api_listen_address(advanced): .*
 ##### grpc_account_api_listen_port(advanced): [0-9]+
 ##### grpc_account_api_whitelist(advanced): .*
@@ -134,6 +136,7 @@ class atomia::windows_base (
   $is_iis                                  = '0',
   $enable_mssql                            = false,
   $enable_postgresql                       = true,
+  $test_env                                = '0',
   $grpc_account_api_listen_address         = '0.0.0.0',
   $grpc_account_api_listen_port            = '50053',
   $grpc_account_api_whitelist              = '',
@@ -184,17 +187,11 @@ class atomia::windows_base (
     }
     else
     {
-      $factfile = 'C:/ProgramData/PuppetLabs/facter/facts.d/actiontrail_ip.txt'
       $actiontrail_ip = "${actiontrail_host}.${appdomain}"
 
       # TODO: Get these from hiera
       $database_server = ''
       $mirror_database_server = ''
-    }
-
-    dism { 'NetFx3':
-      ensure => present,
-      all    => true,
     }
 
     # 6.1 is 2008 R2, so this matches 2012 and forward
@@ -230,26 +227,10 @@ class atomia::windows_base (
         all    => true,
       }
 
-      dism { 'WCF-HTTP-Activation':
-        ensure => present,
-        all    => true,
-      }
-
       dism { 'WCF-HTTP-Activation45':
         ensure => present,
         all    => true,
       }
-
-      file { 'c:/install/app-pool-settings.ps1':
-        ensure => 'file',
-        source => 'puppet:///modules/atomia/windows_base/app-pool-settings.ps1'
-      }
-
-      exec { 'app-pool-settings':
-        command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/app-pool-settings.ps1',
-        require => File['c:/install/app-pool-settings.ps1']
-      }
-
     }
 
     dism { 'MSMQ-Server':
@@ -269,16 +250,6 @@ class atomia::windows_base (
     }
 
     dism { 'IIS-ISAPIExtensions':
-      ensure => present,
-      all    => true,
-    }
-
-    dism { 'IIS-NetFxExtensibility':
-      ensure => present,
-      all    => true,
-    }
-
-    dism { 'IIS-ASPNET':
       ensure => present,
       all    => true,
     }
@@ -315,7 +286,7 @@ class atomia::windows_base (
   }
   # End IIS and modules
 
-  if !defined(File['c:/install']) {
+  if (!defined(File['c:/install']) and $::atomia_role_1 != 'test_environment') {
     file { 'c:/install': ensure => 'directory' }
   }
 
@@ -339,13 +310,15 @@ class atomia::windows_base (
   exec { 'install-chocolatey':
     command  => "iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))",
     provider => powershell,
-    onlyif   => 'Test-Path C:\ProgramData\Chocolatey'
+    onlyif   => 'if (Test-Path "C:\ProgramData\Chocolatey") { exit 1;}  else { exit 0; }',
+    notify   => Exec['set-chocolatey-path']
   }
 
   exec { 'set-chocolatey-path':
     command => 'c:\windows\system32\cmd.exe /c SET PATH=%PATH%;%systemdrive%\ProgramData\chocolatey\bin',
     creates => 'c:/install/chocolatey_installed.txt',
     require => Exec['install-chocolatey'],
+    refreshonly => true
   }
 
   package { 'GoogleChrome':
@@ -452,13 +425,13 @@ class atomia::windows_base (
   }
   else {
     file { 'c:/install/certificates':
-      source  => 'puppet:///atomiacerts/certificates',
+      source  => "puppet:///atomiacerts/${::environment}/certificates",
       recurse => true
     }
 
     file { 'C:\inetpub\wwwroot\empty.crl':
       ensure => 'file',
-      source => 'puppet:///atomiacerts/empty.crl'
+      source => "puppet:///atomiacerts/${::environment}/empty.crl"
     }
 
     file { 'c:/install/install_atomia_application.ps1':

@@ -24,7 +24,6 @@ class atomia::nagios::client(
 ) {
 
   $atomia_domain   = hiera('atomia::config::atomia_domain')
-  $internal_domain = hiera('atomia::internaldns::zone_name','')
   if !$public_ip {
     if $::ec2_public_ipv4 {
       $public_ip = $::ec2_public_ipv4

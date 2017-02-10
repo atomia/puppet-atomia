@@ -1,4 +1,3 @@
 ---
 classes:
    - atomia::active_directory
-   - atomia::nagios::client

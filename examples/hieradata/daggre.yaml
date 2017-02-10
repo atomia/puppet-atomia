@@ -4,4 +4,3 @@ classes:
    - atomia::atomiarepository
    - atomia::adjoin
    - atomia::daggre
-   - atomia::nagios::client

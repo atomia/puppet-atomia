@@ -38,11 +38,11 @@
 ##### certificate_default_cert(advanced): ^-----BEGIN.*-----$
 ##### virtual_ips_interface_to_manage(advanced): ^[a-z]+[0-9]+$
 ##### virtual_ips_netmask(advanced): %ip
-##### apache_cluster_nodes(advanced): %apache_cluster_nodes
-##### iis_cluster_nodes(advanced): %iis_cluster_nodes
-##### mail_cluster_nodes(advanced): %mail_cluster_nodes
-##### ftp_cluster_nodes(advanced): %ftp_cluster_nodes
-##### haproxy_nodes(advanced): ^[a-z0-9,-]*$
+##### apache_cluster_nodes: %apache_cluster_nodes
+##### iis_cluster_nodes: %iis_cluster_nodes
+##### mail_cluster_nodes: %mail_cluster_nodes
+##### ftp_cluster_nodes: %ftp_cluster_nodes
+##### haproxy_nodes: ^[a-z0-9,-]*$
 ##### cluster_ip_auth_key(advanced): %password
 ##### cluster_ip_warntime(advanced): %int
 ##### cluster_ip_deadtime(advanced): %int

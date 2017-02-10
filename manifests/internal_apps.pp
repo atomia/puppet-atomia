@@ -34,6 +34,7 @@ class atomia::internal_apps (
   exec { 'set-logonasaservice':
     command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/logonasaservice.ps1',
     require => File['c:/install/logonasaservice.ps1'],
+    creates => 'c:/install/logonasaservice'
   }
 
   if($repository == 'PublicRepository')
@@ -66,6 +67,7 @@ class atomia::internal_apps (
       command => 'C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Executionpolicy Unrestricted -File c:/install/install_atomia_application.ps1 -repository PublicRepository -application "Atomia Admin Panel"',
       require => [Exec['install-actiontrail'],File['unattended.ini']],
       creates => 'C:\Program Files (x86)\Atomia\AdminPanel',
+      notify  => Exec['app-pool-settings']
     }
   }
   else
@@ -98,11 +100,27 @@ class atomia::internal_apps (
       command => 'C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Executionpolicy Unrestricted -File c:/install/install_atomia_application.ps1 -repository TestRepository -application "Atomia Admin Panel"',
       require => [Exec['install-actiontrail'],File['unattended.ini']],
       creates => 'C:\Program Files (x86)\Atomia\AdminPanel',
+      notify  => Exec['app-pool-settings']
+    }
+  }
+  if(!defined(File['c:/install/app-pool-settings.ps1'])) {
+    file { 'c:/install/app-pool-settings.ps1':
+      ensure => 'file',
+      source => 'puppet:///modules/atomia/windows_base/app-pool-settings.ps1'
     }
   }
 
-  file { 'C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role_internal.txt':
-    content => 'atomia_role_1=internal_apps',
+  if(!defined(Exec['app-pool-settings'])) {
+    exec { 'app-pool-settings':
+      command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file c:/install/app-pool-settings.ps1',
+      require => File['c:/install/app-pool-settings.ps1'],
+      refreshonly => true
+    }
+  }
+  if ($::atomia_role_1 != 'test_environment') {
+    file { 'C:\ProgramData\PuppetLabs\facter\facts.d\atomia_role_internal.txt':
+      content => 'atomia_role_1=internal_apps',
+    }
   }
 
   # Automation Server default transformations

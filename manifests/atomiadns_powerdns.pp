@@ -35,7 +35,7 @@ class atomia::atomiadns_powerdns (
     }
   }
 
-  if $::lsbdistrelease == '14.04' {
+  if $::lsbdistrelease == '14.04' or $::lsbdistrelease == '16.04' {
     $pdns_package = 'pdns-server'
 
     package { 'pdns-backend-mysql':
@@ -46,8 +46,39 @@ class atomia::atomiadns_powerdns (
     $pdns_package = 'pdns-static'
   }
 
-  package { $pdns_package:
-    ensure  => present
+  if $::lsbdistrelease == '16.04' {
+    package { 'libdbi-perl':
+      ensure => present
+    }
+
+    file { '/etc/apt/sources.list.d/pdns.list':
+      ensure  => present,
+      content => 'deb [arch=amd64] http://repo.powerdns.com/ubuntu xenial-auth-40 main'
+    } ->
+    file { '/etc/apt/preferences.d/pdns':
+      ensure  => present,
+      content => 'Package: pdns-*
+  Pin: origin repo.powerdns.com
+  Pin-Priority: 600
+  ',
+      notify  => Exec['powerdns-pubkey']
+    } ->
+    exec {'powerdns-pubkey':
+      command => '/usr/bin/curl https://repo.powerdns.com/FD380FBB-pub.asc | /usr/bin/sudo /usr/bin/apt-key add -',
+      refreshonly => true,
+      notify  => Exec['apt-update-pdns']
+    } ->
+    exec {'apt-update-pdns':
+      command => '/usr/bin/apt-get update',
+      refreshonly => true,
+    } ->
+    package { $pdns_package:
+      ensure  => present
+    }
+  } else {
+    package { $pdns_package:
+      ensure  => present
+    }
   }
 
   service { 'pdns':

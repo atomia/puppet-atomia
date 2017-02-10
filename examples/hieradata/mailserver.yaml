@@ -4,5 +4,3 @@ classes:
    - atomia::atomiarepository
    - atomia::adjoin
    - atomia::mailserver
-   - atomia::nagios::client
-

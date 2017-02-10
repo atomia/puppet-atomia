@@ -6,10 +6,11 @@
 #### web_content_volume_size: The size of the volume used for website content (customer websites)
 #### configuration_volume_size: The size of the volume used for shared configurations
 #### mail_volume_size: The size of the volume used for the mail cluster
-#### peers: Hostname/IP of all the peers in the cluster
+#### peers: Hostname of all the peers in the cluster (NOT the master node)
 #### physical_volume: The physical volume on the server to create storage volumes on
 #### vg_name: The name of the volume group to be created for use with Gluster
 #### quota_management_ssh_key: The SSH key to allow quota management for
+#### gluster_hostname: DNS name containing a records for all gluster nodes
 
 ### Validations
 ##### web_content_volume_size: ^[0-9]+G$
@@ -19,15 +20,17 @@
 ##### physical_volume: .*
 ##### vg_name: .*
 ##### quota_management_ssh_key: (^$|^ssh-rsa )
+##### gluster_hostname: .*
 
 class atomia::glusterfs (
-  $web_content_volume_size   = '100G',
-  $configuration_volume_size = '10G',
-  $mail_volume_size          = '100G',
+  $web_content_volume_size   = '4G',
+  $configuration_volume_size = '1G',
+  $mail_volume_size          = '4G',
   $peers                     = $fqdn,
-  $physical_volume           = '/dev/sdb',
+  $physical_volume           = '/dev/xvdb',
   $vg_name                   = 'gluster',
   $quota_management_ssh_key  = '',
+  $gluster_hostname          = ''
 ) {
 
   $is_first_node = hiera('atomia::glusterfs::is_first_node', 0)
@@ -36,6 +39,20 @@ class atomia::glusterfs (
   if !$public_ip {
     if $::ec2_public_ipv4 {
       $public_ip = $::ec2_public_ipv4
+      # Fix resolv.conf on EC2
+      $ad_ip = hiera('atomia::active_directory::master_ip', '8.8.8.8')
+      file_line { 'dhclient-fix':
+        path => '/etc/dhcp/dhclient.conf',
+        line => "supersede domain-name-servers $ad_ip;",
+        notify => Exec['reload dhcp']
+      } ->
+      exec {'reload dhcp':
+        command => '/usr/bin/sudo dhclient -r; /usr/bin/sudo dhclient',
+        subscribe => File_line['dhclient-fix'],
+        refreshonly => true
+     }
+
+
     } elsif $::ipaddress_eth0 {
       $public_ip = $::ipaddress_eth0
     }
@@ -54,22 +71,6 @@ class atomia::glusterfs (
     ip   => $::ipaddress_eth0
   }
 
-  if !$::vagrant {
-    $internal_zone       = hiera('atomia::internaldns::zone_name')
-    $gluster_hostname    = "gluster.${internal_zone}"
-    @@bind::a { "${fqdn}-gluster-dns":
-      ensure    => 'present',
-      zone      => $internal_zone,
-      ptr       => false,
-      hash_data => {
-        'gluster' => {
-          owner => $::ipaddress },
-      },
-    }
-  } else {
-    $gluster_hostname    = '192.168.33.38'
-  }
-
   $peers_arr = split($peers,',')
   $peers_size = size($peers_arr)
 
@@ -79,9 +80,25 @@ class atomia::glusterfs (
   package { 'samba': ensure => present }
   package { 'ctdb': ensure => present}
 
-  class { 'glusterfs::server':
-    peers => $peers_arr,
+  package { 'glusterfs-server': ensure => installed }
+  ->
+  service { 'glusterd':
+    ensure    => running,
+    enable    => true,
+    hasstatus => true,
+    name      => 'glusterfs-server',
+    require   => Package['glusterfs-server'],
   }
+
+  if $is_first_node == 1 {
+    $peers_arr.each | $p| {
+        exec { "/usr/sbin/gluster peer probe $p":
+          unless  => "/bin/egrep '^hostname.+=${p}$' /var/lib/glusterd/peers/*",
+          require => Service['glusterfs-server'],
+        }
+      }
+  }
+
 
   file { [ '/export', '/export/web', '/export/mail', '/export/config' ]:
     ensure  => directory,
@@ -191,8 +208,7 @@ class atomia::glusterfs (
     exec { 'gluster volume create /export/web':
       command => template('atomia/glusterfs/create_web_volume.erb'),
       creates => '/var/lib/glusterd/vols/web_volume',
-      require => [ Class['glusterfs::server'], File['/export/web/vol1'] ],
-      unless  => "/usr/bin/test `/usr/sbin/gluster peer status | /bin/grep -c Hostname` -eq ${peers_size};",
+      require => [ Package['glusterfs-server'], File['/export/web/vol1'] ],
       notify  => Exec['start web volume'],
     }
   }
@@ -220,8 +236,7 @@ class atomia::glusterfs (
     exec { 'gluster volume create /export/mail':
       command => template('atomia/glusterfs/create_mail_volume.erb'),
       creates => '/var/lib/glusterd/vols/mail_volume',
-      require => [ Class['glusterfs::server'], File['/export/mail/vol1'] ],
-      unless  => "/usr/bin/test `/usr/sbin/gluster peer status | /bin/grep -c Hostname` -eq ${peers_size};",
+      require => [ Package['glusterfs-server'], File['/export/mail/vol1'] ],
       notify  => Exec['start mail volume'],
     }
   }
@@ -241,8 +256,7 @@ class atomia::glusterfs (
     exec { 'gluster volume create /export/config':
       command => template('atomia/glusterfs/create_config_volume.erb'),
       creates => '/var/lib/glusterd/vols/config_volume',
-      require => [ Class['glusterfs::server'], File['/export/config/vol1'] ],
-      unless  => "/usr/bin/test `/usr/sbin/gluster peer status | /bin/grep -c Hostname` -eq ${peers_size};",
+      require => [ Package['glusterfs-server'], File['/export/config/vol1'] ],
       notify  => Exec['start config volume'],
     }
   }

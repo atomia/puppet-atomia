@@ -3,4 +3,3 @@ classes:
    - atomia::adjoin
    - atomia::windows_base
    - atomia::public_apps
-   - atomia::nagios::client

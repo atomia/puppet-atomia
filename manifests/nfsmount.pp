@@ -4,7 +4,7 @@ define atomia::nfsmount(
   $nfs_location,
   $nfs_type      = hiera('atomia::nfsmount::nfs_type', 'nfs'),
   $nfs_options   = hiera('atomia::nfsmount::nfs_options', 'rw,noatime'),
-  $ad_domain     = hiera('atomia::adjoin::domain_name', ''),
+  $ad_domain     = hiera('atomia::active_directory::domain_name', ''),
 ) {
 
 
@@ -100,4 +100,3 @@ define atomia::nfsmount(
     }
 
 }
-

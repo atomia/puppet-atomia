@@ -21,7 +21,7 @@
 ### Validations
 ##### agent_user(advanced): %username
 ##### agent_password(advanced): %password
-##### master_ip(advanced): %ip
+##### master_ip: %ip
 ##### provisioning_host: ^[0-9.a-z%-]+$
 ##### pureftpd_password(advanced): %password
 ##### ftp_cluster_ip: %ip
@@ -37,7 +37,7 @@
 class atomia::pureftpd (
   $agent_user                 = 'automationserver',
   $agent_password,
-  $master_ip                  = $ipaddress,
+  $master_ip                  = '',
   $provisioning_host          = '%',
   $pureftpd_password,
   $ftp_cluster_ip,
@@ -57,7 +57,7 @@ class atomia::pureftpd (
   if $skip_mount == '0' {
 
     if $content_share_nfs_location == '' {
-      $internal_zone = hiera('atomia::internaldns::zone_name','')
+      $gluster_hostname = hiera('atomia::glusterfs::gluster_hostname','')
       package { 'glusterfs-client': ensure => present, }
 
       if !defined(File['/storage']) {
@@ -68,7 +68,7 @@ class atomia::pureftpd (
 
       fstab::mount { '/storage/content':
         ensure  => 'mounted',
-        device  => "gluster.${internal_zone}:/web_volume",
+        device  => "${gluster_hostname}:/web_volume",
         options => 'defaults,_netdev',
         fstype  => 'glusterfs',
         require => [Package['glusterfs-client'],File['/storage']],

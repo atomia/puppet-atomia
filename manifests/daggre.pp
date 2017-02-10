@@ -18,7 +18,7 @@
 #### mongo_db_name: The database name that the cronagent will use.
 
 ### Validations
-##### ip_addr(advanced): .*
+##### ip_addr(advanced): %hostname
 ##### global_auth_token(advanced): %password
 ##### content_share_nfs_location(advanced): %nfs_share
 ##### config_share_nfs_location(advanced): %nfs_share
@@ -37,7 +37,7 @@ class atomia::daggre (
   $content_share_nfs_location   = '',
   $config_share_nfs_location    = '',
   $use_nfs3                     = '1',
-  $ip_addr                      = $ipaddress,
+  $ip_addr                      = '',
   $cloudlinux_database          = '0',
   $cloudlinux_database_password = 'atomia123',
   $local_address                = 'localhost',
@@ -60,6 +60,14 @@ class atomia::daggre (
     store_creds    => true,
     admin_username => $mongo_admin_user,
     admin_password => $mongo_admin_pass,
+    dbpath_fix     => false
+  }
+
+  if $::lsbdistrelease == '16.04' {
+    file {'/etc/systemd/system/mongod.service':
+       source => 'puppet:///modules/atomia/mongodb/mongod.service',
+       ensure => present
+    }
   }
 
   if $::operatingsystem == 'Ubuntu' {
@@ -132,9 +140,8 @@ class atomia::daggre (
 
   service { 'daggre':
     ensure    => running,
-    name      => 'daggre',
     enable    => true,
-    pattern   => '.*/usr/bin/daggre.*',
+    status    => 'test `ps aux | grep /usr/bin/daggre | grep -v grep | wc -l` -eq 1',
     require   => [Package['daggre'], File['/etc/default/daggre']],
     subscribe => File['/etc/default/daggre'],
   }
@@ -142,7 +149,7 @@ class atomia::daggre (
   $test_env = hiera('atomia::config::test_env', '0')
 
   if ($test_env == '0') and ($content_share_nfs_location == '') {
-    $internal_zone = hiera('atomia::internaldns::zone_name','')
+    $gluster_hostname = hiera('atomia::glusterfs::gluster_hostname','')
     package { 'glusterfs-client': ensure => present, }
 
     if !defined(File['/storage']) {
@@ -153,14 +160,14 @@ class atomia::daggre (
 
     fstab::mount { '/storage/content':
       ensure  => 'mounted',
-      device  => "gluster.${internal_zone}:/web_volume",
+      device  => "${gluster_hostname}:/web_volume",
       options => 'defaults,_netdev',
       fstype  => 'glusterfs',
       require => [Package['glusterfs-client'],File['/storage']],
     }
     fstab::mount { '/storage/configuration':
       ensure  => 'mounted',
-      device  => "gluster.${internal_zone}:/config_volume",
+      device  => "${gluster_hostname}:/config_volume",
       options => 'defaults,_netdev',
       fstype  => 'glusterfs',
       require => [ Package['glusterfs-client'],File['/storage']],
