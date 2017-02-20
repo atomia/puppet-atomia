@@ -62,7 +62,7 @@ mod "glusterfs",
 
 mod "concat",
    :git => "git://github.com/puppetlabs/puppetlabs-concat.git",
-   :ref => "c70d77ca2b11666f7faae52b8079264fa0c5a8c5"
+   :ref => "803f95830ebe58485c03abdae46801c12ca89be3"
 
 mod "hosts",
   :git => "git://github.com/ghoneycutt/puppet-module-hosts.git",
