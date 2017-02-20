@@ -26,13 +26,22 @@ if [ x"$command" = x"add" ]; then
 		exit 0
 	fi
 
+	mail_volume_path="/storage/mailcontent"
+	if [ x"$volume" = x"mail_volume" ] && [ -d "$mail_volume_path" ]; then
+		[ -d "$mail_volume_path/$path" ] || {
+			mkdir -p "$mail_volume_path/$path"
+			chown 2000:2000 "$mail_volume_path/$path"
+			chmod 700 "$mail_volume_path/$path"
+		}
+	fi
+
 	output=`gluster volume quota "$volume" limit-usage "$path" "$quota" 2>&1`
 	echo "$output"
-	echo "$output" | grep -i "limit set" > /dev/null
+	echo "$output" | grep -iE "success|limit set" > /dev/null
 elif [ x"$command" = x"remove" ]; then
 	output=`gluster volume quota "$volume" remove "$path" 2>&1`
 	echo "$output"
-	echo "$output" | grep -iE "removed quota|no limit set" > /dev/null
+	echo "$output" | grep -iE "success|removed quota|no limit set|No such file" > /dev/null
 else
 	echo "unknown command $command"
 	exit 1

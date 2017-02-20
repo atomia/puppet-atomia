@@ -36,40 +36,24 @@ class atomia::glusterfs (
   $is_first_node = hiera('atomia::glusterfs::is_first_node', 0)
 
   # Set ip correctly when on ec2
-  if !$public_ip {
-    if $::ec2_public_ipv4 {
-      $public_ip = $::ec2_public_ipv4
-      # Fix resolv.conf on EC2
-      $ad_ip = hiera('atomia::active_directory::master_ip', '8.8.8.8')
-      file_line { 'dhclient-fix':
-        path => '/etc/dhcp/dhclient.conf',
-        line => "supersede domain-name-servers $ad_ip;",
-        notify => Exec['reload dhcp']
-      } ->
-      exec {'reload dhcp':
-        command => '/usr/bin/sudo dhclient -r; /usr/bin/sudo dhclient',
-        subscribe => File_line['dhclient-fix'],
-        refreshonly => true
-     }
-
-
-    } elsif $::ipaddress_eth0 {
-      $public_ip = $::ipaddress_eth0
-    }
-    else {
-      $public_ip = $::ipaddress
+  if defined('$::ec2_public_ipv4') {
+    # Fix resolv.conf on EC2
+    $ad_ip = hiera('atomia::active_directory::master_ip', '8.8.8.8')
+    file_line { 'dhclient-fix':
+      path => '/etc/dhcp/dhclient.conf',
+      line => "supersede domain-name-servers $ad_ip;",
+      notify => Exec['reload dhcp']
+    } ->
+    exec {'reload dhcp':
+      command => '/usr/bin/sudo dhclient -r; /usr/bin/sudo dhclient',
+      subscribe => File_line['dhclient-fix'],
+      refreshonly => true
     }
   }
-
 
   $netbios_domain_name = hiera('atomia::active_directory::netbios_domain_name')
   $domain_name         = hiera('atomia::active_directory::domain_name')
   $ad_password         = hiera('atomia::active_directory::windows_admin_password')
-
-  host { 'domain-member-host':
-    name => "${::hostname}.${domain_name}",
-    ip   => $::ipaddress_eth0
-  }
 
   $peers_arr = split($peers,',')
   $peers_size = size($peers_arr)
@@ -78,7 +62,8 @@ class atomia::glusterfs (
   package { 'xfsprogs': ensure => present }
   package { 'lvm2': ensure => present }
   package { 'samba': ensure => present }
-  package { 'ctdb': ensure => present}
+  package { 'ctdb': ensure => present }
+  package { 'attr': ensure => present, require => [ Package['glusterfs-server'] ] }
 
   package { 'glusterfs-server': ensure => installed }
   ->
@@ -219,6 +204,14 @@ class atomia::glusterfs (
     options => 'defaults,_netdev',
     fstype  => 'glusterfs',
     require => [Exec['start web volume'], File['/storage']],
+  }
+
+  fstab::mount { '/storage/mailcontent':
+    ensure  => 'mounted',
+    device  => "${gluster_hostname}:/mail_volume",
+    options => 'defaults,_netdev',
+    fstype  => 'glusterfs',
+    require => [Exec['start mail volume'], File['/storage']],
   }
 
   exec { 'start web volume':
