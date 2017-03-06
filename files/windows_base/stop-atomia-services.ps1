@@ -1,0 +1,12 @@
+Stop-Service AccountGrpcService
+Stop-Service ActionTrailGrpcService
+Stop-Service AuthorizationGrpcService
+Stop-Service AtomiaAutomationServerCleanUpService
+Stop-Service AtomiaAutomationServerPeriodicUpdater
+Stop-Service AtomiaAutomationServerProvisioningEngine
+Stop-Service BillingGrpcService
+Stop-Service ConfigGrpcService
+Stop-Service CoreGrpcService
+Stop-Service NativeGrpcService
+Stop-Service PublicOrderGrpcService
+Stop-Service UserGrpcService

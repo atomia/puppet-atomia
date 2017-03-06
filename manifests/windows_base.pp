@@ -411,6 +411,15 @@ class atomia::windows_base (
     source => 'puppet:///modules/atomia/windows_base/recreate_all_config_files.ps1'
   }
 
+  file { 'c:/install/stop-atomia-services.ps1':
+    source  => 'puppet:///modules/windows_base/stop-atomia-services.ps1',
+    require => File['c:/install']
+  }
+
+  file { 'c:/install/start-atomia-services.ps1':
+    source  => 'puppet:///modules/windows_base/start-atomia-services.ps1',
+    require => File['c:/install']
+  }
 
   if($::vagrant){
     file { 'c:/install/certificates':
