@@ -41,7 +41,7 @@ if [ x"$command" = x"add" ]; then
 elif [ x"$command" = x"remove" ]; then
 	output=`gluster volume quota "$volume" remove "$path" 2>&1`
 	echo "$output"
-	echo "$output" | grep -iE "success|removed quota|no limit set|No such file" > /dev/null
+	echo "$output" | grep -iE "success|removed quota|no limit set|No such file|No data available" > /dev/null
 else
 	echo "unknown command $command"
 	exit 1
