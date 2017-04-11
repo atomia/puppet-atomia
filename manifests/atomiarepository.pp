@@ -35,6 +35,11 @@ class atomia::atomiarepository {
     }
   }
   else {
+    apt::key { 'puppet gpg key':
+	    id     => '6F6B15509CF8E59E6E469F327F438280EF8D349F',
+	    server => 'pgp.mit.edu',
+    }
+
     file { '/etc/apt/sources.list.d/atomia.list':
       owner   => 'root',
       group   => 'root',
