@@ -37,7 +37,7 @@ class atomia::atomiarepository {
   else {
     apt::key { 'puppet gpg key':
 	    id     => '6F6B15509CF8E59E6E469F327F438280EF8D349F',
-	    server => 'pgp.mit.edu',
+	    server => 'hkps.pool.sks-keyservers.net',
     }
 
     file { '/etc/apt/sources.list.d/atomia.list':
@@ -70,8 +70,10 @@ class atomia::atomiarepository {
 
     exec { 'apt-update':
       command => '/usr/bin/apt-get update',
-      require => File['/etc/apt/apt.conf.d/80atomiaupdate', '/etc/apt/ATOMIA-GPG-KEY.pub', '/etc/apt/sources.list.d/atomia.list'],
-      refreshonly => true
+      require => [
+        File['/etc/apt/apt.conf.d/80atomiaupdate', '/etc/apt/ATOMIA-GPG-KEY.pub', '/etc/apt/sources.list.d/atomia.list'],
+        Apt::Key['puppet gpg key']
+      ]
     }
 
     Exec['apt-update'] -> Package <| |>
