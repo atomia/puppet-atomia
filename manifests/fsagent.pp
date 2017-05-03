@@ -41,6 +41,7 @@ class atomia::fsagent (
 
 
 
+  package { 'attr': ensure => present }
   package { 'python-software-properties': ensure => present }
   package { 'python': ensure => present }
   package { 'g++': ensure => present }
@@ -62,13 +63,15 @@ class atomia::fsagent (
       path    => '/usr/bin:/usr/sbin:/bin',
       unless  => 'test -L /usr/bin/gem && ls -l /usr/bin/gem | grep gem2.0 > /dev/null'
     }
+  } else {
+    package { 'ruby': ensure => present }
   }
-
-
+  
   package { ['jgrep']:
     ensure   => installed,
     provider => 'gem'
   }
+
   class { 'apt': }
 
   if $::operatingsystem == 'Ubuntu' {
@@ -121,29 +124,25 @@ class atomia::fsagent (
     $gluster_hostname = hiera('atomia::glusterfs::gluster_hostname','')
 
     if $content_share_nfs_location == '' {
-      package { 'glusterfs-client': ensure => present, }
-
       if !defined(File['/storage']) {
         file { '/storage':
           ensure => directory,
         }
       }
 
-      fstab::mount { '/storage/content':
+      glusterfs::mount { '/storage/content':
         ensure     => 'mounted',
-        manage_dir => false,
         device     => "${gluster_hostname}:/web_volume",
         options    => 'defaults,_netdev',
         fstype     => 'glusterfs',
-        require    => [Package['glusterfs-client'],File['/storage']],
+        require    => File['/storage'],
       }
-      fstab::mount { '/storage/configuration':
+      glusterfs::mount { '/storage/configuration':
         ensure     => 'mounted',
-        manage_dir => false,
         device     => "${gluster_hostname}:/config_volume",
         options    => 'defaults,_netdev',
         fstype     => 'glusterfs',
-        require    => [ Package['glusterfs-client'],File['/storage']],
+        require    => File['/storage'],
       }
     }
     else
