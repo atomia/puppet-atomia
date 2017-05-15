@@ -1,0 +1,7 @@
+---
+classes:
+   - atomia::active_directory
+   - atomia::windows_base
+   - atomia::atomia_database
+   - atomia::internal_apps
+   - atomia::public_apps
