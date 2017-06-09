@@ -412,12 +412,12 @@ class atomia::windows_base (
   }
 
   file { 'c:/install/stop-atomia-services.ps1':
-    source  => 'puppet:///modules/windows_base/stop-atomia-services.ps1',
+    source  => 'puppet:///modules/atomia/windows_base/stop-atomia-services.ps1',
     require => File['c:/install']
   }
 
   file { 'c:/install/start-atomia-services.ps1':
-    source  => 'puppet:///modules/windows_base/start-atomia-services.ps1',
+    source  => 'puppet:///modules/atomia/windows_base/start-atomia-services.ps1',
     require => File['c:/install']
   }
 
