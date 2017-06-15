@@ -50,6 +50,10 @@ class atomia::atomiadns_powerdns (
     package { 'libdbi-perl':
       ensure => present
     }
+	
+    package { 'curl':
+      ensure => present
+    }
 
     file { '/etc/apt/sources.list.d/pdns.list':
       ensure  => present,
@@ -65,8 +69,9 @@ class atomia::atomiadns_powerdns (
     } ->
     exec {'powerdns-pubkey':
       command => '/usr/bin/curl https://repo.powerdns.com/FD380FBB-pub.asc | /usr/bin/sudo /usr/bin/apt-key add -',
-      refreshonly => true,
-      notify  => Exec['apt-update-pdns']
+      unless => '/usr/bin/gpg --recv-keys FD380FBB >/dev/null 2>&1',
+      notify  => Exec['apt-update-pdns'],
+      require => Package['curl']
     } ->
     exec {'apt-update-pdns':
       command => '/usr/bin/apt-get update',
