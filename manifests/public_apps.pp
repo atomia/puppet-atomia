@@ -102,4 +102,22 @@ exec {'install-bcp':
       content => 'atomia_role_1=atomia_public_apps',
     }
   }
+
+  # Install .NET framework 4.6.1
+  if versioncmp($::kernelmajversion, '6.1') > 0 {	# this matches 2012 and forward
+    if(!defined(File['c:/install/install_net461.ps1'])) {
+      file { 'c:/install/install_net461.ps1':
+        ensure => 'file',
+        source => 'puppet:///modules/atomia/windows_base/install_net461.ps1',
+      }
+   }
+
+    if(!defined(Exec['Install-NET461'])) {
+      exec { 'Install-NET461':
+        command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file C:\install\install_net461.ps1',
+        creates => 'C:\install\installed_net461.txt',
+        require => File['c:/install/install_net461.ps1'],
+      }
+   }
+  }
   }
