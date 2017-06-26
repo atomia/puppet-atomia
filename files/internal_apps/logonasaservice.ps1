@@ -10,10 +10,16 @@ param(
     $Sids = $curSIDs.line
     $sidstring = ""
     foreach($user in $users){
-        $objUser = New-Object System.Security.Principal.NTAccount($user)
-        $strSID = $objUser.Translate([System.Security.Principal.SecurityIdentifier])
+        try{
+            $objUser = New-Object System.Security.Principal.NTAccount("$user") 
+            $strSID = $objUser.Translate([System.Security.Principal.SecurityIdentifier])
+        }
+        catch{
+            Write-Host "User ""$user"" can not be found !!!" -foregroundcolor red
+            break
+        }
         if(!$Sids.Contains($strSID) -and !$sids.Contains($user)){
-            $sidstring += ",*$strSID"
+        	$sidstring += ",*$strSID"
         }
     }
     if($sidstring){
