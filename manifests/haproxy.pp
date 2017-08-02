@@ -373,27 +373,3 @@ class atomia::haproxy (
     }
   }
 }
-
-define haproxy::ipalias(
-  $alias_num,
-  $interface = '',
-  $ip        = '',
-  $netmask   = '',
-) {
-
-  if $ip != '' {
-    augeas { "haproxy_ipalias_${ip}":
-      context => '/files/etc/network/interfaces',
-      changes => [
-        "set auto[child::1 = '${interface}:${alias_num}']/1 ${interface}:${alias_num}",
-        "set iface[. = '${interface}:${alias_num}'] ${interface}:${alias_num}",
-        "set iface[. = '${interface}:${alias_num}']/family inet",
-        "set iface[. = '${interface}:${alias_num}']/method static",
-        "set iface[. = '${interface}:${alias_num}']/address ${ip}",
-        "set iface[. = '${interface}:${alias_num}']/netmask ${netmask}",
-      ],
-      notify  => Exec['enable-all-interfaces'],
-      before  => [ Package['heartbeat'], Service['heartbeat'] ]
-    }
-  }
-}
