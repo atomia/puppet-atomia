@@ -39,7 +39,7 @@ sudo apt-get install puppetdb-terminus
 
 mkdir -p /etc/puppet/atomia/service_files
 
-echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref => \"master\" " > /etc/puppet/Puppetfile
+echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref => \"old\" " > /etc/puppet/Puppetfile
 
 cd /etc/puppet
 
