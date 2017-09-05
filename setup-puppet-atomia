@@ -2,10 +2,6 @@ sudo apt-get update
 
 apt-get install -y puppetmaster git apache2-utils curl rubygems-integration build-essential libmysqlclient-dev ruby-dev
 echo "127.0.0.1 puppet" >> /etc/hosts
-#echo "127.0.0.1 puppetdb" >> /etc/hosts
-
-#puppet agent --enable
-#puppet agent --test
 
 gem install hiera-mysql hiera-mysql-backend mysql mysql2
 cd /etc/puppet
@@ -27,7 +23,6 @@ cd /etc/puppet
 
 gem install librarian-puppet
 HOME=/root librarian-puppet install
-cp /etc/puppet/modules/atomia/files/default_files/* /etc/puppet/atomia/service_files/
 
 mkdir -p /etc/puppet/manifests/
 echo "
@@ -84,7 +79,8 @@ ssl_client_verify_header = SSL_CLIENT_VERIFY
 autosign = true
 reports = store" > /etc/puppet/puppet.conf
 
-mv modules/atomia/examples/hieradata/ /etc/puppet/hieradata/
+cp /etc/puppet/modules/atomia/files/default_files/* /etc/puppet/atomia/service_files/
+mv /etc/puppet/modules/atomia/examples/hieradata/ /etc/puppet/hieradata/
 
 /etc/init.d/puppetmaster restart
 
