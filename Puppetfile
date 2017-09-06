@@ -89,5 +89,5 @@ mod "acl",
     :ref => "bec0f1634035785b5f9837b64c9adfe62546e7cb"
 
 mod "stdlib",
-    :git => "git://github.com:puppetlabs/puppetlabs-stdlib.git",
+    :git => "git://github.com/puppetlabs/puppetlabs-stdlib.git",
     :ref => "f6781af353a678601817e0f1cc0e3813ea79d952"
