@@ -1,3 +1,4 @@
+#!/bin/bash
 if [ `lsb_release -r | awk '{print $2}'` == '14.04' ]
 then
 	wget https://apt.puppetlabs.com/puppetlabs-release-trusty.deb
