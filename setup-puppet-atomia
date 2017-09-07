@@ -1,3 +1,11 @@
+if [ `lsb_release -r | awk '{print $2}'` == '14.04' ]
+then
+	wget https://apt.puppetlabs.com/puppetlabs-release-trusty.deb
+	sudo dpkg -i puppetlabs-release-trusty.deb
+else
+	printf "\nERROR: This server is intended to run on Ubuntu 14.04 only!\n"
+	exit
+fi
 sudo apt-get update
 
 apt-get install -y puppetmaster git apache2-utils curl rubygems-integration build-essential libmysqlclient-dev ruby-dev
