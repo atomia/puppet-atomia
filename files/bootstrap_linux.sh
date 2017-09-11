@@ -103,5 +103,5 @@ fi
 installpuppet
 
 #Clean up
-rm $0
+rm bootstrap_linux.sh
 echo "Done with bootstrap process !!!"
