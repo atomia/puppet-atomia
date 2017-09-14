@@ -7,7 +7,7 @@ Facter.add('atomia_role_1') do
         setcode do
                 serverFQDN = Facter.value(:fqdn)
                 puppetFQDN = getPuppetFQDN()
-                JSON.parse(open("http://#{puppetFQDN}:3000/roles/#{serverFQDN}/json"))["roles"][0]
+                JSON.parse(Net::HTTP.get(URI.parse("http://#{puppetFQDN}:3000/roles/#{serverFQDN}/json")))["roles"][0]
         end
 end
 
@@ -15,7 +15,7 @@ Facter.add('atomia_role_2') do
         setcode do
                 serverFQDN = Facter.value(:fqdn)
                 puppetFQDN = getPuppetFQDN()
-                JSON.parse(open("http://#{puppetFQDN}:3000/roles/#{serverFQDN}/json"))["roles"][1]
+                JSON.parse(Net::HTTP.get(URI.parse("http://#{puppetFQDN}:3000/roles/#{serverFQDN}/json")))["roles"][1]
         end
 end
 
@@ -23,7 +23,7 @@ Facter.add('atomia_role_3') do
         setcode do
                 serverFQDN = Facter.value(:fqdn)
                 puppetFQDN = getPuppetFQDN()
-                JSON.parse(open("http://#{puppetFQDN}:3000/roles/#{serverFQDN}/json"))["roles"][2]
+                JSON.parse(Net::HTTP.get(URI.parse("http://#{puppetFQDN}:3000/roles/#{serverFQDN}/json")))["roles"][2]
         end
 end
 
@@ -31,7 +31,7 @@ Facter.add('atomia_role_4') do
         setcode do
                 serverFQDN = Facter.value(:fqdn)
                 puppetFQDN = getPuppetFQDN()
-                JSON.parse(open("http://#{puppetFQDN}:3000/roles/#{serverFQDN}/json"))["roles"][3]
+                JSON.parse(Net::HTTP.get(URI.parse("http://#{puppetFQDN}:3000/roles/#{serverFQDN}/json")))["roles"][3]
         end
 end
 
@@ -39,12 +39,8 @@ Facter.add('atomia_role_5') do
         setcode do
                 serverFQDN = Facter.value(:fqdn)
                 puppetFQDN = getPuppetFQDN()
-                JSON.parse(open("http://#{puppetFQDN}:3000/roles/#{serverFQDN}/json"))["roles"][4]
+                JSON.parse(Net::HTTP.get(URI.parse("http://#{puppetFQDN}:3000/roles/#{serverFQDN}/json")))["roles"][4]
         end
-end
-
-def open(url)
-        Net::HTTP.get(URI.parse(url))
 end
 
 def getPuppetFQDN
