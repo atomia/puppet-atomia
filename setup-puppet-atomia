@@ -14,7 +14,7 @@ cd /etc/puppet
 
 ## Setup MYSQL and add hiera user and database
 if [ -z ${HIERA_USER_PASSWORD+x} ]; then
-HIERA_USER_PASSWORD=`date +%s | sha256sum | base64 | head -c 16 ; echo`
+HIERA_USER_PASSWORD=`date +%s | sha256sum | base64 | head -c 16`
 fi
 
 SERVER_FQDN=`facter fqdn`
