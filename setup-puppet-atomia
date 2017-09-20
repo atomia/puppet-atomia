@@ -2,11 +2,13 @@ wget https://apt.puppetlabs.com/puppetlabs-release-trusty.deb
 sudo dpkg -i puppetlabs-release-trusty.deb
 sudo apt-get update
 
-apt-get install -y puppetmaster puppet git apache2-utils curl rubygems-integration build-essential libmysqlclient-dev ruby-dev
+sudo apt-get install -y puppetmaster puppet git apache2-utils curl rubygems-integration build-essential libmysqlclient-dev ruby-dev
+sudo apt-get install -y puppetdb puppetdb-terminus
+
 echo "127.0.0.1 puppet" >> /etc/hosts
 echo "127.0.0.1 puppetdb" >> /etc/hosts
 
-gem install hiera-mysql hiera-mysql-backend mysql mysql2
+gem install --no-rdoc --no-ri hiera-mysql hiera-mysql-backend mysql mysql2
 cd /etc/puppet
 
 ## Setup MYSQL and add hiera user and database
@@ -19,15 +21,10 @@ mysql --defaults-file=/etc/mysql/debian.cnf -e "GRANT USAGE ON *.* TO 'hierauser
 mysql --defaults-file=/etc/mysql/debian.cnf -e "CREATE USER 'hierauser'@'localhost' IDENTIFIED BY '${HIERA_USER_PASSWORD}'; GRANT ALL PRIVILEGES ON hiera.* TO 'hierauser'@'localhost';FLUSH PRIVILEGES;"
 
 ## Setup PuppetDB
-
 echo "[main]
 server = ${SERVER_FQDN}
 port = 8081
 soft_write_failure = false" > /etc/puppet/puppetdb.conf
-
-sudo apt-get install puppetdb puppetdb-terminus
-sudo service puppetdb start
-sudo update-rc.d puppetdb defaults
 
 mkdir -p /etc/puppet/atomia/service_files
 
@@ -35,7 +32,7 @@ echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref
 
 cd /etc/puppet
 
-gem install librarian-puppet
+gem install --no-rdoc --no-ri librarian-puppet
 HOME=/root librarian-puppet install
 cp /etc/puppet/modules/atomia/files/default_files/* /etc/puppet/atomia/service_files/
 
@@ -100,6 +97,9 @@ storeconfigs_backend = puppetdb
 reports = store,puppetdb" > /etc/puppet/puppet.conf
 
 mv modules/atomia/examples/hieradata/ /etc/puppet/hieradata/
+
+sudo update-rc.d puppetdb defaults
+sudo service puppetdb start
 
 /etc/init.d/puppetmaster restart
 
