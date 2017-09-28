@@ -21,6 +21,7 @@ class atomia::internal_mailserver (
     changes => [
       "set mynetworks ${allow_subnet}",
     ],
+    require => [ Package['postfix'] ],
     notify  => Service['postfix']
   }
 
