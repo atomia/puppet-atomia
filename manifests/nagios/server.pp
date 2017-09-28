@@ -39,7 +39,6 @@ class atomia::nagios::server(
     'atomia-manager',
     'build-essential',
     'curl',
-    'libapache2-mod-php5',
     'libdatetime-format-iso8601-perl',
     'libdatetime-perl',
     'libgd2-xpm-dev',
@@ -49,24 +48,46 @@ class atomia::nagios::server(
     'nagios-nrpe-server',
     'nagios-plugins',
     'openssl',
-    'php5',
-    'php5-mcrypt',
     'python-pkg-resources',
-    'ruby2.0',
   ]:
     ensure => installed,
   }
 
+  if $::lsbdistrelease == '16.04' {
+    package { [
+      'libapache2-mod-php',
+      'php7.0',
+      'php7.0-mcrypt',
+      'ruby2.3',
+    ]:
+      ensure => installed,
+    }
+    package { ['jgrep']:
+      ensure   => installed,
+      provider => 'gem',
+      require  => [Package['ruby2.3']],
+    }
+  } else {
+    package { [
+      'libapache2-mod-php5',
+      'php5',
+      'php5-mcrypt',
+      'ruby2.0',
+    ]:
+      ensure => installed,
+    }
+    package { ['jgrep']:
+      ensure   => installed,
+      provider => 'gem',
+      require  => [Package['ruby2.0']],
+    }
+  }
+  
+  
   if ! defined(Package['libwww-mechanize-perl']) {
     package { 'libwww-mechanize-perl':
       ensure => installed,
     }
-  }
-
-  package { ['jgrep']:
-    ensure   => installed,
-    provider => 'gem',
-    require  => [Package['ruby2.0']],
   }
 
   group { 'nagios-group':
