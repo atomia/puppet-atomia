@@ -51,7 +51,7 @@ class atomia::daggre (
   class { 'apt': }
 
   class {'::mongodb::globals':
-    manage_package_repo => true
+    manage_package_repo => false
   } ->
   class {'::mongodb::client': } ->
   class {'::mongodb::server':
