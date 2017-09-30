@@ -51,23 +51,44 @@ class atomia::fsagent (
   }
   package { 'python-pkg-resources': ensure => present }
 
-  package { 'ruby2.0':
-    ensure => present,
-    notify => Exec['set-gem-symlink'],
-  }
-
-  exec { 'set-gem-symlink':
-    command => 'ln -fs /usr/bin/gem2.0 /usr/bin/gem',
-    require => Package['ruby2.0'],
+  if $::lsbdistrelease == '16.04' {
+    package { [
+      'ruby2.3',
+    ]:
+      ensure => installed,
+	  notify => Exec['set-gem-symlink'],
+    }
+    package { ['jgrep']:
+      ensure   => installed,
+      provider => 'gem',
+      require  => [Package['ruby2.3'], Exec['set-gem-symlink']],
+    }
+    exec { 'set-gem-symlink':
+    command => 'ln -fs /usr/bin/gem2.3 /usr/bin/gem',
+    require => Package['ruby2.3'],
     path    => '/usr/bin:/usr/sbin:/bin',
-    unless  => 'test -L /usr/bin/gem && ls -l /usr/bin/gem | grep gem2.0 > /dev/null'
+    unless  => 'test -L /usr/bin/gem && ls -l /usr/bin/gem | grep gem2.3 > /dev/null'
+    }
+  } else {
+    package { [
+      'ruby2.0',
+    ]:
+      ensure => installed,
+	  notify => Exec['set-gem-symlink'],
+    }
+    package { ['jgrep']:
+      ensure   => installed,
+      provider => 'gem',
+      require  => [Package['ruby2.0'], Exec['set-gem-symlink']],
+    }
+    exec { 'set-gem-symlink':
+      command => 'ln -fs /usr/bin/gem2.0 /usr/bin/gem',
+      require => Package['ruby2.0'],
+      path    => '/usr/bin:/usr/sbin:/bin',
+      unless  => 'test -L /usr/bin/gem && ls -l /usr/bin/gem | grep gem2.0 > /dev/null'
+    }
   }
 
-  package { ['jgrep']:
-    ensure   => installed,
-    provider => 'gem',
-    require  => [Package['ruby2.0'], Exec['set-gem-symlink']],
-  }
   class { 'apt': }
 
   if $::operatingsystem == 'Ubuntu' {
