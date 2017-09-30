@@ -43,7 +43,19 @@ class atomia::awstats (
   package { 'procmail': ensure => installed }
 
   if !defined(Package['apache2-mpm-worker']) and !defined(Package['apache2-mpm-prefork']) and !defined(Package['apache2']) {
-    package { 'apache2-mpm-worker': ensure => installed }
+    if $::lsbdistrelease == '16.04' {
+      package { [
+        'apache2',
+      ]:
+        ensure => installed,
+      }
+    } else {
+      package { [
+        'apache2-mpm-worker',
+      ]:
+        ensure => installed,
+      }
+    }
   }
 
   if $skip_mount == '0' {
@@ -209,7 +221,7 @@ class atomia::awstats (
   if !defined(Exec['/usr/sbin/a2enmod rewrite']) {
     exec { '/usr/sbin/a2enmod rewrite':
       unless  => '/usr/bin/test -f /etc/apache2/mods-enabled/rewrite.load',
-      require => Package['apache2-mpm-worker'],
+      require => Package['apache2'],
       notify  => Exec['force-reload-apache'],
     }
   }
