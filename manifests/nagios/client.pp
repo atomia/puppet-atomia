@@ -214,37 +214,6 @@ class atomia::nagios::client(
     }
 
 
-    if ($::atomia_role_1 == 'daggre') {
-      @@nagios_service { "${::fqdn}-daggre":
-        host_name           => $::fqdn,
-        service_description => 'Daggre disk space parser',
-        check_command       => 'check_nrpe_1arg!check_daggre_ftp',
-        use                 => 'generic-service',
-        target              => "/etc/nagios3/conf.d/${::hostname}_services.cfg",
-      }
-
-      @@nagios_service { "${::fqdn}-daggre-weblog":
-        host_name           => $::fqdn,
-        service_description => 'Daggre weblog parser',
-        check_command       => 'check_nrpe_1arg!check_daggre_weblog',
-        use                 => 'generic-service',
-        target              => "/etc/nagios3/conf.d/${::hostname}_services.cfg",
-      }
-
-    }
-
-
-    if ($::atomia_role == 'domainreg') {
-
-      @@nagios_service { "${::fqdn}-domainreg":
-        host_name           => $::fqdn,
-        service_description => 'Domainreg API .com',
-        check_command       => 'check_nrpe!check_domainreg!foo.com',
-        use                 => 'generic-service',
-        target              => "/etc/nagios3/conf.d/${::hostname}_services.cfg",
-      }
-    }
-
     if !defined(File['/usr/lib/nagios/plugins/atomia']){
       file { '/usr/lib/nagios/plugins/atomia':
         source  => 'puppet:///modules/atomia/nagios/plugins',
