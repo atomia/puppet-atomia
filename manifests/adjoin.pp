@@ -25,7 +25,7 @@ class atomia::adjoin (
   $admin_user        = 'WindowsAdmin',
   $admin_password    = hiera('atomia::active_directory::windows_admin_password', ''),
   $bind_user         = 'PosixGuest',
-  $bind_password     = hiera('atomia::active_directory::bind_password', ''),
+  $bind_password     = hiera('atomia::active_directory::bind_password', '@posix123'),
   $use_nss_pam_ldapd = '1',
   ) {
   $active_directory_ip = hiera('atomia::active_directory::master_ip','')
@@ -62,7 +62,8 @@ class atomia::adjoin (
     # Join AD on Linux
     $dc=regsubst($domain_name, '\.', ',dc=', 'G')
     $base_dn = "cn=Users,dc=${dc}"
-
+    $base_pw = "$bind_password"
+	
     if $::vagrant {
       $ad_servers = 'ldap://192.168.33.10'
     } else {

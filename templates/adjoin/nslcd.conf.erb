@@ -4,7 +4,7 @@ base <%= @base_dn %>
 uri <%= @ad_servers %>
 
 binddn cn=PosixGuest,<%= @base_dn %>
-bindpw @posix123
+bindpw <%= @base_pw %>
 scope sub
 scope group sub
 scope hosts sub
