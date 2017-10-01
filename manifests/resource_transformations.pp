@@ -66,6 +66,16 @@ class atomia::resource_transformations (
     require => File['C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/'],
   }
 
+  $postgre_server_ip = hiera('atomia::postgresql::server_ip', '')
+  $postgre_server_public_ip = hiera('atomia::postgresql::server_public_ip', '')
+  $postgre_user      = hiera('atomia::postgresql::postgresql_username', '')
+  $postgre_password  = hiera('atomia::postgresql::postgresql_password', '')
+  file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.PostgreSQL.xml' :
+    ensure  => 'file',
+    content => template('atomia/resource_transformations/Resources.PostgreSQL.erb'),
+    require => File['C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/'],
+  }
+
   $daggre_host = hiera('atomia::daggre::ip_addr', '')
   $daggre_token = hiera('atomia::daggre::global_auth_token', '')
   file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.Daggre.xml' :

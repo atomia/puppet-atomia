@@ -1,0 +1,19 @@
+<resourceDescription xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+  <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.PostgreSQL.PostgreSQL'])" xdt:Transform="Replace">
+    <moduleList>
+      <module name="Atomia.Provisioning.Modules.PostgreSQL.PostgreSQL" resourceAsignmentPolicy="ExactResource" />
+      <module name="Atomia.Provisioning.Modules.PostgreSQL.PostgreSQL" resourceAsignmentPolicy="DefaultResource" />
+    </moduleList>
+    <resourceList>
+      <resource name="PostgreSQL01">
+        <property name="PublicIpAddress"><%= @postgre_server_public_ip %></property>
+        <property name="DatabaseServer"><%= @postgre_server_ip %></property>
+        <property name="DatabasePort">5432</property>
+        <property name="DefaultDatabase">postgres</property>
+        <property name="DefaultSchema">public</property>
+        <property name="Username"><%= @postgre_user %></property>
+        <property name="Password"><%=  @postgre_password %></property>
+      </resource>
+    </resourceList>
+  </bindings>
+</resourceDescription>
