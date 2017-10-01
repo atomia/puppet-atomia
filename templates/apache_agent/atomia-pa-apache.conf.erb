@@ -80,7 +80,9 @@ IdleTimeout 30
 <Directory /storage/content/*/*/*/public_html>
         Options +Includes +ExecCGI -Indexes
         AllowOverride All
-
+        <% if @lsbdistrelease != "12.04" %>
+        Require all granted
+        <% end %>
         DirectoryIndex index.php index.html index.htm index.shtml index.wml default.html default.htm
 
         AddHandler cgi-script .pl .cgi .py
@@ -91,13 +93,15 @@ IdleTimeout 30
 <Directory /storage/content/systemservices/public_html>
         Options +Includes +ExecCGI -Indexes
         AllowOverride All
-
+        <% if @lsbdistrelease != "12.04" %>
+        Require all granted
+        <% end %>
         AddHandler fcgid-script .php
         FCGIWrapper /var/www/cgi-wrappers/php-fcgid-wrapper-no-id-test .php
 </Directory>
 
-<% if @lsbdistrelease == "14.04" # TODO: Should instead check apache version %>
-IncludeOptional ssl.d/*.conf
-<% else %>
+<% if @lsbdistrelease == "12.04" # TODO: Should instead check apache version %>
 Include ssl.d/*.conf
+<% else %>
+IncludeOptional ssl.d/*.conf
 <% end %>
