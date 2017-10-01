@@ -20,6 +20,19 @@ class atomia::sshserver (
 
   class { 'apt': }
 
+  if !defined(File['/storage']) {
+    file { '/storage':
+      ensure => directory,
+    }
+  }
+
+  if !defined(File['/storage/content']) {
+    file { '/storage/content':
+      ensure  => directory,
+      require => File['/storage'],
+    }
+  }
+
   if $content_share_nfs_location == '' {
     package { 'glusterfs-client': ensure => present, }
     $internal_zone = hiera('atomia::internaldns::zone_name','')
@@ -28,20 +41,15 @@ class atomia::sshserver (
       device  => "gluster.${internal_zone}:/web_volume",
       options => 'defaults,_netdev',
       fstype  => 'glusterfs',
-      require => [Package['glusterfs-client'],File['/storage']],
+      require => [Package['glusterfs-client'],File['/storage/content']],
     }
   }
   else {
     atomia::nfsmount { 'mount_content':
       use_nfs3     => $use_nfs3,
       mount_point  => '/storage/content',
-      nfs_location => $content_share_nfs_location
-    }
-    if !defined(File['/storage/content']) {
-      file { '/storage/content':
-        ensure  => directory,
-        require => File['/storage'],
-      }
+      nfs_location => $content_share_nfs_location,
+      require => File['/storage/content'],
     }
   }
 }
