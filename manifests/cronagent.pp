@@ -54,7 +54,7 @@ class atomia::cronagent (
   $mongo_db_name      = 'cronagent'
 ){
   class {'::mongodb::globals':
-    manage_package_repo => true
+    manage_package_repo => false
   } ->
   class {'::mongodb::client': } ->
   class {'::mongodb::server':
