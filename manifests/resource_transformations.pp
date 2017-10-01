@@ -136,13 +136,6 @@ class atomia::resource_transformations (
     require => File['C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/'],
   }
 
-  file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.Webinstaller.xml' :
-    ensure  => 'file',
-    content => template('atomia/resource_transformations/Resources.Webinstaller.erb'),
-    require => File['C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/'],
-  }
-
-
   $installatron_url = hiera('atomia::installatron::installatron_hostname','')
   $installatron_key = hiera('atomia::installatron::authentication_key','')
   file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.Installatron.xml' :
