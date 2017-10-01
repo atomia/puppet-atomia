@@ -5,14 +5,20 @@
 ### Variable documentation
 #### postgresql_username: The username of the PostgreSQL user that Automation Server provisions databases and users through.
 #### postgresql_password: The password for the PostgreSQL user that Automation Server provisions databases and users through.
+#### server_ip: Server management IP address (eg. 192.168.33.178)
+#### server_public_ip: Server public IP address (eg. 212.200.237.157)
 
 ### Validations
 ##### postgresql_username(advanced): ^[a-z0-9_-]+$
 ##### postgresql_password(advanced): %password
+##### server_ip: .*
+##### server_public_ip: .*
 
 class atomia::postgresql (
-  $postgresql_username = 'automationserver',
-  $postgresql_password
+  $postgresql_username  = 'automationserver',
+  $postgresql_password  = '',
+  $server_ip            = '',
+  $server_public_ip     = '',
 ){
 
   class { 'postgresql::server':
