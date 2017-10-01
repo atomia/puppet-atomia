@@ -7,6 +7,7 @@ class atomia::nagios::client(
   $atomiadns_master_class    = 'atomia::nagios::client::atomiadns_master',
   $nameserver_class          = 'atomia::nagios::client::nameserver',
   $fsagent_class             = 'atomia::nagios::client::fsagent',
+  $sshserver_class           = 'atomia::nagios::client::sshserver',
   $awstats_class             = 'atomia::nagios::client::awstats',
   $domainreg_class           = 'atomia::nagios::client::domainreg',
   $internaldns_class         = 'atomia::nagios::client::internaldns',
@@ -133,6 +134,11 @@ class atomia::nagios::client(
       'daggre':              {
         $hostgroup = 'linux-atomia-agents,linux-all'
         class { $daggre_class:
+        }
+      }
+      'sshserver':            {
+        $hostgroup = 'linux-atomia-agents,linux-all'
+        class { $sshserver_class:
         }
       }
       'fsagent':              {
