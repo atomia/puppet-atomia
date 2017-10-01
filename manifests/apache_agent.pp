@@ -195,6 +195,12 @@ class atomia::apache_agent (
       notify  => Service['apache2'],
     }
 
+    exec { "/usr/sbin/a2enconf ${pa_conf_file}":
+      unless  => "/usr/bin/test -f /etc/apache2/config-enabled/${pa_conf_file}",
+      require => Package['apache2'],
+      notify  => Exec['force-reload-apache'],
+    }
+
     file { '/etc/apache2/conf/phpversions.conf':
       owner   => 'root',
       group   => 'root',
