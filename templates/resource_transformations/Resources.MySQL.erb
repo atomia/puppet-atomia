@@ -1,23 +1,17 @@
-<% require 'yaml' %>
-<% server_ips = @mysql_server_ips.split(',') %>
 <resourceDescription xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
   <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.MySql.MySql'])" xdt:Transform="Replace">
-      <moduleList>
+    <moduleList>
       <module name="Atomia.Provisioning.Modules.MySql.MySql" MaxItems="500" resourceAsignmentPolicy="RoundRobinStickyPerAccountWithMaximum" />
+      <module name="Atomia.Provisioning.Modules.MySql.MySql" resourceAsignmentPolicy="ExactResource" />
+      <module name="Atomia.Provisioning.Modules.MySql.MySql" resourceAsignmentPolicy="DefaultResource" />
     </moduleList>
     <resourceList>
-<% server_ips.each do |v| %>
-    <% if defined? v.value  %>
-        <% if v.value != "" %>
-          <resource name="mysql<%= v.value %>">
-            <property name="DatabaseServer"><%= v.value %></property>
-            <property name="PublicIpAddress"><%= v.value %></property>
-            <property name="User"><%= @mysql_user %></property>
-            <property name="Password"><%=  @mysql_password %></property>
-          </resource>
-        <% end %>
-     <% end %>    
-<% end %>
+      <resource name="mysql01">
+        <property name="DatabaseServer"><%= @mysql_server_ip %></property>
+        <property name="PublicIpAddress"><%= @mysql_server_public_ip %></property>
+        <property name="User"><%= @mysql_user %></property>
+        <property name="Password"><%=  @mysql_password %></property>
+      </resource>
     </resourceList>
   </bindings>
 </resourceDescription>
