@@ -7,21 +7,24 @@
 #### mysql_password: The password for the MySQL user that automation server provisions databases through.
 #### mysql_root_password: The password for the MySQL root user.
 #### provisioning_host: The IP or hostname of the server running automation server, used for the automation server MySQL user to restrict access.
-#### server_ips: Comma separated list of all mysql servers ip addresses
+#### server_ip: Mysql server management IP address
+#### server_public_ip: Mysql server public IP address
 
 ### Validations
 ##### mysql_username(advanced): %username
 ##### mysql_password(advanced): %password
 ##### mysql_root_password(advanced): %password
 ##### provisioning_host(advanced): ^[0-9.a-z%-]+$
-##### server_ips: .*
+##### server_ip: .*
+##### server_public_ip: .*
 
 class atomia::mysql (
   $mysql_username       = 'automationserver',
   $mysql_password,
   $mysql_root_password,
   $provisioning_host    = '%',
-  $server_ips           = '',
+  $server_ip            = '',
+  $server_public_ip     = '',
 ){
 
   # TODO: Consider changing % to hostname for automation server in internal zone when this is setup.
