@@ -2,8 +2,9 @@ class atomia::nagios::client::atomiadns_master (
 
 ) {
 
-  $atomiadns_password = generate('/etc/puppet/modules/atomia/files/lookup_variable.sh', 'atomiadns', 'agent_password')
-  $atomiadns_user     = generate('/etc/puppet/modules/atomia/files/lookup_variable.sh', 'atomiadns', 'agent_user')
+  $atomiadns_password = hiera('atomia::atomiadns::agent_password','')
+  $atomiadns_user     = hiera('atomia::atomiadns::agent_user','')
+  $atomiadns_url      = hiera('atomia::atomiadns::atomia_dns_url','')
 
   @@nagios_service { "${::fqdn}-atomiadns_master-process-count":
     host_name           => $::fqdn,
@@ -23,6 +24,3 @@ class atomia::nagios::client::atomiadns_master (
     owner               => 'nagios'
   }
 }
-
-
-
