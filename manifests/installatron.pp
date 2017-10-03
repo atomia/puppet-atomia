@@ -54,7 +54,7 @@ class atomia::installatron (
   }
   else {
     atomia::nfsmount { 'mount_content':
-      use_nfs3     => $use_nfs3,
+      use_nfs3     => '1',
       mount_point  => '/storage/content',
       nfs_location => $content_share_nfs_location
     }

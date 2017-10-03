@@ -90,13 +90,13 @@ class atomia::awstats (
     else
     {
       atomia::nfsmount { 'mount_content':
-        use_nfs3     => 1,
+        use_nfs3     => '1',
         mount_point  => '/storage/content',
         nfs_location => $content_share_nfs_location
       }
 
       atomia::nfsmount { 'mount_configuration':
-        use_nfs3     => 1,
+        use_nfs3     => '1',
         mount_point  => '/storage/configuration',
         nfs_location => $configuration_share_nfs_location
       }

@@ -142,10 +142,10 @@ class atomia::mailserver (
 
     package { $required_packages_antispam: ensure => installed }
 
-    if $::lsbdistrelease == '14.04' {
-      package { 'lhasa': ensure => installed }
-    } else {
+    if $::lsbdistrelease == '12.04' {
       package { 'lha': ensure => installed }
+    } else {
+      package { 'lhasa': ensure => installed }
     }
   }
 
@@ -157,7 +157,7 @@ class atomia::mailserver (
 
   if $mail_share_nfs_location != '' {
     atomia::nfsmount { 'mount_mail_content':
-      use_nfs3     => $use_nfs3,
+      use_nfs3     => '1',
       mount_point  => $mailbox_base,
       nfs_location => $mail_share_nfs_location,
       require      => File[$mailbox_base],

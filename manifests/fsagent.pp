@@ -169,13 +169,13 @@ class atomia::fsagent (
     else
     {
       atomia::nfsmount { 'mount_content':
-        use_nfs3     => 1,
+        use_nfs3     => '1',
         mount_point  => '/storage/content',
         nfs_location => $content_share_nfs_location
       }
 
       atomia::nfsmount { 'mount_configuration':
-        use_nfs3     => 1,
+        use_nfs3     => '1',
         mount_point  => '/storage/configuration',
         nfs_location => $config_share_nfs_location
       }
