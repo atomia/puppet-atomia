@@ -50,11 +50,13 @@ define atomia::nfsmount(
     }
 
     if $::operatingsystem != 'Debian' {
-      if !defined(Service['idmapd']){
-        service {'idmapd' :
-          ensure    => running,
-          subscribe => File['/etc/idmapd.conf'],
-          require   => [Package['nfs-common']],
+      if $::lsbdistrelease != '16.04' {
+        if !defined(Service['idmapd']){
+          service {'idmapd' :
+            ensure    => running,
+            subscribe => File['/etc/idmapd.conf'],
+            require   => [Package['nfs-common']],
+          }
         }
       }
     }
