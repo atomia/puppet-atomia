@@ -218,8 +218,8 @@ command[check_pureftpd_proc]=/usr/lib/nagios/plugins/check_procs -c 1: -a pure-f
 <% $modulepath = "/etc/puppet/modules/atomia/manifests" %>
 <% $lookup_var     = "/etc/puppet/modules/atomia/files/lookup_variable.sh" %>
 
-command[check_daggre_ftp]=/usr/local/nagios/libexec/atomia/check_daggre.pl --uri "<%= @daggre_check_ftp_url %>" --timeout 5 --days 1
-command[check_daggre_weblog]=/usr/local/nagios/libexec/atomia/check_daggre.pl --uri "<%= @daggre_check_traffic_url %>" --timeout 5 --days 1
+command[check_daggre_ftp]=/usr/lib/nagios/plugins/atomia/check_daggre.pl --uri "<%= @daggre_check_ftp_url %>" --timeout 5 --days 1
+command[check_daggre_weblog]=/usr/lib/nagios/plugins/atomia/check_daggre.pl --uri "<%= @daggre_check_traffic_url %>" --timeout 5 --days 1
 
 command[check_all_mountpoints] = /usr/lib/nagios/plugins/atomia/check_mountpoints.sh -A
 
