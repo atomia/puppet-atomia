@@ -28,6 +28,7 @@ class atomia::apache_password_protect ($username, $password) {
     mode   => '0755',
   }
 
+if $::lsbdistrelease == '12.04' {
   file { '/etc/apache2/conf.d':
     ensure  => directory,
     owner   => 'root',
@@ -35,7 +36,15 @@ class atomia::apache_password_protect ($username, $password) {
     mode    => '0755',
     require => File['/etc/apache2'],
   }
-
+} else {
+  file { '/etc/apache2/conf-available':
+    ensure  => directory,
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0755',
+    require => File['/etc/apache2'],
+  }
+}
 
   htpasswd { $username:
     cryptpasswd => ht_sha1($password),
@@ -50,20 +59,29 @@ file { '/etc/apache2/htpasswd.conf':
   require => File['/etc/apache2'],
 }
 
-file { '/etc/apache2/conf.d/passwordprotect':
-  owner   => 'root',
-  group   => 'root',
-  mode    => '0440',
-  source  => 'puppet:///modules/atomia/apache_password_protect/passwordprotect',
-  require => File['/etc/apache2/conf.d'],
-}
+if $::lsbdistrelease == '12.04' {
+  file { '/etc/apache2/conf.d/passwordprotect':
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0440',
+    source  => 'puppet:///modules/atomia/apache_password_protect/passwordprotect',
+    require => File['/etc/apache2/conf.d'],
+  }
+} else {
+  file { '/etc/apache2/conf-available/passwordprotect.conf':
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0440',
+    source  => 'puppet:///modules/atomia/apache_password_protect/passwordprotect',
+    require => File['/etc/apache2/conf-available'],
+  }
 
-if $::lsbdistrelease == '14.04' {
-  exec { 'create_link_24':
-    require => File['/etc/apache2/conf.d/passwordprotect'],
-    command => '/bin/ln -s /etc/apache2/conf.d/passwordprotect /etc/apache2/conf-enabled/passwordprotect.conf',
-    unless  => '/usr/bin/test -f /etc/apache2/conf-enabled/passwordprotect.conf',
+  exec { "/usr/sbin/a2enconf passwordprotect.conf":
+    unless  => "/usr/bin/test -f /etc/apache2/config-enabled/passwordprotect.conf",
+    require => File['/etc/apache2/conf-available'],
+    notify  => Service['apache2'],
   }
 }
+
 }
 
