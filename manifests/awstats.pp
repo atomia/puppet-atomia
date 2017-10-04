@@ -167,13 +167,18 @@ class atomia::awstats (
     source => 'puppet:///modules/atomia/awstats/convert_logs.sh',
   }
 
-  file { '/etc/apache2/conf-enabled/awstats.conf':
+  file { '/etc/apache2/conf-available/awstats.conf':
     owner   => root,
     group   => root,
     mode    => '0444',
     source  => 'puppet:///modules/atomia/awstats/awstats.conf',
-    notify  => Service['apache2'],
     require => [Package['awstats'],Package['atomia-pa-awstats']],
+  }
+
+  exec { "/usr/sbin/a2enconf awstats.conf":
+    unless  => "/usr/bin/test -f /etc/apache2/config-enabled/awstats.conf",
+    require => [Package['awstats'],Package['atomia-pa-awstats']],
+    notify  => Service['apache2'],
   }
 
   file { '/etc/awstats/awstats.conf.local':
@@ -198,7 +203,7 @@ class atomia::awstats (
   }
 
   if !defined(File['/etc/apache2/sites-enabled/000-default']) {
-    file { '/etc/apache2/sites-enabled/000-default':
+    file { '/etc/apache2/sites-enabled/000-default.conf':
       ensure  => absent,
     }
   }
