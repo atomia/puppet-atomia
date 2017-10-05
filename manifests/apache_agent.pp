@@ -192,23 +192,14 @@ class atomia::apache_agent (
       ensure  => present,
       content => template('atomia/apache_agent/atomia-pa-apache.conf.erb'),
       require => [Package['atomia-pa-apache']],
-      notify  => Service['apache2'],
     }
 
     exec { "/usr/sbin/a2enconf ${pa_conf_file}":
-      unless  => "/usr/bin/test -f /etc/apache2/config-enabled/${pa_conf_file}",
+      unless  => "/usr/bin/test -f /etc/apache2/conf-enabled/${pa_conf_file}",
       require => Package['apache2'],
-      notify  => Exec['force-reload-apache'],
-    }
-
-    file { '/etc/apache2/conf/phpversions.conf':
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
-      content => template('atomia/apache_agent/phpversions.erb'),
-      require => [Package['atomia-pa-apache']],
       notify  => Service['apache2'],
     }
+
   }
 
   file { '/etc/statisticscopy.conf':
@@ -392,6 +383,14 @@ class atomia::apache_agent (
 
     $php_branches_array = extract_major_minor($php_versions_array)
 
+    file { '/etc/apache2/conf/phpversions.conf':
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      content => template('atomia/apache_agent/phpversions.erb'),
+      require => [Package['atomia-pa-apache']],
+      notify  => Service['apache2'],
+    }
   }
 
   if !defined(Service['apache2']) {
