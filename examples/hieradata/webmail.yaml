@@ -1,0 +1,4 @@
+---
+classes:
+   - atomia::linux_base
+   - atomia::nagios::client
