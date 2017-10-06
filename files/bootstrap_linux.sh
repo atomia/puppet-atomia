@@ -44,6 +44,7 @@ if [ -e '/etc/debian_version' ]; then
 		if [ `lsb_release -r | awk '{print $2}'` == '14.04' ]; then
 			wget http://apt.puppetlabs.com/puppet-release-$dist.deb
 			sudo dpkg -i puppet-release-$dist.deb
+			apt-get install -y puppet
 			apt-get install -y facter
 			sed -i 's/START=no/START=yes/' /etc/default/puppet
 			rm -f puppet-release-*.deb
