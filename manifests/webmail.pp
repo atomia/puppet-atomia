@@ -22,4 +22,15 @@ class atomia::webmail (
     db_password => 'secret',
   }
 
+  package { ['apache2', 'libapache2-mod-php', 'php-pear', 'php-mysql', 'php']: ensure => present, }
+
+  
+  file { '/opt':
+    ensure  => directory,
+  }
+  file { [ '/var/cache/puppet', '/var/cache/puppet/archives' ]:
+    ensure  => directory,
+  }
+
+  
 }
