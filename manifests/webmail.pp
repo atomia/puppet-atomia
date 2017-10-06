@@ -22,7 +22,7 @@ class atomia::webmail (
     db_password => 'secret',
   }
 
-  package { ['apache2', 'libapache2-mod-php', 'php-pear', 'php-mysql', 'php']: ensure => present, }
+  package { ['apache2', 'libapache2-mod-php', 'php-pear', 'php-pgsql', 'php', 'composer', 'git', 'postgresql']: ensure => present, }
 
   
   file { '/opt':
