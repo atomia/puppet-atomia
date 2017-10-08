@@ -9,3 +9,7 @@ spec/fixtures/
 metadata.json
 /metadata.json
 log
+.librarian/*
+.idea/*
+modules/*
+Puppetfile.lock
