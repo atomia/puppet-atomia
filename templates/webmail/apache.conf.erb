@@ -1,0 +1,67 @@
+# This configuration file is managed by puppet
+# altough is possible, we do not recommend modifying it manually
+
+<VirtualHost *:80>
+  # Virtual host configuration + information (there is no need for https because we do termination on lb nodes)
+  ServerAdmin info@<%= @publicdomain %>
+  ServerName webmail.<%= @publicdomain %>
+  DocumentRoot /var/lib/roundcube
+
+  # Access to tinymce files
+  <Directory "/usr/share/tinymce/www/">
+    Options Indexes MultiViews FollowSymLinks
+    AllowOverride None
+    <IfVersion >= 2.3>
+      Require all granted
+    </IfVersion>
+    <IfVersion < 2.3>
+      Order allow,deny
+      Allow from all
+    </IfVersion>
+  </Directory>
+  
+  <Directory /var/lib/roundcube/>
+    Options +FollowSymLinks
+    # This is needed to parse /var/lib/roundcube/.htaccess. See its
+    # content before setting AllowOverride to None.
+    AllowOverride All
+    <IfVersion >= 2.3>
+      Require all granted
+    </IfVersion>
+    <IfVersion < 2.3>
+      Order allow,deny
+      Allow from all
+    </IfVersion>
+  </Directory>
+  
+  # Protecting basic directories:
+  <Directory /var/lib/roundcube/config>
+    Options -FollowSymLinks
+    AllowOverride None
+  </Directory>
+  
+  <Directory /var/lib/roundcube/temp>
+    Options -FollowSymLinks
+    AllowOverride None
+    <IfVersion >= 2.3>
+      Require all denied
+    </IfVersion>
+    <IfVersion < 2.3>
+      Order allow,deny
+      Deny from all
+    </IfVersion>
+  </Directory>
+  
+  <Directory /var/lib/roundcube/logs>
+    Options -FollowSymLinks
+    AllowOverride None
+    <IfVersion >= 2.3>
+      Require all denied
+    </IfVersion>
+    <IfVersion < 2.3>
+      Order allow,deny
+      Deny from all
+    </IfVersion>
+  </Directory>
+
+</VirtualHost>

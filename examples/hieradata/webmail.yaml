@@ -1,4 +1,5 @@
 ---
 classes:
    - atomia::linux_base
+   - atomia::webmail
    - atomia::nagios::client
