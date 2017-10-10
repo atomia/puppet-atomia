@@ -14,6 +14,7 @@
 #### apache_cluster_nodes: A comma separated list of Apache cluster nodes or empty to use all hosts with the Apache role.
 #### iis_cluster_nodes: A comma separated list of IIS cluster nodes or empty to use all hosts with the IIS role.
 #### mail_cluster_nodes: A comma separated list of Mail cluster nodes or empty to use all hosts with the Mail role.
+#### webmail_cluster_nodes: A comma separated list of Webmail cluster nodes or empty to use all hosts with the Webmail role.
 #### ftp_cluster_nodes: A comma separated list of FTP cluster nodes or empty to use all hosts with the FTP role.
 #### haproxy_nodes: A comma separated list of hostnames for all HAProxy load balancers in this cluster, the first one will be primary.
 #### cluster_ip_auth_key: The shared secret for the Heartbeat failover of the virtual IPs.
@@ -41,6 +42,7 @@
 ##### apache_cluster_nodes(advanced): %apache_cluster_nodes
 ##### iis_cluster_nodes(advanced): %iis_cluster_nodes
 ##### mail_cluster_nodes(advanced): %mail_cluster_nodes
+##### webmail_cluster_nodes(advanced): %webmail_cluster_nodes
 ##### ftp_cluster_nodes(advanced): %ftp_cluster_nodes
 ##### haproxy_nodes(advanced): ^[a-z0-9,-]*$
 ##### cluster_ip_auth_key(advanced): %password
@@ -68,6 +70,7 @@ class atomia::haproxy (
   $apache_cluster_nodes            = '',
   $iis_cluster_nodes               = '',
   $mail_cluster_nodes              = '',
+  $webmail_cluster_nodes           = '',
   $ftp_cluster_nodes               = '',
   $haproxy_nodes_hostnames         = '',
   $cluster_ip_auth_key             = 'default_password',

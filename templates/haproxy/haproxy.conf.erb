@@ -38,7 +38,6 @@ frontend apachecluster
 
 	acl acme_challenge path_beg /.well-known/acme-challenge/
         http-request use-service lua.stateless_acme_challenge if acme_challenge
-
 	default_backend apache_servers
 
 frontend iiscluster
@@ -49,7 +48,6 @@ frontend iiscluster
 
 	acl acme_challenge path_beg /.well-known/acme-challenge/
         http-request use-service lua.stateless_acme_challenge if acme_challenge
-
 	default_backend iis_servers
 
 frontend mailcluster
@@ -59,6 +57,16 @@ frontend mailcluster
 	bind <%= @mail_cluster_ip %>:143
 	bind <%= @mail_cluster_ip %>:587
 	default_backend mail_servers
+
+frontend webmailcluster
+  bind <%= @mail_cluster_ip %>:80
+  bind <%= @mail_cluster_ip %>:443 ssl crt /etc/haproxy/atomia_certificates/default.pem crt /etc/haproxy/atomia_certificates crt /var/lib/acme/haproxy
+  option  http-server-close
+  http-request add-header X-Proto https if { ssl_fc }
+
+  acl acme_challenge path_beg /.well-known/acme-challenge/
+  http-request use-service lua.stateless_acme_challenge if acme_challenge
+  default_backend webmail_servers
 
 frontend ftpcluster
 	mode tcp
@@ -72,7 +80,6 @@ backend apache_servers
 
 	acl acme_challenge path_beg /.well-known/acme-challenge/
         http-request use-service lua.stateless_acme_challenge if acme_challenge
-
 <% end -%>
 
 backend iis_servers
@@ -86,6 +93,15 @@ backend mail_servers
 	balance roundrobin
 <% @mail_cluster_nodes.split(",").each_with_index do |node, index| -%>
 	server mail<%=index+1 %> <%= node %>
+<% end -%>
+
+backend webmail_servers
+  balance roundrobin
+<% @webmail_cluster_nodes.split(",").each_with_index do |node, index| -%>
+	server webmail<%=index+1 %> <%= node %>:80 check
+
+	acl acme_challenge path_beg /.well-known/acme-challenge/
+	http-request use-service lua.stateless_acme_challenge if acme_challenge
 <% end -%>
 
 backend ftp_servers
