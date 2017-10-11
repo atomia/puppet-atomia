@@ -68,6 +68,11 @@ frontend webmailcluster
   http-request use-service lua.stateless_acme_challenge if acme_challenge
   default_backend webmail_servers
 
+frontend sshcluster
+	mode tcp
+	bind <%= @ssh_cluster_ip %>:22
+	default_backend ssh_servers
+
 frontend ftpcluster
 	mode tcp
 	bind <%= @ftp_cluster_ip %>:21
@@ -102,6 +107,13 @@ backend webmail_servers
 
 	acl acme_challenge path_beg /.well-known/acme-challenge/
 	http-request use-service lua.stateless_acme_challenge if acme_challenge
+<% end -%>
+
+
+backend ssh_servers
+  balance roundrobin
+<% @ssh_cluster_nodes.split(",").each_with_index do |node, index| -%>
+  server ssh<%=index+1 %> <%= node %>:22 check
 <% end -%>
 
 backend ftp_servers

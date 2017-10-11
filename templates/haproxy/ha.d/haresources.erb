@@ -10,3 +10,6 @@
 <% if @ftp_cluster_ip != "" -%>
 <%= @haproxy_nodes.split(",")[0] + " " + @ftp_cluster_ip %>
 <% end -%>
+<% if @ssh_cluster_ip != "" -%>
+<%= @haproxy_nodes.split(",")[0] + " " + @ssh_cluster_ip %>
+<% end -%>
