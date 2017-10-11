@@ -3,17 +3,14 @@
 ### Deploys and configures a Roundcube webmail server.
 
 ### Variable documentation
-#### cluster_ip: The virtual IP of the mail cluster.
 #### db_password: The password for the Roundcube database.
 #### mysql_root_password: The password for the MySQL root user.
 
 ### Validations
-##### cluster_ip: %ip
-##### db_password(advanced): %password
+##### db_password: %password
 ##### mysql_root_password(advanced): %password
 
 class atomia::webmail (
-  $cluster_ip                     = '',
   $db_password                    = '',
   $mysql_root_password            = '',
 ) {
@@ -60,8 +57,8 @@ class atomia::webmail (
   file { '/etc/roundcube/config.inc.php':
     path    => '/etc/roundcube/config.inc.php',
     owner   => 'root',
-    group   => 'root',
-    mode    => '0644',
+    group   => 'www-data',
+    mode    => '0640',
     content => template('atomia/webmail/config.inc.php.erb'),
     notify  => [ Service['apache2'] ]
   }
