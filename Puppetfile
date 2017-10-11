@@ -95,3 +95,5 @@ mod "stdlib",
 mod 'tohuwabohu-roundcube', '3.0.0'
 
 mod 'willdurand-composer', '1.2.6'
+
+mod 'saz-ssh', '3.0.1'

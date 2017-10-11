@@ -118,6 +118,15 @@ class atomia::haproxy (
       require => Package['python-software-properties']
     }
 
+    if $ssh_cluster_ip != '' {
+      class { 'ssh::server':
+        validate_sshd_file => true,
+        options => {
+          'Port'   => [2022],
+        },
+      }
+    }
+
     package { 'haproxy':
       ensure  => present,
       require => [ Apt::Ppa['ppa:vbernat/haproxy-1.5'] ]
