@@ -87,7 +87,8 @@ class atomia::haproxy (
   $acme_endpoint                   = 'https://acme-v01.api.letsencrypt.org/directory',
   $preview_domain                  = expand_default('preview.[[atomia_domain]]'),
   $apache_config_sync_source       = 'root@fsagent:/storage/configuration/maps',
-  $iis_config_sync_source          = 'root@fsagent:/storage/configuration/iis'
+  $iis_config_sync_source          = 'root@fsagent:/storage/configuration/iis',
+  $ssl_redirects_sync_source       = 'root@fsagent:/storage/configuration'
 ) {
 
   if $haproxy_nodes_hostnames == '' {
@@ -306,6 +307,14 @@ class atomia::haproxy (
   } else {
     $haproxy_conf = template('atomia/haproxy/haproxy.conf.erb')
 
+    file { '/etc/haproxy/ssl-redirects.lst':
+      ensure => present,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      require => Package['haproxy']
+    }
+
     file { '/etc/haproxy/atomia_certificates':
       ensure  => directory,
       owner   => 'root',
@@ -327,6 +336,14 @@ class atomia::haproxy (
       require => [ Package['haproxy'], Package['rsync'] ]
     }
 
+    file { '/etc/haproxy/sync_ssl_redirects.sh':
+      ensure  => file,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0755',
+      source  => 'puppet:///modules/atomia/haproxy/sync_ssl_redirects.sh',
+      require => [ Package['haproxy'], Package['rsync'] ]
+    }
 
     if $certificate_sync_ssh_key != '' {
       file { '/root/.ssh':
@@ -365,6 +382,18 @@ class atomia::haproxy (
         content => $sync_acmetool_cron,
         require => [ File['/root/.ssh/id_rsa'], File['/usr/bin/acmetool_sync.sh'] ]
       }
+
+      $sync_ssl_redirects_cron = template('atomia/haproxy/sync_ssl_redirects.cron')
+
+      file { '/etc/cron.d/atomia-sync-ssl-redirects':
+        ensure  => file,
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        content => $sync_ssl_redirects_cron,
+        require => [ File['/root/.ssh/id_rsa'], File['/etc/haproxy/sync_ssl_redirects.sh'] ]
+      }
+
     }
 
     if $certificate_default_cert == '' {
@@ -390,7 +419,13 @@ class atomia::haproxy (
     }
 
     file { '/etc/haproxy/haproxy.cfg':
-      require => [ Package['haproxy'], File['/etc/haproxy/atomia_certificates'], File['/usr/lib/stateless_acme_challenge.lua'], File['/var/lib/acme/haproxy'] ],
+      require => [ 
+        Package['haproxy'], 
+        File['/etc/haproxy/atomia_certificates'], 
+        File['/usr/lib/stateless_acme_challenge.lua'], 
+        File['/var/lib/acme/haproxy'], 
+        File['/etc/haproxy/ssl-redirects.lst'] 
+      ],
       notify  => Exec['restart-haproxy'],
       content => $haproxy_conf
     }
