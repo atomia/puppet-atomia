@@ -1,0 +1,1 @@
+* * * * * root flock -n /var/lock/ssl-redirects.lock /etc/haproxy/sync_ssl_redirects.sh "<%= @ssl_redirects_sync_source %>"

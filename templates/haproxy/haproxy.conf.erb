@@ -36,6 +36,11 @@ frontend apachecluster
 	option  http-server-close
 	http-request add-header X-Proto https if { ssl_fc }
 
+	acl enforce_ssl hdr(host) -i -f /etc/haproxy/ssl-redirects.lst
+	acl is_http_req ssl_fc,not
+
+	http-request redirect scheme https if enforce_ssl is_http_req
+
 	acl acme_challenge path_beg /.well-known/acme-challenge/
         http-request use-service lua.stateless_acme_challenge if acme_challenge
 	default_backend apache_servers
@@ -45,6 +50,11 @@ frontend iiscluster
 	bind <%= @iis_cluster_ip %>:443 ssl crt /etc/haproxy/atomia_certificates/default.pem crt /etc/haproxy/atomia_certificates crt /var/lib/acme/haproxy
 	option  http-server-close
 	http-request add-header X-Proto https if { ssl_fc }
+
+	acl enforce_ssl hdr(host) -i -f /etc/haproxy/ssl-redirects.lst
+	acl is_http_req ssl_fc,not
+
+	http-request redirect scheme https if enforce_ssl is_http_req
 
 	acl acme_challenge path_beg /.well-known/acme-challenge/
         http-request use-service lua.stateless_acme_challenge if acme_challenge
