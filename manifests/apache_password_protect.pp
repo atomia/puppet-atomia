@@ -77,7 +77,7 @@ if $::lsbdistrelease == '12.04' {
   }
 
   exec { '/usr/sbin/a2enconf passwordprotect.conf':
-    unless  => "/usr/bin/test -f /etc/apache2/config-enabled/passwordprotect.conf",
+    unless  => '/usr/bin/test -f /etc/apache2/config-enabled/passwordprotect.conf',
     require => File['/etc/apache2/conf-available'],
     notify  => Service['apache2'],
   }

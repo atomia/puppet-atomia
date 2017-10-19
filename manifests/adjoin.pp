@@ -62,7 +62,7 @@ class atomia::adjoin (
     # Join AD on Linux
     $dc=regsubst($domain_name, '\.', ',dc=', 'G')
     $base_dn = "cn=Users,dc=${dc}"
-    $base_pw = "${bind_password}"
+    $base_pw = $bind_password
 
     if $::vagrant {
       $ad_servers = 'ldap://192.168.33.10'
