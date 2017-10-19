@@ -8,4 +8,4 @@ This Puppet Module is used to deploy and configure a complete Atomia environment
 All contributions are welcome and are preferably done via Issue reports and or Pull requests.
 
 ## Maintainers
-* Stefan Mortensen, stefan.mortensen@atomia.com, github: stefanmortensen
+* Branislav Vukelic, branislav@atomia.com, github: branislavvukelic
