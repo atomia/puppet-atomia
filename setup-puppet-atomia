@@ -28,7 +28,7 @@ soft_write_failure = false" > /etc/puppet/puppetdb.conf
 
 mkdir -p /etc/puppet/atomia/service_files
 
-echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref => \"old\" " > /etc/puppet/Puppetfile
+echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref => \"master\" " > /etc/puppet/Puppetfile
 
 cd /etc/puppet
 
