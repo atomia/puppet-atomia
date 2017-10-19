@@ -49,7 +49,7 @@ class atomia::sshserver (
       use_nfs3     => '1',
       mount_point  => '/storage/content',
       nfs_location => $content_share_nfs_location,
-      require => File['/storage/content'],
+      require      => File['/storage/content'],
     }
   }
 }

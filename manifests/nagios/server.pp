@@ -82,8 +82,8 @@ class atomia::nagios::server(
       require  => [Package['ruby2.0']],
     }
   }
-  
-  
+
+
   if ! defined(Package['libwww-mechanize-perl']) {
     package { 'libwww-mechanize-perl':
       ensure => installed,

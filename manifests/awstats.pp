@@ -175,8 +175,8 @@ class atomia::awstats (
     require => [Package['awstats'],Package['atomia-pa-awstats']],
   }
 
-  exec { "/usr/sbin/a2enconf awstats.conf":
-    unless  => "/usr/bin/test -f /etc/apache2/config-enabled/awstats.conf",
+  exec { '/usr/sbin/a2enconf awstats.conf':
+    unless  => '/usr/bin/test -f /etc/apache2/config-enabled/awstats.conf',
     require => [Package['awstats'],Package['atomia-pa-awstats']],
     notify  => Service['apache2'],
   }

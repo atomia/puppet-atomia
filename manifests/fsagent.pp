@@ -56,7 +56,7 @@ class atomia::fsagent (
       'ruby2.3',
     ]:
       ensure => installed,
-	  notify => Exec['set-gem-symlink'],
+      notify => Exec['set-gem-symlink'],
     }
     package { ['jgrep']:
       ensure   => installed,
@@ -74,7 +74,7 @@ class atomia::fsagent (
       'ruby2.0',
     ]:
       ensure => installed,
-	  notify => Exec['set-gem-symlink'],
+      notify => Exec['set-gem-symlink'],
     }
     package { ['jgrep']:
       ensure   => installed,

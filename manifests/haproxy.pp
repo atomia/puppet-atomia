@@ -122,7 +122,7 @@ class atomia::haproxy (
     if $ssh_cluster_ip != '' {
       class { 'ssh::server':
         validate_sshd_file => true,
-        options => {
+        options            => {
           'Port'   => [2022],
         },
       }
@@ -308,7 +308,7 @@ class atomia::haproxy (
     $haproxy_conf = template('atomia/haproxy/haproxy.conf.erb')
 
     file { '/etc/haproxy/ssl-redirects.lst':
-      ensure => present,
+      ensure  => present,
       owner   => 'root',
       group   => 'root',
       mode    => '0644',
@@ -419,12 +419,12 @@ class atomia::haproxy (
     }
 
     file { '/etc/haproxy/haproxy.cfg':
-      require => [ 
-        Package['haproxy'], 
-        File['/etc/haproxy/atomia_certificates'], 
-        File['/usr/lib/stateless_acme_challenge.lua'], 
-        File['/var/lib/acme/haproxy'], 
-        File['/etc/haproxy/ssl-redirects.lst'] 
+      require => [
+        Package['haproxy'],
+        File['/etc/haproxy/atomia_certificates'],
+        File['/usr/lib/stateless_acme_challenge.lua'],
+        File['/var/lib/acme/haproxy'],
+        File['/etc/haproxy/ssl-redirects.lst']
       ],
       notify  => Exec['restart-haproxy'],
       content => $haproxy_conf

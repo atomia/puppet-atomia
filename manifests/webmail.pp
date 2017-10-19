@@ -30,19 +30,19 @@ class atomia::webmail (
   ->
   # set debconf properties
   exec { 'set-roundcube-password':
-    unless => "dpkg-query -l roundcube-core 2>/dev/null",
+    unless  => 'dpkg-query -l roundcube-core 2>/dev/null',
     command => 'echo roundcube-core roundcube/mysql/app-pass password $db_password | sudo /usr/bin/debconf-set-selections',
-    path => ['/usr/bin/','/bin/'],
+    path    => ['/usr/bin/','/bin/'],
   }
   ->
   exec { 'confirm-roundcube-password':
-    unless => "dpkg-query -l roundcube-core 2>/dev/null",
+    unless  => 'dpkg-query -l roundcube-core 2>/dev/null',
     command => 'echo roundcube-core roundcube/app-password-confirm password $db_password | sudo /usr/bin/debconf-set-selections',
-    path => ['/usr/bin/','/bin/'],
+    path    => ['/usr/bin/','/bin/'],
   }
   ->
   package { ['roundcube', 'roundcube-plugins', 'roundcube-plugins-extra', 'tinymce']:
-    ensure => present,
+    ensure  => present,
     require => [Package['apache2'], Package['mysql-server'], ],
   }
   ->
@@ -63,8 +63,8 @@ class atomia::webmail (
     notify  => [ Service['apache2'] ]
   }
   ->
-  if !defined(File["/etc/apache2/sites-enabled/000-default.conf"]) {
-    file { "/etc/apache2/sites-enabled/000-default.conf":
+  if !defined(File['/etc/apache2/sites-enabled/000-default.conf']) {
+    file { '/etc/apache2/sites-enabled/000-default.conf':
       ensure  => absent,
       require => Package['apache2'],
       notify  => Service['apache2'],
