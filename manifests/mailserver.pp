@@ -184,7 +184,7 @@ class atomia::mailserver (
         }
       }
 
-      fstab::mount { '/storage/content':
+      fstab::mount { "${mailbox_base}":
         ensure  => 'mounted',
         device  => "gluster.${internal_zone}:/mail_volume",
         options => 'defaults,_netdev',
