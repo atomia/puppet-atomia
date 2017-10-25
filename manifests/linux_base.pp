@@ -20,7 +20,7 @@ class atomia::linux_base {
   }
 
   if $internal_dns != '' {
-    if ($::atomia_role_1 != 'glusterfs') and ($::atomia_role_1 != 'glusterfs_replica') {
+    if ($::atomia_role_1 != 'glusterfs') and ($::atomia_role_1 != 'glusterfs_replica') and ($::atomia_role_1 != 'storage') {
       class { 'resolv_conf':
         nameservers => [$internal_dns],
       }
