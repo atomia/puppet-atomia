@@ -52,6 +52,7 @@ class atomia::awstats (
     } else {
       package { [
         'apache2-mpm-worker',
+        'apache2',
       ]:
         ensure => installed,
       }
