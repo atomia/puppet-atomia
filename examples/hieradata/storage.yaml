@@ -1,0 +1,6 @@
+---
+classes:
+   - atomia::adjoin
+   - atomia::linux_base
+   - atomia::storage
+   - atomia::nagios::client
