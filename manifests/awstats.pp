@@ -90,6 +90,12 @@ class atomia::awstats (
     }
     else
     {
+      if !defined(File['/storage']) {
+        file { '/storage':
+          ensure => directory,
+        }
+      }
+
       atomia::nfsmount { 'mount_content':
         use_nfs3     => '1',
         mount_point  => '/storage/content',
