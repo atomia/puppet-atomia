@@ -28,10 +28,6 @@ mod "nsclient",
   :git => "git://github.com/stefanmortensen/puppet-nsclient",
   :ref => "1e3cd1ffe23168ce16b40c2a1ecb3afd0be3c51d"
 
-mod "nfs",
-  :git => "git://github.com/stefanmortensen/puppet-nfs.git",
-  :ref => "41f3de5c1c5655d5ca072db5bdc68719c764289e"
-
 mod "httpauth",
   :git => "git://github.com/jamtur01/puppet-httpauth.git",
   :ref => "22bcdf43e36838e16579c10a7db875bd066ae263"
@@ -92,8 +88,4 @@ mod "stdlib",
     :git => "git://github.com/puppetlabs/puppetlabs-stdlib.git",
     :ref => "f6781af353a678601817e0f1cc0e3813ea79d952"
 
-mod 'tohuwabohu-roundcube', '3.0.0'
-
-mod 'willdurand-composer', '1.2.6'
-
-mod 'saz-ssh', '3.0.1'
+mod 'haraldsk-nfs', '1.1.1'
