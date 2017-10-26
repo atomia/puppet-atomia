@@ -35,7 +35,9 @@ class atomia::mysql (
     remove_default_accounts => true,
     override_options        => {
     'mysqld' => {
-      'bind_address' => '*' }
+      'bind_address' => '*',
+      'skip-name-resolve' => '',
+      }
     }
   }
 
