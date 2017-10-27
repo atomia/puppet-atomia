@@ -238,6 +238,14 @@ class atomia::awstats (
     }
   }
 
+  if !defined(Exec['/usr/sbin/a2enmod authz_groupfile']) {
+    exec { '/usr/sbin/a2enmod authz_groupfile':
+      unless  => '/usr/bin/test -f /etc/apache2/mods-enabled/authz_groupfile.load',
+      require => Package['apache2'],
+      notify  => Exec['force-reload-apache'],
+    }
+  }
+
   file { '/etc/cron.d/rotate-awstats-logs':
     ensure  => present,
     content => "0 0 * * * root lockfile -r0 /var/run/rotate-awstats && (find /var/log/awstats/ -mtime +14 -exec rm -f '{}' '+'; rm -f /var/run/rotate-awstats.lock)"
