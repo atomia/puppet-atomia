@@ -91,6 +91,7 @@ frontend ftpcluster
 	default_backend ftp_servers
 
 backend apache_servers
+	option forwardfor
 	balance roundrobin
 <% @apache_cluster_nodes.split(",").each_with_index do |node, index| -%>
 	server apache<%=index+1 %> <%= node %>:80 check
@@ -113,7 +114,8 @@ backend mail_servers
 <% end -%>
 
 backend webmail_servers
-  balance roundrobin
+	option forwardfor
+	balance roundrobin
 <% @webmail_cluster_nodes.split(",").each_with_index do |node, index| -%>
 	server webmail<%=index+1 %> <%= node %>:80 check
 
