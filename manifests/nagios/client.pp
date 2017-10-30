@@ -42,8 +42,8 @@ class atomia::nagios::client(
   if $::operatingsystem == 'windows' {
     class { 'nsclient':
       allowed_hosts           => ['0.0.0.0/0'],
-      package_source_location => 'https://github.com/mickem/nscp/releases/download/0.5.0.62',
-      package_source          => 'NSCP-0.5.0.62-x64.msi',
+      package_source_location => 'https://github.com/mickem/nscp/releases/download/0.5.1.44',
+      package_source          => 'NSCP-0.5.1.44-x64.msi',
     }
 
     case $::atomia_role_1 {
