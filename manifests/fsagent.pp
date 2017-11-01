@@ -115,6 +115,7 @@ class atomia::fsagent (
   }
 
   package { 'atomia-fsagent': ensure => present, require => Package['nodejs'] }
+  package { 'atomia-sslredirects-agent': ensure => present, require => Package['nodejs'] }
 
   if !defined(File['/storage']) {
     file { '/storage':
@@ -198,6 +199,14 @@ class atomia::fsagent (
     require => [Package['atomia-fsagent'], File['/storage/content/backup']],
   }
 
+  file { '/etc/default/ssl-redirects-agent':
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0440',
+    content => template('atomia/fsagent/ssl-redirects-agent.cfg.erb'),
+    require => [Package['atomia-sslredirects-agent']],
+  }
+
   file { '/etc/cron.d/clearsessions':
     ensure  => file,
     content => "15 * * * * root lockfile -r0 /var/run/clearsession.lock && (find /storage/configuration/php_session_path -mtime +2 -exec rm -f '{}' '+'; rm -f /var/run/clearsession.lock) \n"
@@ -234,6 +243,12 @@ class atomia::fsagent (
     ensure    => running,
     enable    => true,
     subscribe => [Package['atomia-fsagent'], File['/etc/default/fsagent']],
+  }
+
+  service { 'atomia-sslredirects-agent':
+    ensure    => running,
+    enable    => true,
+    subscribe => [Package['atomia-sslredirects-agent'], File['/etc/default/ssl-redirects-agent']],
   }
 
   if $create_storage_files == '1' {
