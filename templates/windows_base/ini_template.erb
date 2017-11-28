@@ -9,6 +9,7 @@ Domain = <%= @ad_domain %>
 SqlServer = <%= @database_server %>
 FailoverSqlServer = <%= @mirror_database_server %>
 PublicHost = <%= @appdomain %>
+SqlMaxPoolSize = 500
 EnableMsSqlDeployment = <%= @enable_mssql %>
 EnablePostgreSqlDeployment = <%= @enable_postgresql %>
 <% if @enable_postgresql == 'true' || @enable_postgresql == true %>
