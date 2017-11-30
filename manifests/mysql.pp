@@ -9,6 +9,7 @@
 #### provisioning_host: The IP or hostname of the server running automation server, used for the automation server MySQL user to restrict access.
 #### server_ip: Mysql server management IP address
 #### server_public_ip: Mysql server public IP address
+#### enable_phpmyadmin: Should phpmyadmin be installed on mysql node (true or false)
 
 ### Validations
 ##### mysql_username(advanced): %username
@@ -17,6 +18,7 @@
 ##### provisioning_host(advanced): ^[0-9.a-z%-]+$
 ##### server_ip: .*
 ##### server_public_ip: .*
+##### enable_phpmyadmin: ^(true|false)$
 
 class atomia::mysql (
   $mysql_username       = 'automationserver',
@@ -25,7 +27,14 @@ class atomia::mysql (
   $provisioning_host    = '%',
   $server_ip            = '',
   $server_public_ip     = '',
+  $enable_phpmyadmin    = 'true',
 ){
+
+  if($enable_phpmyadmin == 'true' and !defined(Class['atomia::phpmyadmin'])) {
+    class {'atomia::phpmyadmin':
+      mysql_host         => '127.0.0.1',
+    }
+  }
 
   # TODO: Consider changing % to hostname for automation server in internal zone when this is setup.
 

@@ -1,9 +1,19 @@
 class atomia::phpmyadmin (
   $mysql_host
 ){
+
+  if $::lsbdistrelease == '14.04' {
+    $php_version            = 'php5'
+    $php_path               = '/etc/php5/apache2/php.ini'
+  } else {
+    $php_version            = 'php7.0'
+    $php_path               = '/etc/php/7.0/apache2/php.ini'
+  }
+
   package { 'phpmyadmin': ensure => present }
   package { 'apache2': ensure => present }
-  package { 'libapache2-mod-php5': ensure => present }
+  package { "libapache2-mod-${php_version}": ensure => present }
+
   file { '/etc/phpmyadmin/config.inc.php':
     owner   => 'root',
     group   => 'root',
@@ -12,8 +22,7 @@ class atomia::phpmyadmin (
     require => Package['phpmyadmin'],
   }
 
-
-  file { '/etc/apache2/sites-available/phpmyadmin-default':
+  file { '/etc/apache2/sites-available/phpmyadmin.conf':
     owner   => 'root',
     group   => 'root',
     mode    => '0444',
@@ -21,42 +30,18 @@ class atomia::phpmyadmin (
     require => Package['apache2'],
   }
 
-
-  file { '/etc/apache2/sites-enabled/phpmyadmin-default':
-    ensure  => link,
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0444',
-    target  => '/etc/apache2/sites-available/phpmyadmin-default',
-    require => [File['/etc/apache2/sites-available/phpmyadmin-default'],
-    Package['apache2']],
-    notify  => Service['apache2'],
+  exec { "/usr/sbin/a2ensite phpmyadmin.conf":
+    unless  => '/usr/bin/test -f /etc/apache2/sites-enabled/phpmyadmin.conf',
+    require => [File['/etc/apache2/sites-available/phpmyadmin.conf'], Package['apache2']],
+    notify  => Exec['force-reload-apache-phpmyadmin'],
   }
 
-
-  if !defined(File['/etc/apache2/sites-enabled/000-default']) {
-    file { '/etc/apache2/sites-enabled/000-default':
+  if !defined(File['/etc/apache2/sites-enabled/000-default.conf']) {
+    file { '/etc/apache2/sites-enabled/000-default.conf':
       ensure  => absent,
       require => Package['apache2'],
       notify  => Service['apache2'],
     }
-  }
-
-  if !defined(File['/etc/apache2/sites-available/default']) {
-    file { '/etc/apache2/sites-available/default':
-      ensure  => absent,
-      require => Package['apache2'],
-      notify  => Service['apache2'],
-    }
-  }
-
-  file { '/etc/php5/apache2/php.ini':
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0644',
-    source  => 'puppet:///modules/atomia/phpmyadmin/php.ini',
-    require => Package['apache2'],
-    notify  => Service['apache2'],
   }
 
   exec { 'force-reload-apache-phpmyadmin':
@@ -65,9 +50,9 @@ class atomia::phpmyadmin (
     command     => '/etc/init.d/apache2 force-reload',
   }
 
-  exec { '/usr/sbin/a2enmod php5':
-    unless  => '/usr/bin/test -f /etc/apache2/mods-enabled/php5.load',
-    require => Package['libapache2-mod-php5'],
+  exec { "/usr/sbin/a2enmod ${php_version}":
+    unless  => "/usr/bin/test -f /etc/apache2/mods-enabled/${php_version}.load",
+    require => Package["libapache2-mod-${php_version}"],
     notify  => Exec['force-reload-apache-phpmyadmin'],
   }
 
