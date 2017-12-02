@@ -24,7 +24,7 @@ class atomia::iis(
 
   if $sharepath == '' {
     $internal_zone = hiera('atomia::internaldns::zone_name','')
-    $realsharepath = "\\gluster.${internal_zone}\configshare\iis"
+    $realsharepath = "\\gluster.${internal_zone}\\configshare\\iis"
   }
   else
   {
@@ -89,7 +89,7 @@ class atomia::iis(
   exec { 'enable_iis_sharedconfig':
     provider => powershell,
     command  => "c:/install/setup_iis.ps1 -Action 'enable' -UNCPath '${realsharepath}' -adminUser '${addomain}\\${adminuser}' -adminPassword '${adminpassword}'",
-    onlyif   => "C:\Windows\System32\cmd.exe /c 'if exist ${realsharepath}\\applicationHost.config (exit 0) else (exit 1)'",
+    onlyif   => "C:\\Windows\\System32\\cmd.exe /c 'if exist ${realsharepath}\\applicationHost.config (exit 0) else (exit 1)'",
     creates  => 'c:\install\2_iis_sharedconfig_enabled.txt'
   }
   ->
