@@ -51,6 +51,11 @@ class atomia::fsagent (
   }
   package { 'python-pkg-resources': ensure => present }
 
+  service { 'nscd':
+    enable => false,
+    ensure => 'stopped',
+  }
+  
   if $::lsbdistrelease == '16.04' {
     package { [
       'ruby2.3',
