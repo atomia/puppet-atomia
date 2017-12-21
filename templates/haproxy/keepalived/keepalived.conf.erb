@@ -1,0 +1,153 @@
+<% if @haproxy_nodes.split(",")[0] == @hostname -%>
+vrrp_script chk_script_apache {
+    script "/usr/local/bin/atomia-keepalived-check.sh haproxy --ips <%= @apache_cluster_ip %> --ports 80 443"
+    interval <%= @cluster_ip_check_interval %>      #run above script every 5 seconds
+    fall <%= @cluster_ip_num_fails %>          #require 3 fails for switch
+    rise <%= @cluster_ip_num_rise %>          #require 3 success for OK
+}
+vrrp_script chk_script_ftp {
+    script "/usr/local/bin/atomia-keepalived-check.sh haproxy --ips <%= @ftp_cluster_ip %> --ports 21"
+    interval <%= @cluster_ip_check_interval %>      #run above script every 5 seconds
+    fall <%= @cluster_ip_num_fails %>          #require 3 fails for switch
+    rise <%= @cluster_ip_num_rise %>          #require 3 success for OK
+}
+vrrp_instance apache_fip_master {
+    state MASTER
+    interface <%= @virtual_ips_interface_to_manage %>
+    virtual_router_id 100
+    priority 100
+    advert_int <%= @cluster_advert_int %>
+    authentication {
+        auth_type PASS
+        auth_pass <%= @cluster_ip_auth_key %>
+    }
+    virtual_ipaddress {
+        <%= @apache_cluster_ip %>
+    }
+    track_script {
+        chk_script_apache
+    }
+}
+vrrp_instance ftp_fip_master {
+    state MASTER
+    interface <%= @virtual_ips_interface_to_manage %>
+    virtual_router_id 102
+    priority 100
+    advert_int <%= @cluster_advert_int %>
+    authentication {
+        auth_type PASS
+        auth_pass <%= @cluster_ip_auth_key %>
+    }
+    virtual_ipaddress {
+        <%= @ftp_cluster_ip %>
+    }
+    track_script {
+        chk_script_ftp
+    }
+}
+vrrp_instance iis_fip_backup {
+    state BACKUP
+    interface <%= @virtual_ips_interface_to_manage %>
+    virtual_router_id 101
+    priority 99
+    advert_int <%= @cluster_advert_int %>
+    authentication {
+        auth_type PASS
+        auth_pass <%= @cluster_ip_auth_key %>
+    }
+    virtual_ipaddress {
+        <%= @iis_cluster_ip %>
+    }
+}
+vrrp_instance mail_fip_backup {
+    state BACKUP
+    interface <%= @virtual_ips_interface_to_manage %>
+    virtual_router_id 103
+    priority 99
+    advert_int <%= @cluster_advert_int %>
+    authentication {
+        auth_type PASS
+        auth_pass <%= @cluster_ip_auth_key %>
+    }
+    virtual_ipaddress {
+        <%= @mail_cluster_ip %>
+    }
+}
+<% end -%>
+
+<% if @haproxy_nodes.split(",")[1] == @hostname -%>
+vrrp_script chk_script_iis {
+    script "/usr/local/bin/atomia-keepalived-check.sh haproxy --ips <%= @iis_cluster_ip %> --ports 80 443"
+    interval <%= @cluster_ip_check_interval %>      #run above script every 5 seconds
+    fall <%= @cluster_ip_num_fails %>          #require 3 fails for switch
+    rise <%= @cluster_ip_num_rise %>          #require 3 success for OK
+}
+vrrp_script chk_script_mail {
+    script "/usr/local/bin/atomia-keepalived-check.sh haproxy --ips <%= @mail_cluster_ip %> --ports 25 587 110 143 993"
+    interval <%= @cluster_ip_check_interval %>      #run above script every 5 seconds
+    fall <%= @cluster_ip_num_fails %>          #require 3 fails for switch
+    rise <%= @cluster_ip_num_rise %>          #require 3 success for OK
+}
+vrrp_instance iis_fip_master {
+    state MASTER
+    interface <%= @virtual_ips_interface_to_manage %>
+    virtual_router_id 101
+    priority 100
+    advert_int <%= @cluster_advert_int %>
+    authentication {
+        auth_type PASS
+        auth_pass <%= @cluster_ip_auth_key %>
+    }
+    virtual_ipaddress {
+        <%= @iis_cluster_ip %>
+    }
+    track_script {
+        chk_script_iis
+    }
+}
+vrrp_instance mail_fip_master {
+    state MASTER
+    interface <%= @virtual_ips_interface_to_manage %>
+    virtual_router_id 103
+    priority 100
+    advert_int <%= @cluster_advert_int %>
+    authentication {
+        auth_type PASS
+        auth_pass <%= @cluster_ip_auth_key %>
+    }
+    virtual_ipaddress {
+        <%= @mail_cluster_ip %>
+    }
+    track_script {
+        chk_script_mail
+    }
+}
+vrrp_instance apache_fip_backup {
+    state BACKUP
+    interface <%= @virtual_ips_interface_to_manage %>
+    virtual_router_id 100
+    priority 99
+    advert_int <%= @cluster_advert_int %>
+    authentication {
+        auth_type PASS
+        auth_pass <%= @cluster_ip_auth_key %>
+    }
+    virtual_ipaddress {
+        <%= @apache_cluster_ip %>
+    }
+}
+vrrp_instance ftp_fip_backup {
+    state BACKUP
+    interface <%= @virtual_ips_interface_to_manage %>
+    virtual_router_id 102
+    priority 99
+    advert_int <%= @cluster_advert_int %>
+    authentication {
+        auth_type PASS
+        auth_pass <%= @cluster_ip_auth_key %>
+    }
+    virtual_ipaddress {
+        <%= @ftp_cluster_ip %>
+    }
+}
+<% end -%>
