@@ -80,8 +80,11 @@ frontend webmailcluster
 
 <% if @ssh_cluster_ip != "" -%>
 frontend sshcluster
-	mode tcp
 	bind <%= @ssh_cluster_ip %>:22
+	mode tcp
+	option tcplog
+	stick-table type ip size 200k expire 30m
+	stick on src
 	default_backend ssh_servers
 <% end -%>
 
@@ -130,6 +133,7 @@ backend webmail_servers
 
 <% if @ssh_cluster_ip != "" -%>
 backend ssh_servers
+	mode tcp
 	balance roundrobin
 <% @ssh_cluster_nodes.split(",").each_with_index do |node, index| -%>
 	server ssh<%=index+1 %> <%= node %>:22 check
