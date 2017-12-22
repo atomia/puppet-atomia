@@ -46,11 +46,22 @@ class atomia::fsagent (
   package { 'g++': ensure => present }
   package { 'make': ensure => present }
   package { 'procmail': ensure => present }
+  package { 'unscd': ensure => present }
   if !defined(Package['atomia-manager']) {
     package { 'atomia-manager': ensure => present }
   }
   package { 'python-pkg-resources': ensure => present }
 
+  service { 'nscd':
+    enable => false,
+    ensure => 'stopped',
+  }
+  service { 'unscd':
+    enable => true,
+    ensure => 'running',
+    require  => Package['unscd'],
+  }
+  
   if $::lsbdistrelease == '16.04' {
     package { [
       'ruby2.3',
