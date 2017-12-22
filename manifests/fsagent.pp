@@ -59,7 +59,7 @@ class atomia::fsagent (
   service { 'unscd':
     enable => true,
     ensure => 'running',
-    require  => [Package['unscd'],
+    require  => Package['unscd'],
   }
   
   if $::lsbdistrelease == '16.04' {
