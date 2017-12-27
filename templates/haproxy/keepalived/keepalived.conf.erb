@@ -16,7 +16,7 @@ vrrp_instance apache_fip_master {
     interface <%= @virtual_ips_interface_to_manage %>
     virtual_router_id 100
     priority 100
-    advert_int <%= @cluster_advert_int %>
+    advert_int <%= @cluster_ip_advert_int %>
     authentication {
         auth_type PASS
         auth_pass <%= @cluster_ip_auth_key %>
@@ -33,7 +33,7 @@ vrrp_instance ftp_fip_master {
     interface <%= @virtual_ips_interface_to_manage %>
     virtual_router_id 102
     priority 100
-    advert_int <%= @cluster_advert_int %>
+    advert_int <%= @cluster_ip_advert_int %>
     authentication {
         auth_type PASS
         auth_pass <%= @cluster_ip_auth_key %>
@@ -50,7 +50,7 @@ vrrp_instance iis_fip_backup {
     interface <%= @virtual_ips_interface_to_manage %>
     virtual_router_id 101
     priority 99
-    advert_int <%= @cluster_advert_int %>
+    advert_int <%= @cluster_ip_advert_int %>
     authentication {
         auth_type PASS
         auth_pass <%= @cluster_ip_auth_key %>
@@ -64,7 +64,7 @@ vrrp_instance mail_fip_backup {
     interface <%= @virtual_ips_interface_to_manage %>
     virtual_router_id 103
     priority 99
-    advert_int <%= @cluster_advert_int %>
+    advert_int <%= @cluster_ip_advert_int %>
     authentication {
         auth_type PASS
         auth_pass <%= @cluster_ip_auth_key %>
@@ -93,7 +93,7 @@ vrrp_instance iis_fip_master {
     interface <%= @virtual_ips_interface_to_manage %>
     virtual_router_id 101
     priority 100
-    advert_int <%= @cluster_advert_int %>
+    advert_int <%= @cluster_ip_advert_int %>
     authentication {
         auth_type PASS
         auth_pass <%= @cluster_ip_auth_key %>
@@ -110,7 +110,7 @@ vrrp_instance mail_fip_master {
     interface <%= @virtual_ips_interface_to_manage %>
     virtual_router_id 103
     priority 100
-    advert_int <%= @cluster_advert_int %>
+    advert_int <%= @cluster_ip_advert_int %>
     authentication {
         auth_type PASS
         auth_pass <%= @cluster_ip_auth_key %>
@@ -127,7 +127,7 @@ vrrp_instance apache_fip_backup {
     interface <%= @virtual_ips_interface_to_manage %>
     virtual_router_id 100
     priority 99
-    advert_int <%= @cluster_advert_int %>
+    advert_int <%= @cluster_ip_advert_int %>
     authentication {
         auth_type PASS
         auth_pass <%= @cluster_ip_auth_key %>
@@ -141,7 +141,7 @@ vrrp_instance ftp_fip_backup {
     interface <%= @virtual_ips_interface_to_manage %>
     virtual_router_id 102
     priority 99
-    advert_int <%= @cluster_advert_int %>
+    advert_int <%= @cluster_ip_advert_int %>
     authentication {
         auth_type PASS
         auth_pass <%= @cluster_ip_auth_key %>

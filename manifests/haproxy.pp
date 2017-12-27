@@ -120,7 +120,7 @@ class atomia::haproxy (
     apt::ppa { 'ppa:vbernat/haproxy-1.5':
       require => Package['python-software-properties']
     }
-
+/* TODO: Temporary
     if $ssh_cluster_ip != '' {
       class { 'ssh::server':
         validate_sshd_file => true,
@@ -129,18 +129,25 @@ class atomia::haproxy (
         },
       }
     }
-
+*/
     package { 'haproxy':
       ensure  => present,
       require => [ Apt::Ppa['ppa:vbernat/haproxy-1.5'] ]
     }
-    package { 'keepalived':
-      ensure  => present,
-    }
+    
 
     if $virtual_ips_interface_to_manage != '' {
       sysctl::conf { 'net.ipv4.ip_nonlocal_bind':
         value => 1
+      }
+      
+      package { 'keepalived':
+        ensure  => present,
+      }
+      service { 'keepalived':
+        ensure    => running,
+        enable    => true,
+        require   => Package['keepalived'],
       }
 
       exec { 'enable-all-interfaces':
@@ -188,7 +195,7 @@ class atomia::haproxy (
         owner   => 'root',
         group   => 'root',
         mode    => '0755',
-        source  => 'puppet://files/haproxy/atomia-keepalived-check.sh',
+        source  => 'puppet:///modules/atomia/haproxy/atomia-keepalived-check.sh',
         require => Package['keepalived'],
       }
       file { '/etc/keepalived':
@@ -450,4 +457,5 @@ define haproxy::ipalias(
       before  => [ Package['keepalived'], Service['keepalived'] ]
     }
   }
+}
 }
