@@ -18,11 +18,11 @@
 #### ssh_cluster_nodes: A comma separated list of SSH cluster nodes or empty to use all hosts with the SSH role.
 #### ftp_cluster_nodes: A comma separated list of FTP cluster nodes or empty to use all hosts with the FTP role.
 #### haproxy_nodes: A comma separated list of hostnames for all HAProxy load balancers in this cluster, the first one will be primary.
-#### cluster_ip_auth_key: The shared secret for the Heartbeat failover of the virtual IPs.
-#### cluster_ip_warntime: The value to use for the warntime Heartbeat configuration option.
-#### cluster_ip_deadtime: The value to use for the deadtime Heartbeat configuration option.
-#### cluster_ip_initdead: The value to use for the initdead Heartbeat configuration option.
-#### cluster_ip_keepalive: The value to use for the keepalive Heartbeat configuration option.
+#### cluster_ip_auth_key: The shared secret for the Keepalived vrrp failover of the virtual IPs.
+#### cluster_ip_advert_int: The time in seconds for sending multicast requests.
+#### cluster_ip_check_interval: The time in seconds for checking if the service is alive.
+#### cluster_ip_num_fails: The number of failed checks until failover ip goes to backup node.
+#### cluster_ip_num_rise: The number of successfull checks until failover ip gets back to its master node.
 #### ssl_default_bind_options: The default SSL bind options to use in the HAProxy config.
 #### ssl_default_bind_ciphers: The default SSL bind cipher list to use in the HAProxy config.
 #### acme_agreement: The ACME agreement to auto-approve.
@@ -48,10 +48,10 @@
 ##### ftp_cluster_nodes(advanced): %ftp_cluster_nodes
 ##### haproxy_nodes(advanced): ^[a-z0-9,-]*$
 ##### cluster_ip_auth_key(advanced): %password
-##### cluster_ip_warntime(advanced): %int
-##### cluster_ip_deadtime(advanced): %int
-##### cluster_ip_initdead(advanced): %int
-##### cluster_ip_keepalive(advanced): %int
+##### cluster_ip_advert_int(advanced): %int
+##### cluster_ip_check_interval(advanced): %int
+##### cluster_ip_num_fails(advanced): %int
+##### cluster_ip_num_rise(advanced): %int
 ##### ssl_default_bind_options(advanced): .
 ##### ssl_default_bind_ciphers(advanced): .
 ##### acme_agreement(advanced): %url
@@ -76,14 +76,16 @@ class atomia::haproxy (
   $ssh_cluster_nodes               = '',
   $ftp_cluster_nodes               = '',
   $haproxy_nodes_hostnames         = '',
+
   $cluster_ip_auth_key             = 'default_password',
-  $cluster_ip_warntime             = 5,
-  $cluster_ip_deadtime             = 15,
-  $cluster_ip_initdead             = 60,
-  $cluster_ip_keepalive            = 2,
+  $cluster_ip_advert_int           = 5,
+  $cluster_ip_check_interval       = 5,
+  $cluster_ip_num_fails            = 3,
+  $cluster_ip_num_rise             = 3,
+
   $ssl_default_bind_options        = 'no-sslv3 no-tls-tickets',
   $ssl_default_bind_ciphers        = 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA',
-  $acme_agreement                  = 'https://letsencrypt.org/documents/LE-SA-v1.1.1-August-1-2016.pdf',
+  $acme_agreement                  = 'https://letsencrypt.org/documents/LE-SA-v1.2-November-15-2017.pdf',
   $acme_endpoint                   = 'https://acme-v01.api.letsencrypt.org/directory',
   $preview_domain                  = expand_default('preview.[[atomia_domain]]'),
   $apache_config_sync_source       = 'root@fsagent:/storage/configuration/maps',
@@ -132,10 +134,24 @@ class atomia::haproxy (
       ensure  => present,
       require => [ Apt::Ppa['ppa:vbernat/haproxy-1.5'] ]
     }
+    
 
     if $virtual_ips_interface_to_manage != '' {
       sysctl::conf { 'net.ipv4.ip_nonlocal_bind':
         value => 1
+      }
+
+      package { 'keepalived':
+        ensure  => present,
+      }
+      service { 'keepalived':
+        ensure    => running,
+        enable    => true,
+        require   => Package['keepalived'],
+      }
+      service { 'heartbeat':
+        enable => false,
+        ensure => 'stopped',
       }
 
       exec { 'enable-all-interfaces':
@@ -145,76 +161,27 @@ class atomia::haproxy (
         require     => Package['haproxy'],
       }
 
-      haproxy::ipalias { 'apache_vip':
-        interface => $virtual_ips_interface_to_manage,
-        ip        => $apache_cluster_ip,
-        netmask   => $virtual_ips_netmask,
-        alias_num => 1
+      file { '/usr/local/bin/atomia-keepalived-check.sh':
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0755',
+        source  => 'puppet:///modules/atomia/haproxy/atomia-keepalived-check.sh',
+        require => Package['keepalived'],
       }
-
-      haproxy::ipalias { 'iis_vip':
-        interface => $virtual_ips_interface_to_manage,
-        ip        => $iis_cluster_ip,
-        netmask   => $virtual_ips_netmask,
-        alias_num => 2
+      file { '/etc/keepalived':
+        ensure  => 'directory',
+        owner   => 'root',
+        group   => 'root',
+        require => Package['keepalived'],
       }
-
-      haproxy::ipalias { 'mail_vip':
-        interface => $virtual_ips_interface_to_manage,
-        ip        => $mail_cluster_ip,
-        netmask   => $virtual_ips_netmask,
-        alias_num => 3
-      }
-
-      haproxy::ipalias { 'ftp_vip':
-        interface => $virtual_ips_interface_to_manage,
-        ip        => $ftp_cluster_ip,
-        netmask   => $virtual_ips_netmask,
-        alias_num => 4
-      }
-
-      haproxy::ipalias { 'ssh_vip':
-        interface => $virtual_ips_interface_to_manage,
-        ip        => $ssh_cluster_ip,
-        netmask   => $virtual_ips_netmask,
-        alias_num => 5
-      }
-
-      file { '/etc/ha.d/ha.cf':
+      file { '/etc/keepalived/keepalived.conf':
         owner   => 'root',
         group   => 'root',
         mode    => '0440',
-        content => template('atomia/haproxy/ha.d/ha.cf.erb'),
-        require => Package['heartbeat'],
-        notify  => Service['heartbeat'],
+        content => template('atomia/haproxy/keepalived/keepalived.conf.erb'),
+        require => Package['keepalived'],
+        notify  => Service['keepalived'],
       }
-
-      file { '/etc/ha.d/authkeys':
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0600',
-        content => template('atomia/haproxy/ha.d/authkeys.erb'),
-        require => Package['heartbeat'],
-        notify  => Service['heartbeat'],
-      }
-
-      file { '/etc/ha.d/haresources':
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0440',
-        content => template('atomia/haproxy/ha.d/haresources.erb'),
-        require => Package['heartbeat'],
-        notify  => Service['heartbeat'],
-      }
-
-      package { 'heartbeat': ensure => present }
-
-      service { 'heartbeat':
-        ensure  => running,
-        enable  => true,
-        require => Package['heartbeat'],
-      }
-    }
   } else {
     package { 'haproxy': ensure => present }
   }
@@ -229,6 +196,12 @@ class atomia::haproxy (
     exec { 'restart-haproxy':
       refreshonly => true,
       command     => '/etc/init.d/haproxy restart',
+    }
+  }
+  if !defined(Exec['restart-keepalived']) {
+    exec { 'restart-keepalived':
+      refreshonly => true,
+      command     => '/etc/init.d/keepalived restart',
     }
   }
 
@@ -431,27 +404,4 @@ class atomia::haproxy (
     }
   }
 }
-
-define haproxy::ipalias(
-  $alias_num,
-  $interface = '',
-  $ip        = '',
-  $netmask   = '',
-) {
-
-  if $ip != '' {
-    augeas { "haproxy_ipalias_${ip}":
-      context => '/files/etc/network/interfaces',
-      changes => [
-        "set auto[child::1 = '${interface}:${alias_num}']/1 ${interface}:${alias_num}",
-        "set iface[. = '${interface}:${alias_num}'] ${interface}:${alias_num}",
-        "set iface[. = '${interface}:${alias_num}']/family inet",
-        "set iface[. = '${interface}:${alias_num}']/method static",
-        "set iface[. = '${interface}:${alias_num}']/address ${ip}",
-        "set iface[. = '${interface}:${alias_num}']/netmask ${netmask}",
-      ],
-      notify  => Exec['enable-all-interfaces'],
-      before  => [ Package['heartbeat'], Service['heartbeat'] ]
-    }
-  }
 }
