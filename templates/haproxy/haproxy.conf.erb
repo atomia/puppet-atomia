@@ -63,6 +63,8 @@ frontend mailcluster
 	bind <%= @mail_cluster_ip %>:110
 	bind <%= @mail_cluster_ip %>:143
 	bind <%= @mail_cluster_ip %>:587
+	bind <%= @mail_cluster_ip %>:993
+	bind <%= @mail_cluster_ip %>:995
 	default_backend mail_servers
 
 frontend webmailcluster
