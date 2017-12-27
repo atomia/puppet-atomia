@@ -88,4 +88,6 @@ mod "stdlib",
     :git => "git://github.com/puppetlabs/puppetlabs-stdlib.git",
     :ref => "f6781af353a678601817e0f1cc0e3813ea79d952"
 
-mod 'derdanne-nfs', '1.0.1'
+mod 'derdanne-nfs', '1.0.1',
+
+mod 'saz-ssh', '3.0.1'

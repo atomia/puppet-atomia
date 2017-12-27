@@ -120,7 +120,7 @@ class atomia::haproxy (
     apt::ppa { 'ppa:vbernat/haproxy-1.5':
       require => Package['python-software-properties']
     }
-/* TODO: Temporary
+
     if $ssh_cluster_ip != '' {
       class { 'ssh::server':
         validate_sshd_file => true,
@@ -129,7 +129,7 @@ class atomia::haproxy (
         },
       }
     }
-*/
+
     package { 'haproxy':
       ensure  => present,
       require => [ Apt::Ppa['ppa:vbernat/haproxy-1.5'] ]
