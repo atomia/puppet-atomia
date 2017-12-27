@@ -1,6 +1,10 @@
 debug-level             0
 paranoia                no
+<% if @atomia_role_1  == 'fsagent' %>
+enable-cache            passwd          no
+<% else %>
 enable-cache            passwd          yes
+<% end %>
 positive-time-to-live   passwd          3600
 negative-time-to-live   passwd          20
 suggested-size          passwd          211
@@ -25,7 +29,11 @@ check-files             hosts           yes
 persistent              hosts           yes
 shared                  hosts           yes
 max-db-size             hosts           33554432
+<% if @atomia_role_1  == 'fsagent' %>
+enable-cache            services        no
+<% else %>
 enable-cache            services        yes
+<% end %>
 positive-time-to-live   services        28800
 negative-time-to-live   services        20
 suggested-size          services        211

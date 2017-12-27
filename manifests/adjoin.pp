@@ -146,5 +146,14 @@ class atomia::adjoin (
       mode   => '0644',
       source => 'puppet:///modules/atomia/adjoin/common-session',
     }
+
+    file { '/etc/nscd.conf':
+        ensure  => file,
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0600',
+        content => template('atomia/adjoin/nscd.conf.erb'),
+        notify  => [ Service['unscd'], Service['nscd'] ],
+      }
   }
 }

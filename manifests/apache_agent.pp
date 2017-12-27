@@ -48,7 +48,7 @@ class atomia::apache_agent (
   $should_have_php_farm       = '0',
   $php_versions               = '5.4.45,5.5.29',
   $php_extension_packages     = 'php-gd,php-imagick,php-sybase,php-mysql,php-odbc,php-curl,php-pgsql',
-  $apache_modules_to_enable   = 'rewrite,userdir,fcgid,suexec,expires,headers,deflate,include'
+  $apache_modules_to_enable   = 'rewrite,userdir,fcgid,suexec,expires,headers,deflate,include,authz_groupfile'
 ) {
 
   if $::lsbdistrelease == '14.04' or $::lsbdistrelease == '16.04' {
