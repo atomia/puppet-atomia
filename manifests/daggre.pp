@@ -42,9 +42,9 @@ class atomia::daggre (
   $cloudlinux_database_password = 'atomia123',
   $local_address                = 'localhost',
   $mongo_admin_user             = 'admin',
-  $mongo_admin_pass             = '',
+  $mongo_admin_pass             = 'admin',
   $mongo_daggre_user            = 'daggre',
-  $mongo_daggre_pass            = '',
+  $mongo_daggre_pass            = 'daggre',
   $mongo_db_name                = 'daggre'
 ) {
 
