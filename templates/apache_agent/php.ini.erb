@@ -1056,8 +1056,8 @@ allow_url_include = Off
 ;; For Unix only.  You may supply arguments as well (default: "sendmail -t -i").
 ;; http://php.net/sendmail-path
 
-<% if @sendmail_path != "" -%>
-sendmail_path = <% @sendmail_path %>
+<% if @sendmail_path_erb != '' -%>
+sendmail_path = "<%= @sendmail_path_erb %>"
 <% else %> 
 ;;sendmail_path =
 <% end -%>

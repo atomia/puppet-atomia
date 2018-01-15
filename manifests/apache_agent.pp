@@ -19,7 +19,7 @@
 #### apache_modules_to_enable: Determines which Apache modules to enable (comma separated list of modules).
 #### sendmail_path: path to the sendmail or ssmtp what to set in php.ini to use for mail function, or leave empty for disabled mail sending via php mail.
 #### relay_mail_server_ip: IP or Hostname of the mail server which will relay mail sent by sendmail
-#### custom_domain_from_mail: Enable or disable changing of domain when sending mail by sendmail
+#### custom_domain_from_mail: Enable or disable changing of domain when sending mail by sendmail 1 or 0
 
 ### Validations
 ##### username(advanced): %username
@@ -320,29 +320,50 @@ class atomia::apache_agent (
 
   #enable sendmail ssmtp install
   if $::sendmail_path != '' {
+
+    $relay_server_ip = hiera('atomia::mailserver::master_ip','')
+
+    #if relay_mail_server_ip is set then use the value that has been set via puppetGUI or use the master_ip of mailserver 
+    if $relay_mail_server_ip != '' {
+      $relay_server_ip = $relay_mail_server_ip
+    }
+    
+    $sendmail_path_erb = hiera('atomia::apache_agent::sendmail_path','/usr/sbin/sendmail -t -i') #use default from hiera
+    $custom_domain_from_mail_string = 'YES'
+    
+    if $custom_domain_from_mail != '1' {
+      $custom_domain_from_mail_string = 'NO'
+    }
+
     package { 'ssmtp': ensure => present, }
 
     file { '/etc/ssmtp/ssmtp.conf':
       ensure  => present,
+      content  => template('atomia/apache_agent/ssmtp.conf.erb'), #'puppet:///modules/atomia/apache_agent/php.ini',
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      require => [ Package['ssmtp'] ],
+    }
+    
+    file { '/storage/configuration/php.ini':
+      ensure  => present,
+      content  => template('atomia/apache_agent/php.ini.erb'), #'puppet:///modules/atomia/apache_agent/php.ini',
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+    }
+  } else {
+    file { '/storage/configuration/php.ini':
+      ensure  => present,
       replace => 'no',
-      source  => template('atomia/apache_agent/ssmtp.conf.erb'), #'puppet:///modules/atomia/apache_agent/php.ini',
+      content => 'puppet:///modules/atomia/apache_agent/php.ini',
       owner   => 'root',
       group   => 'root',
       mode    => '0644',
     }
   }
   
-
-  file { '/storage/configuration/php.ini':
-    ensure  => present,
-    replace => 'no',
-    source  => template('atomia/apache_agent/php.ini.erb'), #'puppet:///modules/atomia/apache_agent/php.ini',
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0644',
-  }
-
-
   if $should_have_pa_apache == '1' {
     service { 'atomia-pa-apache':
       ensure    => running,
