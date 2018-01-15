@@ -329,10 +329,11 @@ class atomia::apache_agent (
     }
     
     $sendmail_path_erb = hiera('atomia::apache_agent::sendmail_path','/usr/sbin/sendmail -t -i') #use default from hiera
-    $custom_domain_from_mail_string = 'YES'
     
     if $custom_domain_from_mail != '1' {
       $custom_domain_from_mail_string = 'NO'
+    } else {
+      $custom_domain_from_mail_string = 'YES'
     }
 
     package { 'ssmtp': ensure => present, }
