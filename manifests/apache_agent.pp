@@ -18,7 +18,7 @@
 #### php_extension_packages: Determines which PHP extensions to install (comma separated list of package names).
 #### apache_modules_to_enable: Determines which Apache modules to enable (comma separated list of modules).
 #### sendmail_path: path to the sendmail or ssmtp what to set in php.ini to use for mail function, or leave empty for disabled mail sending via php mail.
-#### relay_mail_server_ip: IP or Hostname of the mail server which will relay mail sent by sendmail
+#### relay_mail_server_ip: IP or Hostname of the mail server which will relay mail sent by sendmail or empty to use mail_master_ip
 #### custom_domain_from_mail: Enable or disable changing of domain when sending mail by sendmail 1 or 0
 
 ### Validations
