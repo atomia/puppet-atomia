@@ -354,10 +354,10 @@ class atomia::apache_agent (
       mode    => '0644',
     }
   } else {
+    $sendmail_path_erb = ''
     file { '/storage/configuration/php.ini':
       ensure  => present,
-      replace => 'no',
-      content => 'puppet:///modules/atomia/apache_agent/php.ini',
+      content => template('atomia/apache_agent/php.ini.erb'),
       owner   => 'root',
       group   => 'root',
       mode    => '0644',
