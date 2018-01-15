@@ -9,7 +9,7 @@ fi
 PHP_FCGI_MAX_REQUESTS=10000
 export PHP_FCGI_MAX_REQUESTS
 
-php_cgi_exec="/opt/phpfarm/inst/bin/php-cgi-<%= @php_version %>"
+php_cgi_exec="/opt/phpfarm/inst/bin/php-cgi-<%= @php_version %> -c /storage/configuration/php.ini"
 
 homedir=`getent passwd "$uid" | cut -d : -f 6`
 if [ ! -z "$homedir" ] && [ -d "$homedir" ] && [ -f "$homedir/custom-php.ini" ]; then

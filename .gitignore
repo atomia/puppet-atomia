@@ -13,3 +13,4 @@ log
 .idea/*
 modules/*
 Puppetfile.lock
+.vscode/

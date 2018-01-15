@@ -17,6 +17,9 @@
 #### php_versions: If using custom PHP versions, then this is a comma separated list of the versions to compile and install.
 #### php_extension_packages: Determines which PHP extensions to install (comma separated list of package names).
 #### apache_modules_to_enable: Determines which Apache modules to enable (comma separated list of modules).
+#### sendmail_path: path to the sendmail or ssmtp what to set in php.ini to use for mail function, or leave empty for disabled mail sending via php mail.
+#### relay_mail_server_ip: IP or Hostname of the mail server which will relay mail sent by sendmail or empty to use mail_master_ip
+#### custom_domain_from_mail: Enable or disable changing of domain when sending mail by sendmail 1 or 0
 
 ### Validations
 ##### username(advanced): %username
@@ -33,6 +36,9 @@
 ##### php_versions(advanced): ^[0-9]+\.[0-9]+\.[0-9]+(,[0-9]+\.[0-9]+\.[0-9]+)*$
 ##### php_extension_packages(advanced): ^.*$
 ##### apache_modules_to_enable(advanced): ^[a-z0-9_-]+(,[a-z0-9_-]+)$
+##### sendmail_path: .
+##### relay_mail_server_ip(advanced): %ip_or_hostname
+##### custom_domain_from_mail(advanced): %int_boolean
 
 class atomia::apache_agent (
   $username                   = 'automationserver',
@@ -48,7 +54,10 @@ class atomia::apache_agent (
   $should_have_php_farm       = '0',
   $php_versions               = '5.4.45,5.5.29',
   $php_extension_packages     = 'php-gd,php-imagick,php-sybase,php-mysql,php-odbc,php-curl,php-pgsql',
-  $apache_modules_to_enable   = 'rewrite,userdir,fcgid,suexec,expires,headers,deflate,include,authz_groupfile'
+  $apache_modules_to_enable   = 'rewrite,userdir,fcgid,suexec,expires,headers,deflate,include,authz_groupfile',
+  $relay_mail_server_ip       = '',
+  $custom_domain_from_mail    = '1',
+  $sendmail_path              = '/usr/sbin/sendmail -t -i'
 ) {
 
   if $::lsbdistrelease == '14.04' or $::lsbdistrelease == '16.04' {
@@ -309,16 +318,53 @@ class atomia::apache_agent (
     require => [Package['cgroup-bin']],
   }
 
-  file { '/storage/configuration/php.ini':
-    ensure  => present,
-    replace => 'no',
-    source  => 'puppet:///modules/atomia/apache_agent/php.ini',
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0644',
+  #enable sendmail ssmtp install
+  if $::sendmail_path != '' {
+
+    #if relay_mail_server_ip is set then use the value that has been set via puppetGUI or use the master_ip of mailserver 
+    if $relay_mail_server_ip != '' {
+      $relay_server_ip = $relay_mail_server_ip
+    } else {
+      $relay_server_ip = hiera('atomia::mailserver::master_ip','')
+    }
+    
+    $sendmail_path_erb = hiera('atomia::apache_agent::sendmail_path','/usr/sbin/sendmail -t -i') #use default from hiera
+    
+    if $custom_domain_from_mail != '1' {
+      $custom_domain_from_mail_string = 'NO'
+    } else {
+      $custom_domain_from_mail_string = 'YES'
+    }
+
+    package { 'ssmtp': ensure => present, }
+
+    file { '/etc/ssmtp/ssmtp.conf':
+      ensure  => present,
+      content  => template('atomia/apache_agent/ssmtp.conf.erb'), #'puppet:///modules/atomia/apache_agent/php.ini',
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      require => [ Package['ssmtp'] ],
+    }
+    
+    file { '/storage/configuration/php.ini':
+      ensure  => present,
+      content  => template('atomia/apache_agent/php.ini.erb'), #'puppet:///modules/atomia/apache_agent/php.ini',
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+    }
+  } else {
+    $sendmail_path_erb = ''
+    file { '/storage/configuration/php.ini':
+      ensure  => present,
+      content => template('atomia/apache_agent/php.ini.erb'),
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+    }
   }
-
-
+  
   if $should_have_pa_apache == '1' {
     service { 'atomia-pa-apache':
       ensure    => running,
