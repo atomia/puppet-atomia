@@ -321,11 +321,11 @@ class atomia::apache_agent (
   #enable sendmail ssmtp install
   if $::sendmail_path != '' {
 
-    $relay_server_ip = hiera('atomia::mailserver::master_ip','')
-
     #if relay_mail_server_ip is set then use the value that has been set via puppetGUI or use the master_ip of mailserver 
     if $relay_mail_server_ip != '' {
       $relay_server_ip = $relay_mail_server_ip
+    } else {
+      $relay_server_ip = hiera('atomia::mailserver::master_ip','')
     }
     
     $sendmail_path_erb = hiera('atomia::apache_agent::sendmail_path','/usr/sbin/sendmail -t -i') #use default from hiera
