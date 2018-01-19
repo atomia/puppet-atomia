@@ -318,16 +318,53 @@ class atomia::apache_agent (
     require => [Package['cgroup-bin']],
   }
 
-  file { '/storage/configuration/php.ini':
-    ensure  => present,
-    replace => 'no',
-    source  => 'puppet:///modules/atomia/apache_agent/php.ini',
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0644',
+  #enable sendmail ssmtp install
+  if $::sendmail_path != '' {
+    #if relay_mail_server_ip is set then use the value that has been set via puppetGUI or use the master_ip of mailserver 
+    if $relay_mail_server_ip != '' {
+      $relay_server_ip = $relay_mail_server_ip
+    } else {
+      $relay_server_ip = hiera('atomia::mailserver::master_ip','')
+    }
+    
+    $sendmail_path_erb = hiera('atomia::apache_agent::sendmail_path','/usr/sbin/sendmail -t -i') #use default from hiera
+    
+    if $custom_domain_from_mail != '1' {
+      $custom_domain_from_mail_string = 'NO'
+    } else {
+      $custom_domain_from_mail_string = 'YES'
+    }
+
+    package { 'ssmtp': ensure => present, }
+
+    file { '/etc/ssmtp/ssmtp.conf':
+      ensure  => present,
+      content  => template('atomia/apache_agent/ssmtp.conf.erb'),
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      require => [ Package['ssmtp'] ],
+    }
+    
+    file { '/storage/configuration/php.ini':
+      ensure  => present,
+      content  => template('atomia/apache_agent/php.ini.erb'), 
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+    }
+  } else { 
+    #if sendmail is not enabled because the field is empty
+    $sendmail_path_erb = ''
+    file { '/storage/configuration/php.ini':
+      ensure  => present,
+      content => template('atomia/apache_agent/php.ini.erb'),
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+    }
   }
-
-
+  
   if $should_have_pa_apache == '1' {
     service { 'atomia-pa-apache':
       ensure    => running,
