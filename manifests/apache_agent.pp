@@ -17,6 +17,9 @@
 #### php_versions: If using custom PHP versions, then this is a comma separated list of the versions to compile and install.
 #### php_extension_packages: Determines which PHP extensions to install (comma separated list of package names).
 #### apache_modules_to_enable: Determines which Apache modules to enable (comma separated list of modules).
+#### sendmail_path: path to the sendmail or ssmtp what to set in php.ini to use for mail function, or leave empty for disabled mail sending via php mail.
+#### relay_mail_server_ip: IP or Hostname of the mail server which will relay mail sent by sendmail or empty to use mail_master_ip
+#### custom_domain_from_mail: Enable or disable changing of domain when sending mail by sendmail 1 or 0
 
 ### Validations
 ##### username(advanced): %username
@@ -33,6 +36,9 @@
 ##### php_versions(advanced): ^[0-9]+\.[0-9]+\.[0-9]+(,[0-9]+\.[0-9]+\.[0-9]+)*$
 ##### php_extension_packages(advanced): ^.*$
 ##### apache_modules_to_enable(advanced): ^[a-z0-9_-]+(,[a-z0-9_-]+)$
+##### sendmail_path: .
+##### relay_mail_server_ip(advanced): %ip_or_hostname
+##### custom_domain_from_mail(advanced): %int_boolean
 
 class atomia::apache_agent (
   $username                   = 'automationserver',
@@ -48,7 +54,10 @@ class atomia::apache_agent (
   $should_have_php_farm       = '0',
   $php_versions               = '5.4.45,5.5.29',
   $php_extension_packages     = 'php-gd,php-imagick,php-sybase,php-mysql,php-odbc,php-curl,php-pgsql',
-  $apache_modules_to_enable   = 'rewrite,userdir,fcgid,suexec,expires,headers,deflate,include,authz_groupfile'
+  $apache_modules_to_enable   = 'rewrite,userdir,fcgid,suexec,expires,headers,deflate,include,authz_groupfile',
+  $relay_mail_server_ip       = '',
+  $custom_domain_from_mail    = '1',
+  $sendmail_path              = '/usr/sbin/sendmail -t -i'
 ) {
 
   if $::lsbdistrelease == '14.04' or $::lsbdistrelease == '16.04' {
