@@ -82,8 +82,6 @@ frontend sshcluster
 	bind <%= @ssh_cluster_ip %>:22
 	mode tcp
 	option tcplog
-	stick-table type ip size 200k expire 30m
-	stick on src
 	default_backend ssh_servers
 <% end -%>
 
@@ -93,13 +91,13 @@ frontend ftpcluster
 	mode tcp
 	option tcplog
 	balance leastconn
-	stick-table type ip size 200k expire 30m
-	stick on src
 	default_backend ftp_servers
 
 backend apache_servers
 	option forwardfor
 	balance roundrobin
+	stick-table type ip size 200k expire 30m
+	stick on src
 <% @apache_cluster_nodes.split(",").each_with_index do |node, index| -%>
 	server apache<%=index+1 %> <%= node %>:80 check
 
@@ -109,6 +107,8 @@ backend apache_servers
 
 backend iis_servers
 	balance roundrobin
+	stick-table type ip size 200k expire 30m
+	stick on src
 <% @iis_cluster_nodes.split(",").each_with_index do |node, index| -%>
 	server iis<%=index+1 %> <%= node %>:80 check
 <% end -%>
@@ -116,6 +116,8 @@ backend iis_servers
 backend mail_servers
 	mode tcp
 	balance roundrobin
+	stick-table type ip size 200k expire 30m
+	stick on src
 <% @mail_cluster_nodes.split(",").each_with_index do |node, index| -%>
 	server mail<%=index+1 %> <%= node %>
 <% end -%>
@@ -123,6 +125,8 @@ backend mail_servers
 backend webmail_servers
 	option forwardfor
 	balance roundrobin
+	stick-table type ip size 200k expire 30m
+	stick on src
 <% @webmail_cluster_nodes.split(",").each_with_index do |node, index| -%>
 	server webmail<%=index+1 %> <%= node %>:80 check
 
@@ -134,6 +138,8 @@ backend webmail_servers
 backend ssh_servers
 	mode tcp
 	balance roundrobin
+	stick-table type ip size 200k expire 30m
+	stick on src
 <% @ssh_cluster_nodes.split(",").each_with_index do |node, index| -%>
 	server ssh<%=index+1 %> <%= node %>:22 check
 <% end -%>
@@ -143,6 +149,8 @@ backend ftp_servers
 	mode tcp
 	option httpchk
 	balance roundrobin
+	stick-table type ip size 200k expire 30m
+	stick on src
 <% @ftp_cluster_nodes.split(",").each_with_index do |node, index| -%>
 	server ftp<%=index+1 %> <%= node %> check port 9200
 <% end -%>
