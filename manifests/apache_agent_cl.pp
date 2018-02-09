@@ -34,166 +34,17 @@ class atomia::apache_agent_cl (
   $config_share_nfs_location  = '',
   $use_nfs3                   = '1',
   $cluster_ip,
-  $apache_agent_ip            = $::fqdn,
+  $apache_agent_ip            = '',
   $maps_path                  = '/storage/configuration/maps',
   $is_master                  = 1,
   $cloudlinux_agent_secret,
-  $daggre_ip,
 ) {
 
-    # Install lve-stats
-    exec { 'install lve-stats2':
-      command => '/usr/bin/yum -y install lve-stats --enablerepo=cloudlinux-updates-testing',
-      unless  => '/usr/bin/rpm -qa | /bin/grep -c lve-stats-2',
-      require => [Package['cagefs']],
-    }
+  $daggre_ip                    = hiera('atomia::daggre::ip_addr','atomia123')
+  $cloudlinux_database_password = hiera('atomia::daggre::cloudlinux_database_password','atomia123')
+  $lve_postgres_backend_sed_cmd  = '/usr/bin/sed -i "s/db_type = sqlite/db_type = postgresql/" /etc/sysconfig/lvestats2'
+  $lve_postgres_backend_grep_cmd = '/usr/bin/grep "^db_type = postgresql" /etc/sysconfig/lvestats2'
 
-    service { 'lvestats':
-      ensure  => running,
-      require => [Exec['install lve-stats2'],Exec['set postgres backend']],
-    }
-
-    $cloudlinux_database_password = hiera('atomia::daggre::cloudlinux_database_password','atomia123')
-    exec { 'update lve-stats connections tring':
-      command => "/usr/bin/sed -i 's#connect_string =.*#connect_string = atomia-lve:${cloudlinux_database_password}@${daggre_ip}/lve#' /etc/sysconfig/lvestats2",
-      unless  => "/usr/bin/grep -c 'connect_string = atomia-lve:${cloudlinux_database_password}@${daggre_ip}/lve' /etc/sysconfig/lvestats2",
-      notify  => Service['lvestats'],
-      require => Exec['install lve-stats2'],
-    }
-
-    $lve_postgres_backend_sed_cmd  = '/usr/bin/sed -i "s/db_type = sqlite/db_type = postgresql/" /etc/sysconfig/lvestats2'
-    $lve_postgres_backend_grep_cmd = '/usr/bin/grep "^db_type = postgresql" /etc/sysconfig/lvestats2'
-
-    if $is_master == 1 {
-      exec { 'set postgres backend':
-        command => $lve_postgres_backend_sed_cmd,
-        unless  => $lve_postgres_backend_grep_cmd,
-        notify  => Exec['create lve database'],
-        require => Exec['install lve-stats2'],
-      }
-
-      exec { 'create lve database':
-        command     => '/usr/sbin/lve-create-db',
-        refreshonly => true,
-      }
-    } else {
-      exec { 'set postgres backend':
-        command => $lve_postgres_backend_sed_cmd,
-        unless  => $lve_postgres_backend_grep_cmd,
-        require => Exec['install lve-stats2'],
-      }
-    }
-
-    # Install alt-php
-    package { 'lvemanager': ensure => installed }
-
-    file {'/storage/configuration/cloudlinux/lve_packages':
-      ensure  => 'present',
-      replace => 'no',
-      content => '#lve packages',
-      mode    => '0644',
-      require => [Package['lvemanager'],File['/storage']],
-    }
-
-    file {'/storage/configuration/cloudlinux/lve_packages.sh':
-      ensure  => 'present',
-      source  => 'puppet:///modules/atomia/apache_agent/lve_packages.sh',
-      mode    => '0755',
-      require => [Package['lvemanager'],File['/storage']],
-    }
-
-    exec {'enable lve package lookup':
-      command => '/usr/bin/echo "CUSTOM_GETPACKAGE_SCRIPT=/storage/configuration/cloudlinux/lve_packages.sh" >> /etc/sysconfig/cloudlinux',
-      unless  => '/bin/grep -c "/storage/configuration/cloudlinux/lve_packages.sh" /etc/sysconfig/cloudlinux'
-    }
-
-    exec { 'install altphp':
-        command => '/usr/bin/yum -y groupinstall alt-php',
-        timeout => 1800,
-        unless  => '/usr/bin/rpm -qa | /bin/grep -c alt-php70',
-        require => [Package['cagefs']],
-    }
-
-  if $content_share_nfs_location == '' {
-    $internal_zone = hiera('atomia::internaldns::zone_name','')
-
-    package { 'glusterfs-client': ensure => present, }
-
-    if !defined(File['/storage']) {
-      file { '/storage':
-        ensure => directory,
-      }
-    }
-
-    fstab::mount { '/storage/content':
-      ensure  => 'mounted',
-      device  => "gluster.${internal_zone}:/web_volume",
-      options => 'defaults,_netdev',
-      fstype  => 'glusterfs',
-      require => [Package['glusterfs-client'],File['/storage']],
-    }
-
-    fstab::mount { '/storage/configuration':
-      ensure  => 'mounted',
-      device  => "gluster.${internal_zone}:/config_volume",
-      options => 'defaults,_netdev',
-      fstype  => 'glusterfs',
-      require => [ Package['glusterfs-client'],File['/storage']],
-    }
-  }
-  else
-  {
-    atomia::nfsmount { 'mount_content':
-      use_nfs3     => '1',
-      mount_point  => '/storage/content',
-      nfs_location => $content_share_nfs_location,
-    }
-
-    atomia::nfsmount { 'mount_configuration':
-      use_nfs3     => '1',
-      mount_point  => '/storage/configuration',
-      nfs_location => $config_share_nfs_location,
-    }
-  }
-
-  if $should_have_pa_apache == '1' {
-    package { 'atomia-pa-apache':
-      ensure  => present,
-      require => [Package['httpd'], Package['cronolog'], Package['atomia-python-ZSI'], Package['mod_ssl'] ],
-    }
-
-    package { 'nodejs':
-      ensure  => present,
-      require => Exec['add epel repo'],
-    }
-    package { 'atomia-cloudlinux-agent':
-      ensure  => present,
-      require => Package['nodejs'],
-    }
-
-    service { 'atomia-cloudlinux-agent':
-      ensure  => running,
-      require => Package['atomia-cloudlinux-agent'],
-    }
-
-    if $is_master == 1 {
-      exec { 'sync php versions':
-        command => "/usr/bin/curl -X PUT -H \"Authorization: ${cloudlinux_agent_secret}\" http://localhost:8000/php/sync -v",
-        require => [Package['atomia-cloudlinux-agent'], Exec['install altphp'], File['/etc/httpd/conf/phpversions.conf']],
-      }
-    }
-
-    file { '/storage/configuration/cloudlinux/phpversions.conf':
-      ensure  => present,
-    }
-
-    file { '/etc/httpd/conf/phpversions.conf':
-      ensure  => 'link',
-      target  => '/storage/configuration/cloudlinux/phpversions.conf',
-      require => [File['/storage/configuration/cloudlinux'], File['/storage/configuration/cloudlinux/phpversions.conf']],
-      force   => true,
-    }
-  }
 
   exec { 'add epel repo':
     command => '/usr/bin/rpm -Uhv http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm',
@@ -209,15 +60,68 @@ class atomia::apache_agent_cl (
     require => Exec['add epel repo'],
   }
 
-  service { 'httpd':
-    ensure  => running,
+
+  # Install lve-stats
+  exec { 'install lve-stats2':
+    command => '/usr/bin/yum -y install lve-stats --enablerepo=cloudlinux-updates-testing',
+    unless  => '/usr/bin/rpm -qa | /bin/grep -c lve-stats-2',
+    require => [Package['cagefs']],
   }
 
-  file { '/etc/httpd/conf.d/atomia-pa-apache.conf':
-    ensure  => present,
-    content => template('atomia/apache_agent/atomia-pa-apache-cl.conf.erb'),
-    require => Package['atomia-pa-apache'],
-    notify  => Service['httpd'],
+  exec { 'update lve-stats connection string':
+    command => "/usr/bin/sed -i 's#connect_string =.*#connect_string = atomia-lve:${cloudlinux_database_password}@${daggre_ip}/lve#' /etc/sysconfig/lvestats2",
+    unless  => "/usr/bin/grep -c 'connect_string = atomia-lve:${cloudlinux_database_password}@${daggre_ip}/lve' /etc/sysconfig/lvestats2",
+    notify  => Service['lvestats'],
+    require => Exec['install lve-stats2'],
+  }
+
+  # Set postgres backend
+  exec { 'set postgres backend':
+    command => $lve_postgres_backend_sed_cmd,
+    unless  => $lve_postgres_backend_grep_cmd,
+    notify  => Exec['create lve database'],
+    require => Exec['install lve-stats2'],
+  }
+ 
+  exec { 'create lve database':
+    command     => "/usr/sbin/lve-create-db && touch /storage/configuration/cloudlinux/lve_db_${daggre_ip}",
+    creates     => "/storage/configuration/cloudlinux/lve_db_${daggre_ip}",
+    require     => [Exec['set postgres backend'],File['/storage/configuration/cloudlinux']],
+  }
+
+  service { 'lvestats':
+    ensure  => running,
+    require => [Exec['install lve-stats2'],Exec['set postgres backend'],Exec['create lve database']],
+  }
+
+  # Install alt-php
+  package { 'lvemanager': ensure => installed }
+
+  exec { 'install altphp':
+      command => '/usr/bin/yum -y groupinstall alt-php',
+      timeout => 1800,
+      unless  => '/usr/bin/rpm -qa | /bin/grep -c alt-php70',
+      require => [Package['cagefs']],
+  }
+
+  file {'/storage/configuration/cloudlinux/lve_packages':
+    ensure  => 'present',
+    replace => 'no',
+    content => '#lve packages',
+    mode    => '0644',
+    require => [Package['lvemanager'],File['/storage']],
+  }
+
+  file {'/storage/configuration/cloudlinux/lve_packages.sh':
+    ensure  => 'present',
+    source  => 'puppet:///modules/atomia/apache_agent/lve_packages.sh',
+    mode    => '0755',
+    require => [Package['lvemanager'],File['/storage']],
+  }
+
+  exec {'enable lve package lookup':
+    command => '/usr/bin/echo "CUSTOM_GETPACKAGE_SCRIPT=/storage/configuration/cloudlinux/lve_packages.sh" >> /etc/sysconfig/cloudlinux',
+    unless  => '/bin/grep -c "/storage/configuration/cloudlinux/lve_packages.sh" /etc/sysconfig/cloudlinux'
   }
 
   # Install Cagefs
@@ -238,7 +142,6 @@ class atomia::apache_agent_cl (
     require     => Package['cagefs'],
     refreshonly => true,
   }
-
 
   # Install mod_lsapi
   exec { 'install mod_lsapi':
@@ -274,6 +177,101 @@ class atomia::apache_agent_cl (
     content => template('atomia/apache_agent/modhostinglimits.conf.erb'),
     require => Package['mod_hostinglimits'],
     notify  => Service['httpd']
+  }
+
+  if $content_share_nfs_location == '' {
+    $internal_zone = hiera('atomia::active_directory::domain_name','')
+
+    package { 'glusterfs-client': ensure => present, }
+
+    if !defined(File['/storage']) {
+      file { '/storage':
+        ensure => directory,
+      }
+    }
+
+    fstab::mount { '/storage/content':
+      ensure  => 'mounted',
+      device  => "gluster.${internal_zone}:/web_volume",
+      options => 'defaults,_netdev',
+      fstype  => 'glusterfs',
+      require => [Package['glusterfs-client'],File['/storage']],
+    }
+
+    fstab::mount { '/storage/configuration':
+      ensure  => 'mounted',
+      device  => "gluster.${internal_zone}:/config_volume",
+      options => 'defaults,_netdev',
+      fstype  => 'glusterfs',
+      before  => [File['/storage/configuration/cloudlinux'],Exec['create lve database']],
+      require => [ Package['glusterfs-client'],File['/storage']],
+    }
+  }
+  else
+  {
+    atomia::nfsmount { 'mount_content':
+      use_nfs3     => '1',
+      mount_point  => '/storage/content',
+      nfs_location => $content_share_nfs_location,
+    }
+
+    atomia::nfsmount { 'mount_configuration':
+      use_nfs3     => '1',
+      mount_point  => '/storage/configuration',
+      before       => [File['/storage/configuration/cloudlinux'],Exec['create lve database']],
+      nfs_location => $config_share_nfs_location,
+    }
+  }
+
+  if $should_have_pa_apache == '1' {
+    package { 'atomia-pa-apache':
+      ensure  => present,
+      require => [Package['httpd'], Package['cronolog'], Package['atomia-python-ZSI'], Package['mod_ssl'] ],
+    }
+
+    file { '/storage/configuration/cloudlinux/phpversions.conf':
+      ensure  => present,
+    }
+
+    package { 'nodejs':
+      ensure  => present,
+      require => Exec['add epel repo'],
+    }
+
+    package { 'atomia-cloudlinux-agent':
+      ensure  => present,
+      require => Package['nodejs'],
+    }
+
+    service { 'atomia-cloudlinux-agent':
+      ensure  => running,
+      require => Package['atomia-cloudlinux-agent'],
+    }
+
+    if $is_master == 1 {
+      exec { 'sync php versions':
+        command => "/usr/bin/curl -X PUT -H \"Authorization: ${cloudlinux_agent_secret}\" http://localhost:8000/php/sync -v",
+        require => [Package['atomia-cloudlinux-agent'], Exec['install altphp'], File['/etc/httpd/conf/phpversions.conf']],
+      }
+    }
+
+    file { '/etc/httpd/conf/phpversions.conf':
+      ensure  => 'link',
+      target  => '/storage/configuration/cloudlinux/phpversions.conf',
+      require => [File['/storage/configuration/cloudlinux'], File['/storage/configuration/cloudlinux/phpversions.conf']],
+      force   => true,
+    }
+  }
+
+  service { 'httpd':
+    ensure  => running,
+  }
+
+  file { '/etc/httpd/conf.d/atomia-pa-apache.conf':
+    ensure  => present,
+    content => template('atomia/apache_agent/atomia-pa-apache-cl.conf.erb'),
+    require => Package['atomia-pa-apache'],
+    notify  => Service['httpd'],
   }
 
   # CloudLinux shared configuration

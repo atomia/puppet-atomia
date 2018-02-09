@@ -127,6 +127,27 @@ class atomia::resource_transformations (
     require => File['C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/'],
   }
 
+  $cl_installed = hiera('atomia::apache_agent_cl::apache_agent_ip', '')
+  if $cl_installed != '' {
+    $apache_agent_cl_ip      = hiera('atomia::apache_agent_cl::apache_agent_ip', '')
+    $apache_agent_cl_secret  = hiera('atomia::apache_agent_cl::cloudlinux_agent_secret', '')
+    file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/Resources.CloudLinux.xml' :
+      ensure  => 'file',
+      content => template('atomia/resource_transformations/Resources.CloudLinux.erb'),
+      require => File['C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/'],
+    }
+    file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/ProvisioningDescriptions/Transformation Files/ProvisioningDescription.SetCloudLinuxGID.xml' :
+      ensure  => 'file',
+      content => template('atomia/resource_transformations/ProvisioningDescription.SetCloudLinuxGID.erb'),
+      require => File['C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/'],
+    }
+    file { 'C:/Program Files (x86)/Atomia/AutomationServer/Common/ProvisioningDescriptions/Transformation Files/ProvisioningDescription.EnableCloudLinux.xml' :
+      ensure  => 'file',
+      content => template('atomia/resource_transformations/ProvisioningDescription.EnableCloudLinux.erb'),
+      require => File['C:/Program Files (x86)/Atomia/AutomationServer/Common/Transformation Files/'],
+    }
+  }
+
   $postfix_databasehost = hiera('atomia::mailserver::master_ip','')
   $postfix_password     = hiera('atomia::mailserver::agent_password','')
   $postfix_clusterip    = hiera('atomia::mailserver::cluster_ip','')

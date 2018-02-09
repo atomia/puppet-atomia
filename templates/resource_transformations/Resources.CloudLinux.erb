@@ -1,0 +1,10 @@
+<resourceDescription xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+  <bindings xdt:Locator="XPath(//bindings[moduleList/module/@name='Atomia.Provisioning.Modules.CloudLinux.CloudLinux'])">
+    <resourceList>
+      <resource name="CloudLinux1" xdt:Transform="Insert">
+        <property name="ApiUrl">http://<%= @apache_agent_cl_ip %>:8000</property>
+        <property name="ApiSecret"><%= @apache_agent_cl_secret %></property>
+      </resource>
+    </resourceList>
+  </bindings>
+</resourceDescription>

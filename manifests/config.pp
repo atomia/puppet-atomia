@@ -8,6 +8,7 @@
 #### puppet_hostname: The hostname of the Puppet master
 #### puppet_ip: The ip address of the Puppet master
 #### test_env: Set this to 1 if you are installing a test environment
+#### use_cloudlinux: Set this to 1 if you are installing a CloudLinux web cluster
 
 ### Validations
 ##### atomia_domain: %hostname
@@ -15,6 +16,7 @@
 ##### puppet_hostname: %puppet_host
 ##### puppet_ip: $puppet_ip
 ##### test_env: %int_boolean
+##### use_cloudlinux: %int_boolean
 
 class atomia::config (
   $atomia_domain         = '',
@@ -22,6 +24,7 @@ class atomia::config (
   $puppet_hostname       = '%puppet_host',
   $puppet_ip             = '%puppet_ip',
   $test_env              = '0',
+  $use_cloudlinux        = '0',
 ){
 
 }

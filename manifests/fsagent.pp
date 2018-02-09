@@ -12,7 +12,6 @@
 #### enable_config_agent: If set then we also setup a separate fsagent instance for accessing the web cluster configuration share.
 #### create_storage_files: Toggles if we are to create initial storage directory structure if missing.
 #### allow_ssh_key: If set then this SSH key will have access to the machine as root.
-#### fs_add_group: The gid to use for add operations. Defaults to 33 (www-user on Ubuntu)
 
 ### Validations
 ##### username(advanced): %username
@@ -24,7 +23,6 @@
 ##### enable_config_agent(advanced): %int_boolean
 ##### create_storage_files(advanced): %int_boolean
 ##### allow_ssh_key(advanced): .*
-##### fs_add_group: [0-9]+
 
 class atomia::fsagent (
   $username                   = 'fsagent',
@@ -36,10 +34,15 @@ class atomia::fsagent (
   $enable_config_agent        = '0',
   $create_storage_files       = '1',
   $allow_ssh_key              = '',
-  $fs_add_group               = 33,
 ) {
 
-
+  # fs_add_group: The gid to use for add operations. Defaults to 33 (www-user on Ubuntu)
+  $use_rhel_apache_gid = hiera('atomia::config::use_cloudlinux', '')
+  if $use_rhel_apache_gid == '1' {
+    $fs_add_group = 48
+  } else {
+    $fs_add_group = 33
+  }
 
   package { 'python-software-properties': ensure => present }
   package { 'python': ensure => present }
