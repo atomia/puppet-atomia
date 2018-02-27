@@ -2,7 +2,7 @@ wget https://apt.puppetlabs.com/puppetlabs-release-trusty.deb
 sudo dpkg -i puppetlabs-release-trusty.deb
 sudo apt-get update
 
-sudo apt-get install -y puppetmaster puppet git apache2-utils curl rubygems-integration build-essential libmysqlclient-dev ruby-dev
+sudo apt-get install -y puppetmaster puppet git apache2-utils curl rubygems-integration build-essential libmysqlclient-dev ruby-dev postgresql
 sudo apt-get install -y puppetdb puppetdb-terminus
 
 echo "127.0.0.1 puppet" >> /etc/hosts
@@ -20,11 +20,27 @@ SERVER_FQDN=`facter fqdn`
 mysql --defaults-file=/etc/mysql/debian.cnf -e "GRANT USAGE ON *.* TO 'hierauser'@'localhost'; DROP USER 'hierauser'@'localhost';"
 mysql --defaults-file=/etc/mysql/debian.cnf -e "CREATE USER 'hierauser'@'localhost' IDENTIFIED BY '${HIERA_USER_PASSWORD}'; GRANT ALL PRIVILEGES ON hiera.* TO 'hierauser'@'localhost';FLUSH PRIVILEGES;"
 
+## Setup PostgreSQL and add puppetdb user and database
+if [ -z ${PUPPETDB_USER_PASSWORD+x} ]; then
+PUPPETDB_USER_PASSWORD=`date +%s | sha256sum | base64 | head -c 16`
+fi
+
+sudo -u postgres psql -c "CREATE USER puppetdb WITH PASSWORD '${PUPPETDB_USER_PASSWORD}';"
+sudo -u postgres createdb -O puppetdb puppetdb
+
 ## Setup PuppetDB
 echo "[main]
 server = ${SERVER_FQDN}
 port = 8081
 soft_write_failure = false" > /etc/puppet/puppetdb.conf
+
+echo "[database]
+classname = org.postgresql.Driver
+subprotocol = postgresql
+subname = //localhost:5432/puppetdb
+username = puppetdb
+password = ${PUPPETDB_USER_PASSWORD}
+log-slow-statements = 10" > /etc/puppetdb/conf.d/database.ini
 
 mkdir -p /etc/puppet/atomia/service_files
 
