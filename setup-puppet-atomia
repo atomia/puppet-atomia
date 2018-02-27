@@ -48,7 +48,7 @@ echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref
 
 cd /etc/puppet
 
-gem install --no-rdoc --no-ri librarian-puppet
+gem install --no-rdoc --no-ri librarian-puppet -v 2.2.3
 HOME=/root librarian-puppet install
 cp /etc/puppet/modules/atomia/files/default_files/* /etc/puppet/atomia/service_files/
 
