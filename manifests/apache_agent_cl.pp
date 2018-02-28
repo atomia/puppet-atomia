@@ -45,7 +45,6 @@ class atomia::apache_agent_cl (
   $lve_postgres_backend_sed_cmd  = '/usr/bin/sed -i "s/db_type = sqlite/db_type = postgresql/" /etc/sysconfig/lvestats2'
   $lve_postgres_backend_grep_cmd = '/usr/bin/grep "^db_type = postgresql" /etc/sysconfig/lvestats2'
 
-
   exec { 'add epel repo':
     command => '/usr/bin/rpm -Uhv http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm',
     unless  => "/usr/bin/rpm -qi epel-release | /bin/grep  -c 'Build Date'"
@@ -59,7 +58,6 @@ class atomia::apache_agent_cl (
     ensure  => installed,
     require => Exec['add epel repo'],
   }
-
 
   # Install lve-stats
   exec { 'install lve-stats2':
@@ -95,7 +93,9 @@ class atomia::apache_agent_cl (
   }
 
   # Install alt-php
-  package { 'lvemanager': ensure => installed }
+  package { 'lvemanager': 
+    ensure => installed,
+  }
 
   exec { 'install altphp':
       command => '/usr/bin/yum -y groupinstall alt-php',
@@ -260,6 +260,19 @@ class atomia::apache_agent_cl (
       target  => '/storage/configuration/cloudlinux/phpversions.conf',
       require => [File['/storage/configuration/cloudlinux'], File['/storage/configuration/cloudlinux/phpversions.conf']],
       force   => true,
+    }
+
+    file {'/etc/cl.selector/symlinks.rules':
+      ensure  => 'present',
+      content => 'php.d.location = selector',
+      mode    => '0644',
+      require => [File['/etc/httpd/conf/phpversions.conf']],
+      notify  => Exec['apply-symlinks-rules'],
+    }
+
+    exec { 'apply-symlinks-rules':
+      command     => '/usr/bin/selectorctl --apply-symlinks-rules',
+      refreshonly => true
     }
   }
 
