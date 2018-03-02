@@ -1,0 +1,10 @@
+/bin/mount
+/bin/umount
+/bin/su
+/usr/bin/chfn
+/usr/bin/chsh
+/usr/bin/write
+/usr/local/cpanel/bin/cpwrap
+/usr/local/cpanel/bin/jailshell
+/usr/bin/gcc
+/usr/bin/g++
