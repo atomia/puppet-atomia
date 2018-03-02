@@ -20,6 +20,9 @@ case "$1" in
         --list-packages)
                 cat lve_packages | awk '{ print $2 }' | sort | uniq
         ;;
+        --list-resellers-packages)
+                echo " "
+        ;;
         *)
                 echo "Usage:
 --help               show this message

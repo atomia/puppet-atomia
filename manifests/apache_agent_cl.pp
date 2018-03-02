@@ -120,7 +120,7 @@ class atomia::apache_agent_cl (
   }
 
   exec {'enable lve package lookup':
-    command => '/usr/bin/echo "CUSTOM_GETPACKAGE_SCRIPT=/storage/configuration/cloudlinux/lve_packages.sh" >> /etc/sysconfig/cloudlinux',
+    command => '/usr/bin/echo -e "\nCUSTOM_GETPACKAGE_SCRIPT=/storage/configuration/cloudlinux/lve_packages.sh" >> /etc/sysconfig/cloudlinux',
     unless  => '/bin/grep -c "/storage/configuration/cloudlinux/lve_packages.sh" /etc/sysconfig/cloudlinux'
   }
 
