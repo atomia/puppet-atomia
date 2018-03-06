@@ -275,6 +275,19 @@ class atomia::apache_agent_cl (
       refreshonly => true
     }
   }
+  
+  #Apply black list when changed on puppetmaster
+  file {'/etc/cagefs/black.list':
+    ensure  => 'present',
+    source  => 'puppet:///modules/atomia/apache_agent/black.list',
+    mode    => '0600',
+    notify  => Exec['apply-blacklist']
+  }
+
+  exec { 'apply-blacklist':
+    command     => '/usr/sbin/cagefsctl --force-update',
+    refreshonly => true
+  }
 
   service { 'httpd':
     ensure  => running,
