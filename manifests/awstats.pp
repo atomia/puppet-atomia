@@ -258,12 +258,9 @@ class atomia::awstats (
       ensure => present,
       gid    => '48'
     }
-    file { '/etc/apache2/envvars':
-      owner  => root,
-      group  => root,
-      mode   => '0644',
-      source => 'puppet:///modules/atomia/awstats/envvars',
-      notify  => Service['apache2']
+    exec { '/bin/sed -i "s/export APACHE_RUN_GROUP=.*/export APACHE_RUN_GROUP=apache/" /etc/apache2/envvars':
+      require => Package['apache2'],
+      notify  => Exec['force-reload-apache'],
     }
   }
 }
