@@ -251,5 +251,20 @@ class atomia::awstats (
     content => "0 0 * * * root lockfile -r0 /var/run/rotate-awstats && (find /var/log/awstats/ -mtime +14 -exec rm -f '{}' '+'; rm -f /var/run/rotate-awstats.lock)"
   }
 
+  #Create apache group so the regular www-data can access folder with gid 48 and update the service (applies to cloudlinux)
+  $use_rhel_apache_gid = hiera('atomia::config::use_cloudlinux', '')
+  if $use_rhel_apache_gid == '1' {
+    group { 'apache':
+      ensure => present,
+      gid    => '48'
+    }
+    file { '/etc/apache2/envvars':
+      owner  => root,
+      group  => root,
+      mode   => '0644',
+      source => 'puppet:///modules/atomia/awstats/envvars',
+      notify  => Service['apache2']
+    }
+  }
 }
 
