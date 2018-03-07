@@ -45,22 +45,9 @@ class atomia::apache_agent_cl (
   $lve_postgres_backend_sed_cmd  = '/usr/bin/sed -i "s/db_type = sqlite/db_type = postgresql/" /etc/sysconfig/lvestats2'
   $lve_postgres_backend_grep_cmd = '/usr/bin/grep "^db_type = postgresql" /etc/sysconfig/lvestats2'
 
-  # First we need to add the repo and enable it
-  exec { 'add epel repo':
-    command => '/usr/bin/rpm -Uhv http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm',
-    unless  => "/usr/bin/rpm -qi epel-release | /bin/grep  -c 'Build Date'",
-    notify  => Exec['enable epel repo']
-  }
-
-  exec { 'enable epel repo':
-    command => '/usr/bin/yum-config-manager --enable epel',
-    refreshonly => true
-  }
-
   # Now we add the protect base packge in order for CloudLinux to pull the right dependencies
   package { 'yum-plugin-protectbase':
-    ensure => installed,
-    require => Exec['enable epel repo']
+    ensure => installed
   }
 
   # Create the needed protect file
@@ -70,10 +57,28 @@ class atomia::apache_agent_cl (
     mode    => '0644',
     content => template('atomia/apache_agent/rhnplugin.conf.erb'),
     require => Package['yum-plugin-protectbase'],
+    notify => Exec['add epel repo']
+  }
+
+  # First we need to add the repo and enable it
+  exec { 'add epel repo':
+    command => '/usr/bin/rpm -Uhv http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm',
+    unless  => "/usr/bin/rpm -qi epel-release | /bin/grep  -c 'Build Date'",
+    notify  => Exec['enable epel repo'],
+    refreshonly => true
+  }
+
+  exec { 'enable epel repo':
+    command => '/usr/bin/yum-config-manager --enable epel && touch /etc/yum.repos.d/epelisenabled',
+    refreshonly => true
+  } ->
+  file { '/etc/yum.repos.d/epelisenabled':
+    ensure => 'file',
+    content => '1'
   }
 
   # All the code now goes here as all this above is needed first
-  if defined(File['/etc/yum/pluginconf.d/rhnplugin.conf']) {
+  if defined(File['/etc/yum.repos.d/epelisenabled']) {
     $packages_to_install = [
       'atomiastatisticscopy', 'httpd', 'cronolog', 'atomia-python-ZSI', 'mod_ssl'
     ]

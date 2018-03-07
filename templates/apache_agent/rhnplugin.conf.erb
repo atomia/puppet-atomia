@@ -2,19 +2,9 @@
 enabled = 1
 gpgcheck = 1
 timeout = 120
-<% if @operatingsystemmajrelease == "7" %>
 
-[cloudlinux-x86_64-server-7]
+[cloudlinux-x86_64-server-<%= @operatingsystemmajrelease %>]
 protect = 1
-<% elsif  @operatingsystemmajrelease == "6" %>
-
-[cloudlinux-x86_64-server-6]
-protect = 1
-<% else %>
-
-[cloudlinux-x86_64-server-5]
-protect = 1
-<% end %>
 
 [cloudlinux-base]
 protect = 1
