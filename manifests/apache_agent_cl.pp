@@ -45,343 +45,367 @@ class atomia::apache_agent_cl (
   $lve_postgres_backend_sed_cmd  = '/usr/bin/sed -i "s/db_type = sqlite/db_type = postgresql/" /etc/sysconfig/lvestats2'
   $lve_postgres_backend_grep_cmd = '/usr/bin/grep "^db_type = postgresql" /etc/sysconfig/lvestats2'
 
+  # First we need to add the repo and enable it
   exec { 'add epel repo':
     command => '/usr/bin/rpm -Uhv http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm',
-    unless  => "/usr/bin/rpm -qi epel-release | /bin/grep  -c 'Build Date'"
+    unless  => "/usr/bin/rpm -qi epel-release | /bin/grep  -c 'Build Date'",
+    notify  => Exec['enable epel repo']
   }
 
-  $packages_to_install = [
-    'atomiastatisticscopy', 'httpd', 'cronolog', 'atomia-python-ZSI', 'mod_ssl'
-  ]
-
-  package { $packages_to_install:
-    ensure  => installed,
-    require => Exec['add epel repo'],
-  }
-
-  # Install lve-stats
-  exec { 'install lve-stats2':
-    command => '/usr/bin/yum -y install lve-stats --enablerepo=cloudlinux-updates-testing',
-    unless  => '/usr/bin/rpm -qa | /bin/grep -c lve-stats-2',
-    require => [Package['cagefs']],
-  }
-
-  exec { 'update lve-stats connection string':
-    command => "/usr/bin/sed -i 's#connect_string =.*#connect_string = atomia-lve:${cloudlinux_database_password}@${daggre_ip}/lve#' /etc/sysconfig/lvestats2",
-    unless  => "/usr/bin/grep -c 'connect_string = atomia-lve:${cloudlinux_database_password}@${daggre_ip}/lve' /etc/sysconfig/lvestats2",
-    notify  => Service['lvestats'],
-    require => Exec['install lve-stats2'],
-  }
-
-  # Set postgres backend
-  exec { 'set postgres backend':
-    command => $lve_postgres_backend_sed_cmd,
-    unless  => $lve_postgres_backend_grep_cmd,
-    notify  => Exec['create lve database'],
-    require => Exec['install lve-stats2'],
-  }
- 
-  exec { 'create lve database':
-    command     => "/usr/sbin/lve-create-db && touch /storage/configuration/cloudlinux/lve_db_${daggre_ip}",
-    creates     => "/storage/configuration/cloudlinux/lve_db_${daggre_ip}",
-    require     => [Exec['set postgres backend'],File['/storage/configuration/cloudlinux']],
-  }
-
-  service { 'lvestats':
-    ensure  => running,
-    require => [Exec['install lve-stats2'],Exec['set postgres backend'],Exec['create lve database']],
-  }
-
-  # Install alt-php
-  package { 'lvemanager': 
-    ensure => installed,
-  }
-
-  exec { 'install altphp':
-      command => '/usr/bin/yum -y groupinstall alt-php',
-      timeout => 1800,
-      unless  => '/usr/bin/rpm -qa | /bin/grep -c alt-php70',
-      require => [Package['cagefs']],
-  }
-
-  file {'/storage/configuration/cloudlinux/lve_packages':
-    ensure  => 'present',
-    replace => 'no',
-    content => '#lve packages',
-    mode    => '0644',
-    require => [Package['lvemanager'],File['/storage']],
-  }
-
-  file {'/storage/configuration/cloudlinux/lve_packages.sh':
-    ensure  => 'present',
-    source  => 'puppet:///modules/atomia/apache_agent/lve_packages.sh',
-    mode    => '0755',
-    require => [Package['lvemanager'],File['/storage']],
-  }
-
-  exec {'enable lve package lookup':
-    command => '/usr/bin/echo -e "\nCUSTOM_GETPACKAGE_SCRIPT=/storage/configuration/cloudlinux/lve_packages.sh" >> /etc/sysconfig/cloudlinux',
-    unless  => '/bin/grep -c "/storage/configuration/cloudlinux/lve_packages.sh" /etc/sysconfig/cloudlinux'
-  }
-
-  # Install Cagefs
-  package { 'cagefs':
-    ensure => present,
-    notify => Exec['init cagefs'],
-  }
-
-  exec { 'init cagefs':
-    command     => '/usr/sbin/cagefsctl --init',
-    require     => Package['cagefs'],
-    refreshonly => true,
-    notify      => Exec['enable cagefs'],
-  }
-
-  exec { 'enable cagefs':
-    command     => '/usr/sbin/cagefsctl --disable-all',
-    require     => Package['cagefs'],
-    refreshonly => true,
-  }
-
-  # Install mod_lsapi
-  exec { 'install mod_lsapi':
-    command => '/usr/bin/yum -y install liblsapi liblsapi-devel mod_lsapi gcc gcc-c++ cmake httpd-devel --enablerepo=cloudlinux-updates-testing',
-    unless  => '/usr/bin/rpm -qa | /bin/grep -c liblsapi',
-    notify  => Exec['setup mod_lsapi']
-  }
-
-  exec { 'setup mod_lsapi':
-    command     => '/usr/bin/switch_mod_lsapi --setup',
+  exec { 'enable epel repo':
+    command => '/usr/bin/yum-config-manager --enable epel',
     refreshonly => true
   }
 
-  file { '/etc/httpd/conf.d/lsapi.conf':
+  # Now we add the protect base packge in order for CloudLinux to pull the right dependencies
+  package { 'yum-plugin-protectbase':
+    ensure => installed,
+    require => Exec['enable epel repo']
+  }
+
+  # Create the needed protect file
+  file { '/etc/yum/pluginconf.d/rhnplugin.conf':
     owner   => 'root',
     group   => 'root',
     mode    => '0644',
-    content => template('atomia/apache_agent/lsapi.conf.erb'),
-    require => Exec['install mod_lsapi'],
-    notify  => Service['httpd']
+    content => template('atomia/apache_agent/rhnplugin.conf.erb'),
+    require => Package['yum-plugin-protectbase'],
   }
 
-  # Install mod_hostinglimits
-  package { 'mod_hostinglimits':
-    ensure  => present,
-    require => Package['httpd'],
-  }
+  # All the code now goes here as all this above is needed first
+  if defined(File['/etc/yum/pluginconf.d/rhnplugin.conf']) {
+    $packages_to_install = [
+      'atomiastatisticscopy', 'httpd', 'cronolog', 'atomia-python-ZSI', 'mod_ssl'
+    ]
 
-  file { '/etc/httpd/conf.d/modhostinglimits.conf':
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0644',
-    content => template('atomia/apache_agent/modhostinglimits.conf.erb'),
-    require => Package['mod_hostinglimits'],
-    notify  => Service['httpd']
-  }
-
-  if $content_share_nfs_location == '' {
-    $internal_zone = hiera('atomia::active_directory::domain_name','')
-
-    package { 'glusterfs-client': ensure => present, }
-
-    if !defined(File['/storage']) {
-      file { '/storage':
-        ensure => directory,
-      }
-    }
-
-    fstab::mount { '/storage/content':
-      ensure  => 'mounted',
-      device  => "gluster.${internal_zone}:/web_volume",
-      options => 'defaults,_netdev',
-      fstype  => 'glusterfs',
-      require => [Package['glusterfs-client'],File['/storage']],
-    }
-
-    fstab::mount { '/storage/configuration':
-      ensure  => 'mounted',
-      device  => "gluster.${internal_zone}:/config_volume",
-      options => 'defaults,_netdev',
-      fstype  => 'glusterfs',
-      before  => [File['/storage/configuration/cloudlinux'],Exec['create lve database']],
-      require => [ Package['glusterfs-client'],File['/storage']],
-    }
-  }
-  else
-  {
-    atomia::nfsmount { 'mount_content':
-      use_nfs3     => '1',
-      mount_point  => '/storage/content',
-      nfs_location => $content_share_nfs_location,
-    }
-
-    atomia::nfsmount { 'mount_configuration':
-      use_nfs3     => '1',
-      mount_point  => '/storage/configuration',
-      before       => [File['/storage/configuration/cloudlinux'],Exec['create lve database']],
-      nfs_location => $config_share_nfs_location,
-    }
-  }
-
-  if $should_have_pa_apache == '1' {
-    package { 'atomia-pa-apache':
-      ensure  => present,
-      require => [Package['httpd'], Package['cronolog'], Package['atomia-python-ZSI'], Package['mod_ssl'] ],
-    }
-
-    file { '/storage/configuration/cloudlinux/phpversions.conf':
-      ensure  => present,
-    }
-
-    package { 'nodejs':
-      ensure  => present,
+    package { $packages_to_install:
+      ensure  => installed,
       require => Exec['add epel repo'],
     }
 
-    package { 'atomia-cloudlinux-agent':
-      ensure  => present,
-      require => Package['nodejs'],
+    # Install lve-stats
+    exec { 'install lve-stats2':
+      command => '/usr/bin/yum -y install lve-stats --enablerepo=cloudlinux-updates-testing',
+      unless  => '/usr/bin/rpm -qa | /bin/grep -c lve-stats-2',
+      require => [Package['cagefs']],
     }
 
-    service { 'atomia-cloudlinux-agent':
+    exec { 'update lve-stats connection string':
+      command => "/usr/bin/sed -i 's#connect_string =.*#connect_string = atomia-lve:${cloudlinux_database_password}@${daggre_ip}/lve#' /etc/sysconfig/lvestats2",
+      unless  => "/usr/bin/grep -c 'connect_string = atomia-lve:${cloudlinux_database_password}@${daggre_ip}/lve' /etc/sysconfig/lvestats2",
+      notify  => Service['lvestats'],
+      require => Exec['install lve-stats2'],
+    }
+
+    # Set postgres backend
+    exec { 'set postgres backend':
+      command => $lve_postgres_backend_sed_cmd,
+      unless  => $lve_postgres_backend_grep_cmd,
+      notify  => Exec['create lve database'],
+      require => Exec['install lve-stats2'],
+    }
+  
+    exec { 'create lve database':
+      command     => "/usr/sbin/lve-create-db && touch /storage/configuration/cloudlinux/lve_db_${daggre_ip}",
+      creates     => "/storage/configuration/cloudlinux/lve_db_${daggre_ip}",
+      require     => [Exec['set postgres backend'],File['/storage/configuration/cloudlinux']],
+    }
+
+    service { 'lvestats':
       ensure  => running,
-      require => Package['atomia-cloudlinux-agent'],
+      require => [Exec['install lve-stats2'],Exec['set postgres backend'],Exec['create lve database']],
     }
 
-    if $is_master == 1 {
-      exec { 'sync php versions':
-        command => "/usr/bin/curl -X PUT -H \"Authorization: ${cloudlinux_agent_secret}\" http://localhost:8000/php/sync -v",
-        require => [Package['atomia-cloudlinux-agent'], Exec['install altphp'], File['/etc/httpd/conf/phpversions.conf']],
+    # Install alt-php
+    package { 'lvemanager': 
+      ensure => installed,
+    }
+
+    exec { 'install altphp':
+        command => '/usr/bin/yum -y groupinstall alt-php',
+        timeout => 1800,
+        unless  => '/usr/bin/rpm -qa | /bin/grep -c alt-php70',
+        require => [Package['cagefs']],
+    }
+
+    file {'/storage/configuration/cloudlinux/lve_packages':
+      ensure  => 'present',
+      replace => 'no',
+      content => '#lve packages',
+      mode    => '0644',
+      require => [Package['lvemanager'],File['/storage']],
+    }
+
+    file {'/storage/configuration/cloudlinux/lve_packages.sh':
+      ensure  => 'present',
+      source  => 'puppet:///modules/atomia/apache_agent/lve_packages.sh',
+      mode    => '0755',
+      require => [Package['lvemanager'],File['/storage']],
+    }
+
+    exec {'enable lve package lookup':
+      command => '/usr/bin/echo -e "\nCUSTOM_GETPACKAGE_SCRIPT=/storage/configuration/cloudlinux/lve_packages.sh" >> /etc/sysconfig/cloudlinux',
+      unless  => '/bin/grep -c "/storage/configuration/cloudlinux/lve_packages.sh" /etc/sysconfig/cloudlinux'
+    }
+
+    # Install Cagefs
+    package { 'cagefs':
+      ensure => present,
+      notify => Exec['init cagefs'],
+    }
+
+    exec { 'init cagefs':
+      command     => '/usr/sbin/cagefsctl --init',
+      require     => Package['cagefs'],
+      refreshonly => true,
+      notify      => Exec['enable cagefs'],
+    }
+
+    exec { 'enable cagefs':
+      command     => '/usr/sbin/cagefsctl --disable-all',
+      require     => Package['cagefs'],
+      refreshonly => true,
+    }
+
+    # Install mod_lsapi
+    exec { 'install mod_lsapi':
+      command => '/usr/bin/yum -y install liblsapi liblsapi-devel mod_lsapi gcc gcc-c++ cmake httpd-devel --enablerepo=cloudlinux-updates-testing',
+      unless  => '/usr/bin/rpm -qa | /bin/grep -c liblsapi',
+      notify  => Exec['setup mod_lsapi']
+    }
+
+    exec { 'setup mod_lsapi':
+      command     => '/usr/bin/switch_mod_lsapi --setup',
+      refreshonly => true
+    }
+
+    file { '/etc/httpd/conf.d/lsapi.conf':
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      content => template('atomia/apache_agent/lsapi.conf.erb'),
+      require => Exec['install mod_lsapi'],
+      notify  => Service['httpd']
+    }
+
+    # Install mod_hostinglimits
+    package { 'mod_hostinglimits':
+      ensure  => present,
+      require => Package['httpd'],
+    }
+
+    file { '/etc/httpd/conf.d/modhostinglimits.conf':
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      content => template('atomia/apache_agent/modhostinglimits.conf.erb'),
+      require => Package['mod_hostinglimits'],
+      notify  => Service['httpd']
+    }
+
+    if $content_share_nfs_location == '' {
+      $internal_zone = hiera('atomia::active_directory::domain_name','')
+
+      package { 'glusterfs-client': ensure => present, }
+
+      if !defined(File['/storage']) {
+        file { '/storage':
+          ensure => directory,
+        }
+      }
+
+      fstab::mount { '/storage/content':
+        ensure  => 'mounted',
+        device  => "gluster.${internal_zone}:/web_volume",
+        options => 'defaults,_netdev',
+        fstype  => 'glusterfs',
+        require => [Package['glusterfs-client'],File['/storage']],
+      }
+
+      fstab::mount { '/storage/configuration':
+        ensure  => 'mounted',
+        device  => "gluster.${internal_zone}:/config_volume",
+        options => 'defaults,_netdev',
+        fstype  => 'glusterfs',
+        before  => [File['/storage/configuration/cloudlinux'],Exec['create lve database']],
+        require => [ Package['glusterfs-client'],File['/storage']],
+      }
+    }
+    else
+    {
+      atomia::nfsmount { 'mount_content':
+        use_nfs3     => '1',
+        mount_point  => '/storage/content',
+        nfs_location => $content_share_nfs_location,
+      }
+
+      atomia::nfsmount { 'mount_configuration':
+        use_nfs3     => '1',
+        mount_point  => '/storage/configuration',
+        before       => [File['/storage/configuration/cloudlinux'],Exec['create lve database']],
+        nfs_location => $config_share_nfs_location,
       }
     }
 
-    file { '/etc/httpd/conf/phpversions.conf':
+    if $should_have_pa_apache == '1' {
+      package { 'atomia-pa-apache':
+        ensure  => present,
+        require => [Package['httpd'], Package['cronolog'], Package['atomia-python-ZSI'], Package['mod_ssl'] ],
+      }
+
+      file { '/storage/configuration/cloudlinux/phpversions.conf':
+        ensure  => present,
+      }
+
+      package { 'nodejs':
+        ensure  => present,
+        require => Exec['add epel repo'],
+      }
+
+      package { 'atomia-cloudlinux-agent':
+        ensure  => present,
+        require => Package['nodejs'],
+      }
+
+      service { 'atomia-cloudlinux-agent':
+        ensure  => running,
+        require => Package['atomia-cloudlinux-agent'],
+      }
+
+      if $is_master == 1 {
+        exec { 'sync php versions':
+          command => "/usr/bin/curl -X PUT -H \"Authorization: ${cloudlinux_agent_secret}\" http://localhost:8000/php/sync -v",
+          require => [Package['atomia-cloudlinux-agent'], Exec['install altphp'], File['/etc/httpd/conf/phpversions.conf']],
+        }
+      }
+
+      file { '/etc/httpd/conf/phpversions.conf':
+        ensure  => 'link',
+        target  => '/storage/configuration/cloudlinux/phpversions.conf',
+        require => [File['/storage/configuration/cloudlinux'], File['/storage/configuration/cloudlinux/phpversions.conf']],
+        force   => true,
+      }
+
+      file {'/etc/cl.selector/symlinks.rules':
+        ensure  => 'present',
+        content => 'php.d.location = selector',
+        mode    => '0644',
+        require => [File['/etc/httpd/conf/phpversions.conf']],
+        notify  => Exec['apply-symlinks-rules'],
+      }
+
+      exec { 'apply-symlinks-rules':
+        command     => '/usr/bin/selectorctl --apply-symlinks-rules',
+        refreshonly => true
+      }
+    }
+    
+    #Apply black list when changed on puppetmaster
+    file {'/etc/cagefs/black.list':
+      ensure  => 'present',
+      source  => 'puppet:///modules/atomia/apache_agent/black.list',
+      mode    => '0600',
+      notify  => Exec['apply-blacklist']
+    }
+
+    exec { 'apply-blacklist':
+      command     => '/usr/sbin/cagefsctl --force-update',
+      refreshonly => true
+    }
+
+    service { 'httpd':
+      ensure  => running,
+    }
+
+    file { '/etc/httpd/conf.d/atomia-pa-apache.conf':
+      ensure  => present,
+      content => template('atomia/apache_agent/atomia-pa-apache-cl.conf.erb'),
+      require => Package['atomia-pa-apache'],
+      notify  => Service['httpd'],
+    }
+
+    # CloudLinux shared configuration
+    file { '/storage/configuration/cloudlinux':
+      ensure => directory,
+      owner  => 'root',
+      group  => 'root',
+      mode   => '0701',
+    }
+
+    file { '/storage/configuration/cloudlinux/users.enabled':
+      ensure  => directory,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0701',
+      require => File['/storage/configuration/cloudlinux']
+    }
+
+    file { '/etc/cagefs/users.enabled':
       ensure  => 'link',
-      target  => '/storage/configuration/cloudlinux/phpversions.conf',
-      require => [File['/storage/configuration/cloudlinux'], File['/storage/configuration/cloudlinux/phpversions.conf']],
+      target  => '/storage/configuration/cloudlinux/users.enabled',
+      require => File['/storage/configuration/cloudlinux'],
       force   => true,
     }
 
-    file {'/etc/cl.selector/symlinks.rules':
-      ensure  => 'present',
-      content => 'php.d.location = selector',
+    file { '/storage/configuration/cloudlinux/cagefs_var':
+      ensure  => directory,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0751',
+      require => File['/storage/configuration/cloudlinux']
+    }
+
+    file { '/var/cagefs':
+      ensure  => 'link',
+      target  => '/storage/configuration/cloudlinux/cagefs_var',
+      require => [File['/storage/configuration/cloudlinux/cagefs_var'], Exec['init cagefs']],
+      force   => true,
+    }
+
+    file { '/storage/configuration/cloudlinux/cagefs_container':
+      ensure  => directory,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0755',
+      require => File['/storage/configuration/cloudlinux']
+    }
+
+    file { '/etc/container':
+      ensure  => 'link',
+      target  => '/storage/configuration/cloudlinux/cagefs_container',
+      require => [File['/storage/configuration/cloudlinux/cagefs_container'], Exec['init cagefs']],
+      force   => true,
+    }
+
+    file { $maps_path:
+      ensure  => directory,
+      owner   => 'root',
+      group   => 'apache',
+      mode    => '2750',
+      recurse => true,
+    }
+
+    file { '/storage/configuration/cloudlinux/cagefs_container/ve.cfg':
+      ensure  => file,
+      owner   => 'root',
+      group   => 'root',
       mode    => '0644',
-      require => [File['/etc/httpd/conf/phpversions.conf']],
-      notify  => Exec['apply-symlinks-rules'],
+      replace => 'no',
+      content => template('atomia/apache_agent/ve.cfg.erb'),
+      require => File['/etc/container']
     }
 
-    exec { 'apply-symlinks-rules':
-      command     => '/usr/bin/selectorctl --apply-symlinks-rules',
-      refreshonly => true
+    $maps_to_ensure = [
+      "${maps_path}/frmrs.map", "${maps_path}/parks.map", "${maps_path}/phpvr.map", "${maps_path}/redrs.map", "${maps_path}/sspnd.map",
+      "${maps_path}/users.map", "${maps_path}/vhost.map", "${maps_path}/proxy.map"
+    ]
+
+    file { $maps_to_ensure:
+      ensure  => present,
+      owner   => 'root',
+      group   => 'apache',
+      mode    => '0440',
+      require => File[$maps_path],
     }
   }
-  
-  #Apply black list when changed on puppetmaster
-  file {'/etc/cagefs/black.list':
-    ensure  => 'present',
-    source  => 'puppet:///modules/atomia/apache_agent/black.list',
-    mode    => '0600',
-    notify  => Exec['apply-blacklist']
-  }
-
-  exec { 'apply-blacklist':
-    command     => '/usr/sbin/cagefsctl --force-update',
-    refreshonly => true
-  }
-
-  service { 'httpd':
-    ensure  => running,
-  }
-
-  file { '/etc/httpd/conf.d/atomia-pa-apache.conf':
-    ensure  => present,
-    content => template('atomia/apache_agent/atomia-pa-apache-cl.conf.erb'),
-    require => Package['atomia-pa-apache'],
-    notify  => Service['httpd'],
-  }
-
-  # CloudLinux shared configuration
-  file { '/storage/configuration/cloudlinux':
-    ensure => directory,
-    owner  => 'root',
-    group  => 'root',
-    mode   => '0701',
-  }
-
-  file { '/storage/configuration/cloudlinux/users.enabled':
-    ensure  => directory,
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0701',
-    require => File['/storage/configuration/cloudlinux']
-  }
-
-  file { '/etc/cagefs/users.enabled':
-    ensure  => 'link',
-    target  => '/storage/configuration/cloudlinux/users.enabled',
-    require => File['/storage/configuration/cloudlinux'],
-    force   => true,
-  }
-
-  file { '/storage/configuration/cloudlinux/cagefs_var':
-    ensure  => directory,
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0751',
-    require => File['/storage/configuration/cloudlinux']
-  }
-
-  file { '/var/cagefs':
-    ensure  => 'link',
-    target  => '/storage/configuration/cloudlinux/cagefs_var',
-    require => [File['/storage/configuration/cloudlinux/cagefs_var'], Exec['init cagefs']],
-    force   => true,
-  }
-
-  file { '/storage/configuration/cloudlinux/cagefs_container':
-    ensure  => directory,
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0755',
-    require => File['/storage/configuration/cloudlinux']
-  }
-
-  file { '/etc/container':
-    ensure  => 'link',
-    target  => '/storage/configuration/cloudlinux/cagefs_container',
-    require => [File['/storage/configuration/cloudlinux/cagefs_container'], Exec['init cagefs']],
-    force   => true,
-  }
-
-  file { $maps_path:
-    ensure  => directory,
-    owner   => 'root',
-    group   => 'apache',
-    mode    => '2750',
-    recurse => true,
-  }
-
-  file { '/storage/configuration/cloudlinux/cagefs_container/ve.cfg':
-    ensure  => file,
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0644',
-    replace => 'no',
-    content => template('atomia/apache_agent/ve.cfg.erb'),
-    require => File['/etc/container']
-  }
-
-  $maps_to_ensure = [
-    "${maps_path}/frmrs.map", "${maps_path}/parks.map", "${maps_path}/phpvr.map", "${maps_path}/redrs.map", "${maps_path}/sspnd.map",
-    "${maps_path}/users.map", "${maps_path}/vhost.map", "${maps_path}/proxy.map"
-  ]
-
-  file { $maps_to_ensure:
-    ensure  => present,
-    owner   => 'root',
-    group   => 'apache',
-    mode    => '0440',
-    require => File[$maps_path],
-  }
-
 }
