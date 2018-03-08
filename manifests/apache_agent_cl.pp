@@ -49,7 +49,7 @@ class atomia::apache_agent_cl (
   package { 'yum-plugin-protectbase':
     ensure => installed
   }
-
+  ->
   # Create the needed protect file
   file { '/etc/yum/pluginconf.d/rhnplugin.conf':
     owner   => 'root',
@@ -57,35 +57,32 @@ class atomia::apache_agent_cl (
     mode    => '0644',
     content => template('atomia/apache_agent/rhnplugin.conf.erb'),
     require => Package['yum-plugin-protectbase'],
-    notify => Exec['add epel repo']
+    notify  => Exec['add epel repo']
   }
-
+  ->
   # First we need to add the repo and enable it
   exec { 'add epel repo':
     command => '/usr/bin/rpm -Uhv http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm',
     unless  => "/usr/bin/rpm -qi epel-release | /bin/grep  -c 'Build Date'",
+    require => [Package['yum-plugin-protectbase'], File['/etc/yum/pluginconf.d/rhnplugin.conf']],
     notify  => Exec['enable epel repo'],
     refreshonly => true
   }
-
+  ->
   exec { 'enable epel repo':
-    command => '/usr/bin/yum-config-manager --enable epel && touch /etc/yum.repos.d/epelisenabled',
+    command => '/usr/bin/yum-config-manager --enable epel',
     refreshonly => true
-  } ->
-  file { '/etc/yum.repos.d/epelisenabled':
-    ensure => 'file',
-    content => '1'
   }
 
   # All the code now goes here as all this above is needed first
-  if defined(File['/etc/yum.repos.d/epelisenabled']) {
     $packages_to_install = [
       'atomiastatisticscopy', 'httpd', 'cronolog', 'atomia-python-ZSI', 'mod_ssl'
     ]
 
     package { $packages_to_install:
       ensure  => installed,
-      require => Exec['add epel repo'],
+      require => Exec['enable epel repo'],
+      notify  => Exec['apply-firewall-httpd']
     }
 
     # Install lve-stats
@@ -109,7 +106,7 @@ class atomia::apache_agent_cl (
       notify  => Exec['create lve database'],
       require => Exec['install lve-stats2'],
     }
-  
+
     exec { 'create lve database':
       command     => "/usr/sbin/lve-create-db && touch /storage/configuration/cloudlinux/lve_db_${daggre_ip}",
       creates     => "/storage/configuration/cloudlinux/lve_db_${daggre_ip}",
@@ -122,8 +119,9 @@ class atomia::apache_agent_cl (
     }
 
     # Install alt-php
-    package { 'lvemanager': 
+    package { 'lvemanager':
       ensure => installed,
+      require => [Package['cagefs']],
     }
 
     exec { 'install altphp':
@@ -155,8 +153,9 @@ class atomia::apache_agent_cl (
 
     # Install Cagefs
     package { 'cagefs':
-      ensure => present,
-      notify => Exec['init cagefs'],
+      ensure  => present,
+      require => [Exec['enable epel repo'], Package[$packages_to_install]],
+      notify  => Exec['init cagefs'],
     }
 
     exec { 'init cagefs':
@@ -176,6 +175,7 @@ class atomia::apache_agent_cl (
     exec { 'install mod_lsapi':
       command => '/usr/bin/yum -y install liblsapi liblsapi-devel mod_lsapi gcc gcc-c++ cmake httpd-devel --enablerepo=cloudlinux-updates-testing',
       unless  => '/usr/bin/rpm -qa | /bin/grep -c liblsapi',
+      require => Package['cagefs'],
       notify  => Exec['setup mod_lsapi']
     }
 
@@ -256,6 +256,7 @@ class atomia::apache_agent_cl (
       package { 'atomia-pa-apache':
         ensure  => present,
         require => [Package['httpd'], Package['cronolog'], Package['atomia-python-ZSI'], Package['mod_ssl'] ],
+        notify  => Exec['apply-firewall-apache-agent']
       }
 
       file { '/storage/configuration/cloudlinux/phpversions.conf':
@@ -264,12 +265,13 @@ class atomia::apache_agent_cl (
 
       package { 'nodejs':
         ensure  => present,
-        require => Exec['add epel repo'],
+        require => Package['cagefs'],
       }
 
       package { 'atomia-cloudlinux-agent':
         ensure  => present,
         require => Package['nodejs'],
+        notify  => Exec['apply-firewall-cl-agent']
       }
 
       service { 'atomia-cloudlinux-agent':
@@ -304,12 +306,13 @@ class atomia::apache_agent_cl (
         refreshonly => true
       }
     }
-    
+
     #Apply black list when changed on puppetmaster
     file {'/etc/cagefs/black.list':
       ensure  => 'present',
       source  => 'puppet:///modules/atomia/apache_agent/black.list',
       mode    => '0600',
+      require     => Package['cagefs'],
       notify  => Exec['apply-blacklist']
     }
 
@@ -320,6 +323,25 @@ class atomia::apache_agent_cl (
 
     service { 'httpd':
       ensure  => running,
+    }
+
+    #Apply the firewall rules when package is installed
+    exec { 'apply-firewall-httpd':
+      command => '/usr/bin/firewall-cmd --zone=public --add-port=80/tcp --permanent && /usr/bin/firewall-cmd --reload',
+      require => Package['httpd'],
+      unless  => '/usr/sbin/iptables -S | /usr/bin/grep "80 "'
+    }
+
+    exec { 'apply-firewall-cl-agent':
+      command => '/usr/bin/firewall-cmd --zone=public --add-port=8000/tcp --permanent && /usr/bin/firewall-cmd --reload',
+      require => Package['atomia-cloudlinux-agent'],
+      unless  => '/usr/sbin/iptables -S | /usr/bin/grep 8000'
+    }
+
+    exec { 'apply-firewall-apache-agent':
+      command => '/usr/bin/firewall-cmd --zone=public --add-port=9999/tcp --permanent && /usr/bin/firewall-cmd --reload',
+      require => Package['atomia-pa-apache'],
+      unless  => '/usr/sbin/iptables -S | /usr/bin/grep 9999'
     }
 
     file { '/etc/httpd/conf.d/atomia-pa-apache.conf':
@@ -335,6 +357,7 @@ class atomia::apache_agent_cl (
       owner  => 'root',
       group  => 'root',
       mode   => '0701',
+      require => [Package['cagefs']],
     }
 
     file { '/storage/configuration/cloudlinux/users.enabled':
@@ -388,6 +411,7 @@ class atomia::apache_agent_cl (
       group   => 'apache',
       mode    => '2750',
       recurse => true,
+      require => [File['/storage/configuration/cloudlinux']],
     }
 
     file { '/storage/configuration/cloudlinux/cagefs_container/ve.cfg':
@@ -412,5 +436,4 @@ class atomia::apache_agent_cl (
       mode    => '0440',
       require => File[$maps_path],
     }
-  }
 }
