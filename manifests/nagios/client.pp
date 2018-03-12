@@ -78,22 +78,42 @@ class atomia::nagios::client(
       }
     }
 
+  # Deploy on other OS (Linux) perl-DateTime-Format-ISO8601
   } else {
-    # Deploy on other OS (Linux)
-    package { [
-      'nagios-nrpe-server',
-      'libconfig-json-perl',
-      'libdatetime-format-iso8601-perl'
-    ]:
-      ensure => installed,
-    }
-
-    if ! defined(Package['libwww-mechanize-perl']) {
-      package { 'libwww-mechanize-perl':
+    # Check the distro first if redhat (centos, cloudlinux) then we need to change some libs
+    if $::osfamily == 'redhat' {
+      package { [
+        'nrpe', # we need to install the basic plugins to have the folder needed for our atomia plugins
+        'nagios-plugins-users',
+        'nagios-plugins-load',
+        'nagios-plugins-swap',
+        'nagios-plugins-disk',
+        'nagios-plugins-procs',
+        'perl-JSON',
+        'perl-DateTime-Format-ISO8601'
+      ]:
         ensure => installed,
       }
+      if ! defined(Package['perl-WWW-Mechanize']) {
+        package { 'perl-WWW-Mechanize':
+          ensure => installed,
+        }
+      }
+    } else {
+      package { [
+        'nagios-nrpe-server',
+        'libconfig-json-perl',
+        'libdatetime-format-iso8601-perl'
+      ]:
+        ensure => installed,
+      }
+      if ! defined(Package['libwww-mechanize-perl']) {
+        package { 'libwww-mechanize-perl':
+          ensure => installed,
+        }
+      }
     }
-
+    
     # Define hostgroups based on custom fact
     case $::atomia_role_1 {
       'domainreg':            {
@@ -185,29 +205,12 @@ class atomia::nagios::client(
       default: {
         warning('Unsupported config')
       }
-
-    }
-    if ! defined(Service['nagios-nrpe-server']) {
-      service { 'nagios-nrpe-server':
-        ensure  => running,
-        require => Package['nagios-nrpe-server'],
-      }
     }
 
     $daggre_ip = hiera('atomia::daggre::ip_addr','')
     $daggre_token = hiera('atomia::daggre::global_auth_token','')
     $daggre_check_ftp_url = "http://${daggre_ip}:999/g?a=${daggre_token}&o=100000&latest=ftp_storage"
     $daggre_check_traffic_url = "http://${daggre_ip}:999/g?a=${daggre_token}&o=100000&latest=web_traffic_bytes"
-    # Configuration files
-    file { '/etc/nagios/nrpe.cfg':
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
-      content => template('atomia/nagios/nrpe.cfg.erb'),
-      require => Package['nagios-nrpe-server'],
-      notify  => Service['nagios-nrpe-server']
-    }
-
 
     @@nagios_host { "${::fqdn}-host" :
       use                => 'generic-host',
@@ -219,14 +222,73 @@ class atomia::nagios::client(
       max_check_attempts => '5'
     }
 
+    if $::osfamily == 'redhat' {
+      if ! defined(Service['nrpe']) {
+        service { 'nrpe':
+          ensure  => running,
+          require => Package['nrpe'],
+        }
+      }
+      # Configuration files
+      # We need to be sure these dirs and files are present or nagios client wont run
+      file { '/etc/nagios/nrpe.d':
+        ensure => 'directory'
+      } ->
+      file { '/etc/nagios/nrpe_local.cfg':
+        ensure  => 'present',
+        replace => 'no',
+        content => '',
+        mode    => '0644'
+      } ->
+      file { '/var/run/nagios':
+        ensure => 'directory'
+      } ->
+      file { '/var/run/nagios/nrpe.pid':
+        owner   => 'nrpe',
+        group   => 'nrpe',
+        mode    => '0600',
+        replace => 'no',
+        content => '',
+      } ->
+      file { '/etc/nagios/nrpe.cfg':
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        content => template('atomia/nagios/nrpe.cfg.erb'),
+        require => Package['nrpe'],
+        notify  => Service['nrpe']
+      }
 
-    if !defined(File['/usr/lib/nagios/plugins/atomia']){
-      file { '/usr/lib/nagios/plugins/atomia':
-        source  => 'puppet:///modules/atomia/nagios/plugins',
-        recurse => true,
-        require => Package['nagios-nrpe-server']
+      if !defined(File['/usr/lib64/nagios/plugins/atomia']){
+        file { '/usr/lib64/nagios/plugins/atomia':
+          source  => 'puppet:///modules/atomia/nagios/plugins',
+          recurse => true,
+          require => Package['nrpe']
+        }
+      }
+    } else { #Debian based distros
+      if ! defined(Service['nagios-nrpe-server']) {
+        service { 'nagios-nrpe-server':
+          ensure  => running,
+          require => Package['nagios-nrpe-server'],
+        }
+      }
+      # Configuration files
+      file { '/etc/nagios/nrpe.cfg':
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        content => template('atomia/nagios/nrpe.cfg.erb'),
+        require => Package['nagios-nrpe-server'],
+        notify  => Service['nagios-nrpe-server']
+      }
+      if !defined(File['/usr/lib/nagios/plugins/atomia']){
+        file { '/usr/lib/nagios/plugins/atomia':
+          source  => 'puppet:///modules/atomia/nagios/plugins',
+          recurse => true,
+          require => Package['nagios-nrpe-server']
+        }
       }
     }
-
   }
 }
