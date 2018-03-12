@@ -153,7 +153,6 @@ class atomia::adjoin (
         group   => 'root',
         mode    => '0600',
         content => template('atomia/adjoin/nscd.conf.erb'),
-        notify  => [ Service['unscd'], Service['nscd'] ],
       }
   }
 }
