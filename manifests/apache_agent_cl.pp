@@ -151,6 +151,12 @@ class atomia::apache_agent_cl (
       unless  => '/bin/grep -c "/storage/configuration/cloudlinux/lve_packages.sh" /etc/sysconfig/cloudlinux'
     }
 
+    #fix selectorctl list of default extensions (missing file)
+    exec {'create phpnative.dat':
+      command => '/bin/touch /var/lve/phpnative.dat',
+      require => [Package['lvemanager']],
+    }
+
     # Install Cagefs
     package { 'cagefs':
       ensure  => present,
