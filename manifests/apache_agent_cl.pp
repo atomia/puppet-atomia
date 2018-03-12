@@ -146,6 +146,14 @@ class atomia::apache_agent_cl (
       require => [Package['lvemanager'],File['/storage']],
     }
 
+    # First we need to check if the /etc/sysconfig/cloudlinux exists if not then we need to populate it with defaults
+    # If the file is already there then we don't create it just do the next exec
+    file { '/etc/sysconfig/cloudlinux':
+      ensure  => 'present',
+      replace => 'no', 
+      source => "puppet:///modules/atomia/apache_agent/cloudlinux",
+      mode    => '0644',
+    } ->
     exec {'enable lve package lookup':
       command => '/usr/bin/echo -e "\nCUSTOM_GETPACKAGE_SCRIPT=/storage/configuration/cloudlinux/lve_packages.sh" >> /etc/sysconfig/cloudlinux',
       unless  => '/bin/grep -c "/storage/configuration/cloudlinux/lve_packages.sh" /etc/sysconfig/cloudlinux'

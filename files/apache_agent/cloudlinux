@@ -1,0 +1,5 @@
+[license_check]
+EMAIL=CP
+disable_kill_orphaned_cron = N
+normalized_user_cpu=Y
+CUSTOM_GETPACKAGE_SCRIPT=/storage/configuration/cloudlinux/lve_packages.sh
