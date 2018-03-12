@@ -71,6 +71,7 @@ class atomia::apache_agent_cl (
   ->
   exec { 'enable epel repo':
     command => '/usr/bin/yum-config-manager --enable epel',
+    before => Class['atomia::nagios::client'],
     refreshonly => true
   }
 
