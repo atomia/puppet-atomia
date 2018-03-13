@@ -253,6 +253,7 @@ class atomia::nagios::client(
         }
       }
     } else { #Debian based distros
+      $libpath = 'lib'
       if ! defined(Service['nagios-nrpe-server']) {
         service { 'nagios-nrpe-server':
           ensure  => running,
