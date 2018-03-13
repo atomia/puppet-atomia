@@ -223,6 +223,7 @@ class atomia::nagios::client(
     }
 
     if $::osfamily == 'redhat' {
+      $libpath = 'lib64'
       if ! defined(Service['nrpe']) {
         service { 'nrpe':
           ensure  => running,
@@ -231,24 +232,11 @@ class atomia::nagios::client(
       }
       # Configuration files
       # We need to be sure these dirs and files are present or nagios client wont run
-      file { '/etc/nagios/nrpe.d':
-        ensure => 'directory'
-      } ->
       file { '/etc/nagios/nrpe_local.cfg':
         ensure  => 'present',
         replace => 'no',
         content => '',
         mode    => '0644'
-      } ->
-      file { '/var/run/nagios':
-        ensure => 'directory'
-      } ->
-      file { '/var/run/nagios/nrpe.pid':
-        owner   => 'nrpe',
-        group   => 'nrpe',
-        mode    => '0600',
-        replace => 'no',
-        content => '',
       } ->
       file { '/etc/nagios/nrpe.cfg':
         owner   => 'root',
@@ -267,6 +255,7 @@ class atomia::nagios::client(
         }
       }
     } else { #Debian based distros
+      $libpath = 'lib'
       if ! defined(Service['nagios-nrpe-server']) {
         service { 'nagios-nrpe-server':
           ensure  => running,
