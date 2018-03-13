@@ -37,7 +37,6 @@ class atomia::nagios::client(
     }
   }
 
-
   # Deploy on Windows.
   if $::operatingsystem == 'windows' {
     class { 'nsclient':
@@ -81,7 +80,7 @@ class atomia::nagios::client(
   # Deploy on other OS (Linux) perl-DateTime-Format-ISO8601
   } else {
     # Check the distro first if redhat (centos, cloudlinux) then we need to change some libs
-    if $::osfamily == 'redhat' {
+    if $::osfamily.downcase == 'redhat' {
       package { [
         'nrpe', # we need to install the basic plugins to have the folder needed for our atomia plugins
         'nagios-plugins-users',
@@ -222,7 +221,7 @@ class atomia::nagios::client(
       max_check_attempts => '5'
     }
 
-    if $::osfamily == 'redhat' {
+    if $::osfamily.downcase == 'redhat' {
       if ! defined(Service['nrpe']) {
         service { 'nrpe':
           ensure  => running,
@@ -231,24 +230,11 @@ class atomia::nagios::client(
       }
       # Configuration files
       # We need to be sure these dirs and files are present or nagios client wont run
-      file { '/etc/nagios/nrpe.d':
-        ensure => 'directory'
-      } ->
       file { '/etc/nagios/nrpe_local.cfg':
         ensure  => 'present',
         replace => 'no',
         content => '',
         mode    => '0644'
-      } ->
-      file { '/var/run/nagios':
-        ensure => 'directory'
-      } ->
-      file { '/var/run/nagios/nrpe.pid':
-        owner   => 'nrpe',
-        group   => 'nrpe',
-        mode    => '0600',
-        replace => 'no',
-        content => '',
       } ->
       file { '/etc/nagios/nrpe.cfg':
         owner   => 'root',
