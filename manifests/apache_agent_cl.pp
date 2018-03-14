@@ -359,6 +359,12 @@ class atomia::apache_agent_cl (
       unless  => '/usr/sbin/iptables -S | /usr/bin/grep 9999'
     }
 
+    exec { 'apply-firewall-nagios':
+      command => '/usr/bin/firewall-cmd --zone=public --add-port=5666/tcp --permanent && /usr/bin/firewall-cmd --reload',
+      require => Class['atomia::nagios::client'],
+      unless  => '/usr/sbin/iptables -S | /usr/bin/grep 5666'
+    }
+
     file { '/etc/httpd/conf.d/atomia-pa-apache.conf':
       ensure  => present,
       content => template('atomia/apache_agent/atomia-pa-apache-cl.conf.erb'),
