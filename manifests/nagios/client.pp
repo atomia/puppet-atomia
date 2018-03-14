@@ -4,6 +4,7 @@ class atomia::nagios::client(
   $public_ip                 = ipaddress_eth0,
   $atomia_account            = '100001',
   $apache_agent_class        = 'atomia::nagios::client::apache_agent',
+  $apache_agent_cl_class     = 'atomia::nagios::client::apache_agent_cl',
   $atomiadns_master_class    = 'atomia::nagios::client::atomiadns_master',
   $nameserver_class          = 'atomia::nagios::client::nameserver',
   $fsagent_class             = 'atomia::nagios::client::fsagent',
@@ -128,6 +129,11 @@ class atomia::nagios::client(
       'apache_agent': {
         $hostgroup = 'linux-customer-webservers,linux-all'
         class { $apache_agent_class: }
+      }
+
+      'apache_agent_cl': {
+        $hostgroup = 'linux-customer-webservers,linux-all'
+        class { $apache_agent_cl_class: }
       }
 
       'atomiadns': {

@@ -202,44 +202,55 @@ connection_timeout=300
 # examples only!
 
 <% 
+   # We need $sudo in order to be able to list processes on RHEL system as nrpe user.
+   # Also this needs to applied on RHEL https://gagor.pl/2014/03/nagios-run-checks-as-root-with-nrpe/
    if @osfamily.downcase == 'redhat' 
         $libpath = 'lib64'
+        $apacheprocess = 'httpd'
+        $sudo = '/usr/bin/sudo '         
    else
         $libpath = 'lib'
+        $apacheprocess = 'apache2'
+        $sudo = ''
    end
 %>
-
 
 # The following examples use hardcoded command arguments...
 <% $hierapath = "/etc/puppet/hieradata" %>
 <% $modulepath = "/etc/puppet/modules/atomia/manifests" %>
 <% $lookup_var     = "/etc/puppet/modules/atomia/files/lookup_variable.sh" %>
 
-command[check_users]=/usr/<%= $libpath %>/nagios/plugins/check_users -w 5 -c 10
-command[check_load]=/usr/<%= $libpath %>/nagios/plugins/check_load -w 15,10,5 -c 30,25,20
-command[check_hda1]=/usr/<%= $libpath %>/nagios/plugins/check_disk -w 20% -c 10% -p /dev/hda1
-command[check_zombie_procs]=/usr/<%= $libpath %>/nagios/plugins/check_procs -w 5 -c 10 -s Z
-command[check_total_procs]=/usr/<%= $libpath %>/nagios/plugins/check_procs -w 150 -c 200
-command[check_all_disks]=/usr/<%= $libpath %>/nagios/plugins/check_disk -w 20% -c 10% -e
-command[check_apache_procs]=/usr/<%= $libpath %>/nagios/plugins/check_procs -c 1: -w 3: -C apache2
-command[check_php_procs]=/usr/<%= $libpath %>/nagios/plugins/check_procs -c 100 -w 50 -a php
-command[check_bind_proc]=/usr/<%= $libpath %>/nagios/plugins/check_procs -c 1: -C named
-command[check_powerdnssync_procs]=/usr/<%= $libpath %>/nagios/plugins/check_procs -c 1: -a atomiapowerdnssync
-command[check_powerdns_procs]=/usr/<%= $libpath %>/nagios/plugins/check_procs -c 2: -a pdns_server
-command[check_postgres_proc]=/usr/<%= $libpath %>/nagios/plugins/check_procs -c 4:100 -a postgres
-command[check_awstats_procs]=/usr/<%= $libpath %>/nagios/plugins/check_procs -c 1: -a awstats-agent
-command[check_daggre_proc]=/usr/<%= $libpath %>/nagios/plugins/check_procs -c 1: -a daggre
-command[check_cronagent_proc]=/usr/<%= $libpath %>/nagios/plugins/check_procs -c 1: -a atomia-cronagent
-command[check_pureftpd_proc]=/usr/<%= $libpath %>/nagios/plugins/check_procs -c 1: -a pure-ftpd
+command[check_users]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_users -w 5 -c 10
+command[check_load]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_load -w 15,10,5 -c 30,25,20
+command[check_hda1]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_disk -w 20% -c 10% -p /dev/hda1
+command[check_zombie_procs]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_procs -w 5 -c 10 -s Z
+command[check_total_procs]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_procs -w 150 -c 200
+command[check_all_disks]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_disk -w 20% -c 10% -e
+command[check_apache_procs]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_procs -c 1: -w 3: -C <%= $apacheprocess %>
+command[check_php_procs]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_procs -c 100 -w 50 -a php
+command[check_bind_proc]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_procs -c 1: -C named
+command[check_powerdnssync_procs]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_procs -c 1: -a atomiapowerdnssync
+command[check_powerdns_procs]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_procs -c 2: -a pdns_server
+command[check_postgres_proc]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_procs -c 4:100 -a postgres
+command[check_awstats_procs]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_procs -c 1: -a awstats-agent
+command[check_daggre_proc]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_procs -c 1: -a daggre
+command[check_cronagent_proc]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_procs -c 1: -a atomia-cronagent
+command[check_pureftpd_proc]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_procs -c 1: -a pure-ftpd
 
-command[check_daggre_ftp]=/usr/<%= $libpath %>/nagios/plugins/atomia/check_daggre.pl --uri "<%= @daggre_check_ftp_url %>" --timeout 5 --days 1
-command[check_daggre_weblog]=/usr/<%= $libpath %>/nagios/plugins/atomia/check_daggre.pl --uri "<%= @daggre_check_traffic_url %>" --timeout 5 --days 1
+command[check_daggre_ftp]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/atomia/check_daggre.pl --uri "<%= @daggre_check_ftp_url %>" --timeout 5 --days 1
+command[check_daggre_weblog]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/atomia/check_daggre.pl --uri "<%= @daggre_check_traffic_url %>" --timeout 5 --days 1
 
-command[check_all_mountpoints] = /usr/<%= $libpath %>/nagios/plugins/atomia/check_mountpoints.sh -A
+command[check_all_mountpoints] = <%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/atomia/check_mountpoints.sh -A
 
-command[check_atomiadns]=/usr/<%= $libpath %>/nagios/plugins/atomia/check_atomiadns.sh $ARG1$ http://localhost/atomiadns $ARG2$ $ARG3$
-command[check_domainreg]=/usr/<%= $libpath %>/nagios/plugins/atomia/check_domainreg.sh $ARG1$
-command[check_glusterfs]=/usr/<%= $libpath %>/nagios/plugins/atomia/check_glusterfs -v $ARG1$ -n $ARG2$
+command[check_atomiadns]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/atomia/check_atomiadns.sh $ARG1$ http://localhost/atomiadns $ARG2$ $ARG3$
+command[check_domainreg]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/atomia/check_domainreg.sh $ARG1$
+command[check_glusterfs]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/atomia/check_glusterfs -v $ARG1$ -n $ARG2$
+
+# CloudLinux Specific checks
+command[check_lvestats_procs]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_procs -c 3: -a lvestats-server
+command[check_cagefs_procs]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_procs -c 1: -a cagefs.server
+command[check_cloudlinux_agent_procs]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_procs -c 1: -a app.js
+command[check_apache_agent_procs]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_procs -c 1: -a apache_agent_daemon
 
 # The following examples allow user-supplied arguments and can
 # only be used if the NRPE daemon was compiled with support for
@@ -247,10 +258,10 @@ command[check_glusterfs]=/usr/<%= $libpath %>/nagios/plugins/atomia/check_gluste
 # config file is set to '1'.  This poses a potential security risk, so
 # make sure you read the SECURITY file before doing this.
 
-command[check_users]=/usr/<%= $libpath %>/nagios/plugins/check_users -w $ARG1$ -c $ARG2$
-command[check_load]=/usr/<%= $libpath %>/nagios/plugins/check_load -w $ARG1$ -c $ARG2$
-command[check_disk]=/usr/<%= $libpath %>/nagios/plugins/check_disk -w $ARG1$ -c $ARG2$ -p $ARG3$
-command[check_procs]=/usr/<%= $libpath %>/nagios/plugins/check_procs -w $ARG1$ -c $ARG2$ -s $ARG3$
+command[check_users]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_users -w $ARG1$ -c $ARG2$
+command[check_load]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_load -w $ARG1$ -c $ARG2$
+command[check_disk]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_disk -w $ARG1$ -c $ARG2$ -p $ARG3$
+command[check_procs]=<%= $sudo %>/usr/<%= $libpath %>/nagios/plugins/check_procs -w $ARG1$ -c $ARG2$ -s $ARG3$
 
 #
 # local configuration:
