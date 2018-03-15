@@ -236,11 +236,22 @@ class atomia::nagios::client(
       }
       # Configuration files
       # We need to be sure these dirs and files are present or nagios client wont run
+      # We need to allow access to nrpe user to run sudo without password for it to be able to run checks
       file { '/etc/nagios/nrpe_local.cfg':
         ensure  => 'present',
         replace => 'no',
         content => '',
         mode    => '0644'
+      } ->
+      exec { 'add nrpe to sudoers general' :
+        command => "/usr/bin/echo '%nrpe ALL=(ALL) NOPASSWD: /usr/lib64/nagios/plugins/' >> /etc/sudoers",
+        unless  => "/usr/bin/grep -c '%nrpe ALL=(ALL) NOPASSWD: /usr/lib64/nagios/plugins/' /etc/sudoers",
+        require => Package['nrpe']
+      } ->
+      exec { 'add nrpe to sudoers atomia' :
+        command => "/usr/bin/echo '%nrpe ALL=(ALL) NOPASSWD: /usr/lib64/nagios/plugins/atomia/' >> /etc/sudoers",
+        unless  => "/usr/bin/grep -c '%nrpe ALL=(ALL) NOPASSWD: /usr/lib64/nagios/plugins/atomia/' /etc/sudoers",
+        require => Package['nrpe']
       } ->
       file { '/etc/nagios/nrpe.cfg':
         owner   => 'root',
@@ -259,7 +270,6 @@ class atomia::nagios::client(
         }
       }
     } else { #Debian based distros
-      $libpath = 'lib'
       if ! defined(Service['nagios-nrpe-server']) {
         service { 'nagios-nrpe-server':
           ensure  => running,
