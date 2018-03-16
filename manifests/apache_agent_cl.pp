@@ -146,9 +146,11 @@ class atomia::apache_agent_cl (
       mode    => '0755',
       require => [Package['lvemanager'],File['/storage']],
     }
+    
+    # There was a possible bug, that some CloudLinux nodes were not having anything in the /etc/sysconfig/cloudlinux file.
+    # So we need to check if the /etc/sysconfig/cloudlinux exists if not then we need to populate it with defaults.
+    # If the file is already there then we don't create it just add the CUSTOM_GETPACKAGE_SCRIPT.
 
-    # First we need to check if the /etc/sysconfig/cloudlinux exists if not then we need to populate it with defaults
-    # If the file is already there then we don't create it just do the next exec
     file { '/etc/sysconfig/cloudlinux':
       ensure  => 'present',
       replace => 'no', 
@@ -159,8 +161,11 @@ class atomia::apache_agent_cl (
       command => '/usr/bin/echo -e "\nCUSTOM_GETPACKAGE_SCRIPT=/storage/configuration/cloudlinux/lve_packages.sh" >> /etc/sysconfig/cloudlinux',
       unless  => '/bin/grep -c "/storage/configuration/cloudlinux/lve_packages.sh" /etc/sysconfig/cloudlinux'
     }
+    
+    # Selectorctl was unable to add extensions and so it didn't work properly as it couldn't find the phpnative.dat file.
+    # Because of this, we need to ensure that there is a phpnative.dat file so it would work.
+    # The file can be empty so we can just touch it and leave it empty.
 
-    #fix selectorctl list of default extensions (missing file)
     exec {'create phpnative.dat':
       command => '/bin/touch /var/lve/phpnative.dat',
       require => [Package['lvemanager']],
@@ -321,8 +326,13 @@ class atomia::apache_agent_cl (
         refreshonly => true
       }
     }
+    
+    # Blacklist file allows us to limit the binaries, files, folders that are in CageFS environment.
+    # Sometimes you need to block certian tools like gcc, g++ not be able to be used by users.
+    # As the system can use PHP exec() we need to ensure to block anything that can be misued.
+    # When the black.list file changes on master the rules will be aplied on the client nodes.
+    # CageFS needs to be updated so we do a force update to apply the new list.
 
-    #Apply black list when changed on puppetmaster
     file {'/etc/cagefs/black.list':
       ensure  => 'present',
       source  => 'puppet:///modules/atomia/apache_agent/black.list',
@@ -336,11 +346,18 @@ class atomia::apache_agent_cl (
       refreshonly => true
     }
 
+    # We need to ensure the service is running and that it's enabled on startup.
+
     service { 'httpd':
       ensure  => running,
+      enable  => true
     }
 
-    #Apply the firewall rules when package is installed
+    # These firewall rules are needed on RHEL based systems like CentOS 7 and CloudLinux 7.
+    # IPtables has been replaced with firewall-cmd, so we add the ports via that tool.
+    # All these firewall rules need to be aplied after the packages are installed.
+    # By default only port 22 is allowed and nothing else to listen.
+
     exec { 'apply-firewall-httpd':
       command => '/usr/bin/firewall-cmd --zone=public --add-port=80/tcp --permanent && /usr/bin/firewall-cmd --reload',
       require => Package['httpd'],
@@ -363,6 +380,40 @@ class atomia::apache_agent_cl (
       command => '/usr/bin/firewall-cmd --zone=public --add-port=5666/tcp --permanent && /usr/bin/firewall-cmd --reload',
       require => Class['atomia::nagios::client'],
       unless  => '/usr/sbin/iptables -S | /usr/bin/grep 5666'
+    }
+
+    # We need to adapt systemd services to wait for mounts before we start cagefs and lvestats.
+    # Finally we update the service to apply the changes to the .service files.
+    # All of the commands are run sequentially to ensure the right flow.
+    # ini_settings is added to Puppetfile in order to use this module.
+
+    ini_setting { 'condition LVEctl service file':
+      ensure  => present,
+      path    => '/usr/lib/systemd/system/lvectl.service',
+      section => 'Unit',
+      setting => 'ConditionPathIsMountPoint',
+      value   => '/storage/configuration/',
+      require => [Exec['install lve-stats2'],Exec['set postgres backend'],Exec['create lve database']]
+    } ->
+    ini_setting { 'condition LVEstats service file':
+      ensure  => present,
+      path    => '/usr/lib/systemd/system/lvestats.service',
+      section => 'Unit',
+      setting => 'ConditionPathIsMountPoint',
+      value   => '/storage/configuration/',
+      require => [Exec['install lve-stats2'],Exec['set postgres backend'],Exec['create lve database']]
+    } ->
+    ini_setting { 'condition CageFS service file':
+      ensure  => present,
+      path    => '/usr/lib/systemd/system/cagefs.service',
+      section => 'Unit',
+      setting => 'ConditionPathIsMountPoint',
+      value   => '/storage/configuration/',
+      require => [Exec['install lve-stats2'],Exec['set postgres backend'],Exec['create lve database'],Package['cagefs']]
+    } ->
+    exec { 'apply systemd changes':
+      command => '/bin/systemctl daemon-reload',
+      require => [Package['cagefs'],Exec['install lve-stats2'],Exec['set postgres backend'],Exec['create lve database']]
     }
 
     file { '/etc/httpd/conf.d/atomia-pa-apache.conf':
