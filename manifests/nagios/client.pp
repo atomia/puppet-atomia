@@ -231,6 +231,7 @@ class atomia::nagios::client(
       if ! defined(Service['nrpe']) {
         service { 'nrpe':
           ensure  => running,
+          enable  => true,
           require => Package['nrpe'],
         }
       }
