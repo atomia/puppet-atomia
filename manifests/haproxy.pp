@@ -111,6 +111,7 @@ class atomia::haproxy (
 
   if $::operatingsystem == 'Ubuntu' {
     package { [
+      'python-software-properties',
       'software-properties-common'
     ]:
       ensure => present,
@@ -422,7 +423,7 @@ class atomia::haproxy (
       } else {
         file { '/etc/haproxy/atomia_certificates/default.pem':
           ensure  => file,
-          source  => 'puppet:///modules/atomiacerts/certificates/wildcard_with_key.pem',
+          source  => 'puppet:///atomiacerts/wildcard_with_key.pem',
           owner   => 'root',
           group   => 'root',
           mode    => '0755',
