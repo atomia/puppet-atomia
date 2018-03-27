@@ -29,7 +29,7 @@ defaults
 
 frontend apachecluster
 	bind <%= @apache_cluster_ip %>:80
-	bind <%= @apache_cluster_ip %>:443 ssl crt /etc/haproxy/atomia_certificates/default.pem crt /etc/haproxy/atomia_certificates crt /var/lib/acme/haproxy
+	bind <%= @apache_cluster_ip %>:443 ssl crt /etc/haproxy/atomia_certificates/default.pem crt /etc/haproxy/atomia_certificates crt /etc/haproxy/le_certs
 	option  http-server-close
 	http-request add-header X-Proto https if { ssl_fc }
 
@@ -38,13 +38,15 @@ frontend apachecluster
 
 	http-request redirect scheme https if enforce_ssl is_http_req
 
+	use_backend awstats_servers if { hdr_beg(host) -i awstats. }
+
 	acl acme_challenge path_beg /.well-known/acme-challenge/
 		http-request use-service lua.stateless_acme_challenge if acme_challenge
 	default_backend apache_servers
 
 frontend iiscluster
 	bind <%= @iis_cluster_ip %>:80
-	bind <%= @iis_cluster_ip %>:443 ssl crt /etc/haproxy/atomia_certificates/default.pem crt /etc/haproxy/atomia_certificates crt /var/lib/acme/haproxy
+	bind <%= @iis_cluster_ip %>:443 ssl crt /etc/haproxy/atomia_certificates/default.pem crt /etc/haproxy/atomia_certificates crt /etc/haproxy/le_certs
 	option  http-server-close
 	http-request add-header X-Proto https if { ssl_fc }
 
@@ -69,7 +71,7 @@ frontend mailcluster
 
 frontend webmailcluster
 	bind <%= @mail_cluster_ip %>:80
-	bind <%= @mail_cluster_ip %>:443 ssl crt /etc/haproxy/atomia_certificates/default.pem crt /etc/haproxy/atomia_certificates crt /var/lib/acme/haproxy
+	bind <%= @mail_cluster_ip %>:443 ssl crt /etc/haproxy/atomia_certificates/default.pem crt /etc/haproxy/atomia_certificates crt /etc/haproxy/le_certs
 	option  http-server-close
 	http-request add-header X-Proto https if { ssl_fc }
 
@@ -112,6 +114,10 @@ backend iis_servers
 <% @iis_cluster_nodes.split(",").each_with_index do |node, index| -%>
 	server iis<%=index+1 %> <%= node %>:80 check
 <% end -%>
+
+backend awstats_servers
+    balance roundrobin
+    server awstats1 <%= @awstats_cluster_ip %>:80 check
 
 backend mail_servers
 	mode tcp

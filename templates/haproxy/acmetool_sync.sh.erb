@@ -1,0 +1,124 @@
+#!/bin/sh
+
+PATH=$PATH:/usr/sbin
+export PATH
+
+ATO_NETS="<%= @apache_cluster_ip %>/32"
+certbot="/usr/bin/certbot"
+wanted_cert_path="/etc/letsencrypt/live"
+synced_apache_config="/etc/haproxy/synced_apache_config"
+synced_iis_config="/etc/haproxy/synced_iis_config"
+NEW_CERTS=0
+
+if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+        echo "usage: $0 rsync_path_to_apache_config rsync_path_to_iis_config preview_domain"
+        echo "example:"
+        echo "$0 \"root@192.168.33.21:/storage/configuration/maps\" \"root@192.168.33.21:/storage/configuration/iis\" preview.dev.atomia.com"
+        exit 1
+fi
+
+#rsync all le certs
+#rsync -a -e "ssh -o StrictHostKeyChecking=no" "certbot-rsync@172.16.52.222:/le_certs/" /etc/haproxy/le_certs/
+#rsync -a -e "ssh -o StrictHostKeyChecking=no" "certbot-rsync@172.16.52.222:/le_archive/" /etc/letsencrypt/archive/
+#rsync -a -e "ssh -o StrictHostKeyChecking=no" "certbot-rsync@172.16.52.222:/le_renewal/" /etc/letsencrypt/renewal/
+#rsync -a -e "ssh -o StrictHostKeyChecking=no" "certbot-rsync@172.16.52.222:/le_live/" /etc/letsencrypt/live/
+
+#get all ips
+CURRENT_IPS=$`hostname -I`
+
+#convert to newlines and sort files for comm command
+echo $ATO_NETS | tr " " "\n" | sort > /tmp/l1.tmp
+echo $CURRENT_IPS | tr " " "\n" | sort > /tmp/l2.tmp
+
+#append /32 on all IPS that hostname -I returns
+sed -e 's/$/\/32/' -i /tmp/l2.tmp
+
+#create new ATO_NETS with lines that match both
+ATO_NETS=`comm -12 /tmp/l1.tmp /tmp/l2.tmp | tr "\n" " "`
+
+#remove temp files
+rm /tmp/l1.tmp /tmp/l2.tmp
+
+#check if ATO_NETS is empty
+if [ -z $ATO_NETS ]
+then
+        echo "Empty ATO_NETS, Reloading haproxy"
+        service haproxy reload
+        echo "Reloading done, now exiting"
+        exit
+fi
+
+# Sync all files from /storage/content/ssl to local dir
+rsync -a -e "ssh -o StrictHostKeyChecking=no" --delete "$1"/ "$synced_apache_config"
+#rsync -a -e "ssh -o StrictHostKeyChecking=no" --delete "$2"/ "$synced_iis_config"
+
+in_net() {
+        perl -e '
+use strict;
+
+my $net = shift @ARGV or die "no net";
+my $ip = shift @ARGV or die "no ip";
+
+my @pair = split("/", $net);
+my $pf = $pair[0];
+my $pl = $pair[1];
+
+$pf =~ s/(\d+)([.]|$)/sprintf("%02X", $1)/ge;
+$pf = unpack("N", pack("H8", $pf));
+$pl = unpack("N", pack("b32", "1" x $pl . "0" x (32 - $pl)));
+
+$ip =~ s/(\d+)([.]|$)/sprintf("%02X", $1)/ge;
+$ip = unpack("N", pack("H8", $ip));
+
+exit 1 if ($pf & $pl) ne ($ip & $pl);
+' "$1" "$2"
+}
+
+in_ato_nets() {
+        is_in=no
+        for net in $ATO_NETS; do
+                in_net $net "$1" && {
+                        is_in=yes
+                        break
+                }
+        done
+        echo $is_in
+}
+
+if [ -f "$synced_apache_config/vhost.map" ]; then
+        cat "$synced_apache_config"/vhost.map | awk '{ print $1 }' | grep -vE "$3"'$' | grep -v '^www\.' | grep -E '^[a-zA-Z0-9.-]+$' \
+                        | sort -u | awk '{ print $0 " www." $0 }' | while read cert; do
+                wanted_cert=$(echo "$cert" | cut -d " " -f 1)
+                wanted_wwwcert=$(echo "$cert" | cut -d " " -f 2 )
+                desired=$(echo "$cert" | cut -d " " -f 1 )
+                #echo $wanted_cert $wanted_wwwcert $desired
+                if [ ! -d `echo "$wanted_cert_path/$desired"` ]; then
+                        ip1="$(dig +short $wanted_wwwcert | grep -oE '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b')"
+                        ip2="$(dig +short $wanted_cert | head -1)"
+
+                                if  [ -n "$ip1" ] && [ "$(in_ato_nets $ip1)" = yes ] && [ -n "$ip2" ] && [ "$(in_ato_nets $ip2)" = yes ] ; then
+                                        echo "$wanted_cert_path/$desired"
+                                        #echo "wanted cert: $wanted_cert"
+                                        #echo "www cert: $wwwcert"
+                                        certbot certonly --webroot -w /var/www -d $wanted_cert -d $wanted_wwwcert --non-interactive --agree-tos --email noreply@atomia.com
+                                        if [ -d `echo "$wanted_cert_path/$desired"` ]; then
+                                                echo "Issuing $wanted_cert"
+                                                sudo -E bash -c "cat /etc/letsencrypt/live/$wanted_cert/fullchain.pem /etc/letsencrypt/live/$wanted_cert/privkey.pem > /etc/haproxy/le_certs/$wanted_cert.pem"
+                                                chmod 700 /etc/haproxy/le_certs/$wanted_cert.pem
+                                                rm /var/log/letsencrypt/letsencrypt.log
+                                                find /var/log/letsencrypt/ -size 0 -delete
+                                        fi
+                                fi
+                fi
+        done
+
+        #Delete broken PEMs
+        find /etc/haproxy/le_certs/ -size 0 -delete
+
+        #If there is at least one new cert, reload haproxy
+#       if [ "$NEW_CERTS" -ge "1" ]; then
+                echo "Reloading haproxy"
+                service haproxy reload
+                echo "Reloading done"
+#       fi
+fi
