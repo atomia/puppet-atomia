@@ -4,6 +4,16 @@ PATH=$PATH:/usr/sbin
 export PATH
 
 ATO_NETS="<%= @apache_cluster_ip %>/32"
+
+# Setting up the script to support local and remote
+<% if @haproxy_nodes.split(",")[0].downcase == @hostname %>
+LB_REMOTE="<%= @haproxy_nodes.split(",")[1] %>"
+LB_LOCAL="<%= @haproxy_nodes.split(",")[0] %>"
+<% else %>
+LB_REMOTE="<%= @haproxy_nodes.split(",")[0] %>"
+LB_LOCAL="<%= @haproxy_nodes.split(",")[1] %>"
+<% end %>
+
 certbot="/usr/bin/certbot"
 wanted_cert_path="/etc/letsencrypt/live"
 synced_apache_config="/etc/haproxy/synced_apache_config"
@@ -17,11 +27,44 @@ if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
         exit 1
 fi
 
-#rsync all le certs
-#rsync -a -e "ssh -o StrictHostKeyChecking=no" "certbot-rsync@172.16.52.222:/le_certs/" /etc/haproxy/le_certs/
-#rsync -a -e "ssh -o StrictHostKeyChecking=no" "certbot-rsync@172.16.52.222:/le_archive/" /etc/letsencrypt/archive/
-#rsync -a -e "ssh -o StrictHostKeyChecking=no" "certbot-rsync@172.16.52.222:/le_renewal/" /etc/letsencrypt/renewal/
-#rsync -a -e "ssh -o StrictHostKeyChecking=no" "certbot-rsync@172.16.52.222:/le_live/" /etc/letsencrypt/live/
+# If the ATO_NETS ip is not binded then we need to exit the script as this nodes does not have binded IP
+ip a | grep $ATO_NETS > /dev/null
+BINDED=$?
+if [ $BINDED -eq 1 ]
+then
+    logger "Skipping issuing of LE certs, as this nodes does not have apache cluster ip!"
+    logger "Doing only rsync from the primary load balancer $LB_REMOTE"
+
+    # We now need to sync our certificates from the LB_REMOTE node as we are not on the main node
+    # In order for sync to work a certbot user needs to be created on both nodes with the same key
+    # That user should also have sudo privileges without a password
+    # Also the certbot private key needs to be added to /root/.ssh/certbot
+    if [ -n "$LB_REMOTE" ] 
+    then
+        # Try to login via SSH without password to the remote LB node and pull the certs
+        ssh -o PasswordAuthentication=no -o BatchMode=yes certbot@$LB_REMOTE -p 2022 -i /root/.ssh/certbot exit &>/dev/null
+        if [ $? -eq 0 ]
+        then
+            # Login success, we are able to login with key to the node
+            # Rsync pull certs from remote node primary LB
+            # In order for rsync to work via certbot user we need to add
+            # the certbot to sudoers certbot ALL= NOPASSWD:/usr/bin/rsync
+            echo "Rsync now from $LB_REMOTE"
+
+            rsync -a -e "ssh -o StrictHostKeyChecking=no -i /root/.ssh/certbot -p 2022" --rsync-path="sudo rsync" "certbot@$LB_REMOTE:/etc/haproxy/le_certs/" /etc/haproxy/le_certs/
+            rsync -a -e "ssh -o StrictHostKeyChecking=no -i /root/.ssh/certbot -p 2022" --rsync-path="sudo rsync" "certbot@$LB_REMOTE:/etc/letsencrypt/archive/" /etc/letsencrypt/archive/
+            rsync -a -e "ssh -o StrictHostKeyChecking=no -i /root/.ssh/certbot -p 2022" --rsync-path="sudo rsync" "certbot@$LB_REMOTE:/etc/letsencrypt/renewal/" /etc/letsencrypt/renewal/
+            rsync -a -e "ssh -o StrictHostKeyChecking=no -i /root/.ssh/certbot -p 2022" --rsync-path="sudo rsync" "certbot@$LB_REMOTE:/etc/letsencrypt/live/" /etc/letsencrypt/live/
+            
+            echo "Reloading Haproxy"
+            service haproxy reload
+        else
+            # Login failed, we will not sync
+            logger "Could not login to $LB_REMOTE, skipping sync of LE certificates!"
+        fi
+    fi
+    exit 1
+fi
 
 #get all ips
 CURRENT_IPS=$`hostname -I`
@@ -122,3 +165,5 @@ if [ -f "$synced_apache_config/vhost.map" ]; then
                 echo "Reloading done"
 #       fi
 fi
+
+exit 0

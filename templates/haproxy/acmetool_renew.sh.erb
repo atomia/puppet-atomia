@@ -7,6 +7,15 @@ ATO_NETS="<%= @apache_cluster_ip %>/32"
 
 CERTS_DIR="/etc/haproxy/le_certs"
 
+# If the ATO_NETS ip is not binded then we need to exit the script as this nodes does not have binded IP
+ip a | grep $ATO_NETS > /dev/null
+BINDED=$?
+if [ $BINDED -eq 1 ]
+then
+    logger "Skipping renew of LE certs, as this nodes does not have apache cluster ip!"
+    exit 1
+fi
+
 curdate=$(date +%s)
 renewed_cert=0
 revoked_cert=0
