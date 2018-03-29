@@ -98,13 +98,11 @@ frontend ftpcluster
 backend apache_servers
 	option forwardfor
 	balance roundrobin
-	stick-table type ip size 200k expire 30m
-	stick on src
-<% @apache_cluster_nodes.split(",").each_with_index do |node, index| -%>
-	server apache<%=index+1 %> <%= node %>:80 check
-
 	acl acme_challenge path_beg /.well-known/acme-challenge/
-		http-request use-service lua.stateless_acme_challenge if acme_challenge
+			http-request use-service lua.stateless_acme_challenge if acme_challenge
+	cookie WEBSVR insert
+<% @apache_cluster_nodes.split(",").each_with_index do |node, index| -%>
+	server apache<%=index+1 %> <%= node %>:80 cookie A<%=index+1 %> check inter 3000
 <% end -%>
 
 backend iis_servers

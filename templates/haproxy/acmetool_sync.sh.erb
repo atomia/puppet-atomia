@@ -143,11 +143,11 @@ if [ -f "$synced_apache_config/vhost.map" ]; then
                                         echo "$wanted_cert_path/$desired"
                                         #echo "wanted cert: $wanted_cert"
                                         #echo "www cert: $wwwcert"
-                                        certbot certonly --webroot -w /var/www -d $wanted_cert -d $wanted_wwwcert --non-interactive --agree-tos --email noreply@atomia.com
+                                        certbot certonly --webroot -w /tmp -d $wanted_cert -d $wanted_wwwcert --non-interactive --agree-tos --email noreply@atomia.com
                                         if [ -d `echo "$wanted_cert_path/$desired"` ]; then
                                                 echo "Issuing $wanted_cert"
                                                 sudo -E bash -c "cat /etc/letsencrypt/live/$wanted_cert/fullchain.pem /etc/letsencrypt/live/$wanted_cert/privkey.pem > /etc/haproxy/le_certs/$wanted_cert.pem"
-                                                chmod 700 /etc/haproxy/le_certs/$wanted_cert.pem
+                                                chmod 600 /etc/haproxy/le_certs/$wanted_cert.pem
                                                 rm /var/log/letsencrypt/letsencrypt.log
                                                 find /var/log/letsencrypt/ -size 0 -delete
                                         fi
