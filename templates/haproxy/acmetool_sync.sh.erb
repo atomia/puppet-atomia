@@ -49,14 +49,14 @@ then
             # Rsync pull certs from remote node primary LB
             # In order for rsync to work via certbot user we need to add
             # the certbot to sudoers certbot ALL= NOPASSWD:/usr/bin/rsync
-            echo "Rsync now from $LB_REMOTE"
+            logger "Rsync now from $LB_REMOTE"
 
             rsync -a -e "ssh -o StrictHostKeyChecking=no -i /root/.ssh/certbot -p 2022" --rsync-path="sudo rsync" "certbot@$LB_REMOTE:/etc/haproxy/le_certs/" /etc/haproxy/le_certs/
             rsync -a -e "ssh -o StrictHostKeyChecking=no -i /root/.ssh/certbot -p 2022" --rsync-path="sudo rsync" "certbot@$LB_REMOTE:/etc/letsencrypt/archive/" /etc/letsencrypt/archive/
             rsync -a -e "ssh -o StrictHostKeyChecking=no -i /root/.ssh/certbot -p 2022" --rsync-path="sudo rsync" "certbot@$LB_REMOTE:/etc/letsencrypt/renewal/" /etc/letsencrypt/renewal/
             rsync -a -e "ssh -o StrictHostKeyChecking=no -i /root/.ssh/certbot -p 2022" --rsync-path="sudo rsync" "certbot@$LB_REMOTE:/etc/letsencrypt/live/" /etc/letsencrypt/live/
             
-            echo "Reloading Haproxy"
+            logger "Reloading Haproxy"
             service haproxy reload
         else
             # Login failed, we will not sync
