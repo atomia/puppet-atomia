@@ -136,8 +136,12 @@ if [ -f "$synced_apache_config/vhost.map" ]; then
                 desired=$(echo "$cert" | cut -d " " -f 1 )
                 #echo $wanted_cert $wanted_wwwcert $desired
                 if [ ! -d `echo "$wanted_cert_path/$desired"` ]; then
-                        ip1="$(dig +short $wanted_wwwcert | grep -oE '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b')"
-                        ip2="$(dig +short $wanted_cert | head -1)"
+                        # We force 8.8.8.8 because sometimes our DNS does not propagate
+                        # all records immediateley, it's better to ask the outside DNS
+                        # just to be sure that everything has been propagated before
+                        # issuing the SSL certificate
+                        ip1="$(dig +short $wanted_wwwcert @8.8.8.8 | grep -oE '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b')"
+                        ip2="$(dig +short $wanted_cert @8.8.8.8 | head -1)"
 
                                 if  [ -n "$ip1" ] && [ "$(in_ato_nets $ip1)" = yes ] && [ -n "$ip2" ] && [ "$(in_ato_nets $ip2)" = yes ] ; then
                                         echo "$wanted_cert_path/$desired"

@@ -404,7 +404,7 @@ class atomia::haproxy (
         owner   => 'root',
         group   => 'root',
         mode    => '0644',
-        content => '0 0 * * * root flock -n /var/lock/acmesync.lock /usr/bin/acmetool_renew.sh',
+        content => '0 0 * * * root flock -n /var/lock/acmerenew.lock /usr/bin/acmetool_renew.sh',
         require => [ File['/root/.ssh/id_rsa'], File['/usr/bin/acmetool_renew.sh'] ]
       }
 
