@@ -26,6 +26,8 @@
 #### billing_encryption_cert_thumb: The thumbprint for the billing certificate. This should be prefilled by pressing the generate new certificates button.
 #### root_cert_thumb: The thumbprint for the root certificate. This should be prefilled by pressing the generate new certificates button.
 #### signing_cert_thumb: The thumbprint for the signing certificate. This should be prefilled by pressing the generate new certificates button.
+#### gdprapi_username: The username which Admin Panel uses for communication with GDPR Web API.
+#### gdprapi_password: The password which Admin Panel uses for communication with GDPR Web API.
 #### grpc_account_api_listen_address: The IP address to listen on, default is to listen on all interfaces.
 #### grpc_account_api_listen_port: The port to listen on for the gRPC Account API endpoint.
 #### grpc_account_api_whitelist: Semicolon separated list of ip addresses and ip ranges that should be able to connect to the gRPC endpoint. To disable whitelisting just leave this empty.
@@ -134,6 +136,8 @@ class atomia::windows_base (
   $is_iis                                  = '0',
   $enable_mssql                            = false,
   $enable_postgresql                       = true,
+  $gdprapi_username                        = 'Atomia',
+  $gdprapi_password                        = '@tomia123',
   $grpc_account_api_listen_address         = '0.0.0.0',
   $grpc_account_api_listen_port            = '50053',
   $grpc_account_api_whitelist              = '',
