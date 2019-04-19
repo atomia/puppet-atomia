@@ -267,6 +267,14 @@ class atomia::mailserver (
       require => Package[$postfix_mysql_package]
     }
 
+    file { '/etc/postfix/update_vmail_database_for_quota.sql':
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0444',
+      source  => 'puppet:///modules/atomia/mailserver/update_vmail_database_for_quota.sql',
+      require => Package[$postfix_mysql_package]
+    }
+
     exec { 'setup-master':
       command => '/etc/postfix/setup_database.sh master',
       require => [
