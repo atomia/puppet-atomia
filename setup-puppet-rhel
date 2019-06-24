@@ -1,0 +1,178 @@
+#!/bin/bash
+# Script only supports installation on CentOS 7 for now
+
+# Enable repo that has 3.x puppet compatible master and puppetdb
+echo "[puias]
+name=PUIAS - \$basearch
+baseurl=http://springdale.math.ias.edu/data/puias/unsupported/7/\$basearch
+failovermethod=priority
+enabled=1
+gpgcheck=0" > /etc/yum.repos.d/puias.repo
+
+# Enable epel release and install needed dependencies
+sudo yum -y install epel-release
+sudo yum -y install puppetserver puppet git curl postgresql postgresql-server ruby-devel mysql-devel puppetdb puppetdb-terminus
+
+# Setup postgres puppetdb database
+sudo postgresql-setup initdb
+echo "local   all             all                                     peer
+host    all             all             127.0.0.1/32            md5
+host    all             all             ::1/128                 md5" > /var/lib/pgsql/data/pg_hba.conf
+sudo systemctl enable postgresql
+sudo systemctl start postgresql
+
+# Setup PostgreSQL and add puppetdb user and database
+if [ -z ${PUPPETDB_USER_PASSWORD+x} ]; then
+	PUPPETDB_USER_PASSWORD=`date +%s | sha256sum | base64 | head -c 16`
+fi
+ 
+sudo -u postgres psql -c "CREATE USER puppetdb WITH PASSWORD '${PUPPETDB_USER_PASSWORD}';"
+sudo -u postgres createdb -O puppetdb puppetdb
+
+# Install needed gems (don't worry if some errors show it's normal)
+sudo gem install --no-rdoc --no-ri hiera-mysql hiera-mysql-backend mysql mysql2
+sudo puppetserver gem install --no-rdoc --no-ri jdbc-mysql -s http://rubygems.org/
+sudo puppetserver gem install --no-rdoc --no-ri mysql mysql2 hiera-mysql hiera-mysql-backend -s http://rubygems.org/
+
+cd /etc/puppet
+
+# Read hiera value from puppetmaster-gui config file
+HIERA_USER_USERNAME=`jq -r '.database.user' /opt/puppetmaster-gui/app/config.json`
+HIERA_USER_PASSWORD=`jq -r '.database.password' /opt/puppetmaster-gui/app/config.json`
+
+# Read the hostname of the server
+SERVER_FQDN=`sudo facter fqdn`
+if [ -z $SERVER_FQDN ]; then
+	SERVER_FQDN=`hostname -f`
+fi
+
+# Setup PuppetDB
+echo "[main]
+server = ${SERVER_FQDN}
+port = 8081
+soft_write_failure = false" > /etc/puppet/puppetdb.conf
+
+echo "[database]
+classname = org.postgresql.Driver
+subprotocol = postgresql
+subname = //localhost:5432/puppetdb
+username = puppetdb
+password = ${PUPPETDB_USER_PASSWORD}
+log-slow-statements = 10" > /etc/puppetdb/conf.d/database.ini
+
+# Update jetty.ini for puppetdb
+echo "[jetty]
+host = 0.0.0.0
+port = 8080
+ssl-host = 0.0.0.0
+ssl-port = 8081
+ssl-key = /var/lib/puppetdb/ssl/private_keys/${SERVER_FQDN}.pem
+ssl-cert = /var/lib/puppetdb/ssl/certs/${SERVER_FQDN}.pem
+ssl-ca-cert = /var/lib/puppetdb/ssl/certs/ca.pem" > /etc/puppetdb/conf.d/jetty.ini
+
+mkdir -p /etc/puppet/atomia/service_files
+
+echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref => \"master\" " > /etc/puppet/Puppetfile
+
+cd /etc/puppet
+
+sudo gem install --no-rdoc --no-ri librarian-puppet -v 2.2.3
+HOME=/root librarian-puppet install
+sudo cp /etc/puppet/modules/atomia/files/default_files/* /etc/puppet/atomia/service_files/
+
+mkdir -p /etc/puppet/manifests/
+echo "
+node default {
+        hiera_include('classes')
+}
+" > /etc/puppet/manifests/site.pp
+
+echo "---
+:backends:
+  - yaml
+  - mysql
+
+:yaml:
+  :datadir: /etc/puppet/hieradata
+
+:mysql:
+  :host: localhost
+  :user: ${HIERA_USER_USERNAME}
+  :pass: ${HIERA_USER_PASSWORD}
+  :database: hiera
+
+  :query: SELECT val FROM configuration WHERE var='%{key}'
+
+
+:hierarchy:
+  - \"%{::atomia_role_1}\"
+  - \"%{::atomia_role_2}\"
+  - \"%{::atomia_role_3}\"
+  - \"%{::atomia_role_4}\"
+  - \"%{::atomia_role_5}\"
+  - bootstrap
+
+:logger: console
+" > /etc/puppet/hiera.yaml
+
+echo "[atomiacerts]
+        path /etc/puppet/atomiacerts
+        allow *
+[atomia]
+        path /etc/puppet/atomia
+        allow *" > /etc/puppet/fileserver.conf
+
+echo "[main]
+logdir=/var/log/puppet
+vardir=/var/lib/puppet
+ssldir=/var/lib/puppet/ssl
+rundir=/var/run/puppet
+factpath=$vardir/lib/facter
+parser = future
+
+[master]
+ssl_client_header = SSL_CLIENT_S_DN
+ssl_client_verify_header = SSL_CLIENT_VERIFY
+autosign = true
+storeconfigs = true
+storeconfigs_backend = puppetdb
+reports = store,puppetdb" > /etc/puppet/puppet.conf
+
+# Setup RAM requirements for puppetserver and puppetdb
+# so it can work under lowspec server < 1GB
+echo "JAVA_BIN=\"/usr/lib/jvm/jre-1.7.0-openjdk/bin/java\"
+JAVA_ARGS=\"-Xmx512m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/puppetdb/puppetdb-oom.hprof -Djava.security.egd=file:/dev/urandom\"
+USER=\"puppetdb\"
+INSTALL_DIR=\"/usr/share/puppetdb\"
+CONFIG=\"/etc/puppetdb/conf.d\"" > /etc/sysconfig/puppetdb
+
+echo "JAVA_BIN=\"/usr/bin/java\"
+JAVA_ARGS=\"-Xms512m -Xmx512m -XX:MaxPermSize=256m\"
+USER=\"puppet\"
+INSTALL_DIR=\"/usr/share/puppetserver\"
+CONFIG=\"/etc/puppetserver/conf.d\"
+BOOTSTRAP_CONFIG=\"/etc/puppetserver/bootstrap.cfg\"
+SERVICE_STOP_RETRIES=60" > /etc/sysconfig/puppetserver
+
+# Install additional needed modules
+sudo puppet module install crayfishx/hiera_http
+sudo puppet module install crayfishx/hiera_mysql
+
+# Prepare the roles
+mv modules/atomia/examples/hieradata/ /etc/puppet/hieradata/
+
+# Start puppet master to create the certificates intially
+sudo systemctl enable puppetserver
+sudo service puppetserver restart
+#sudo cp /var/lib/puppet/ssl/certs/ca.pem /var/lib/puppet/ssl/certs/$SERVER_FQDN.pem
+
+# Copy the certificates so they are available for puppetdb also
+sudo cp -aR /var/lib/puppet/ssl /var/lib/puppetdb/ssl
+sudo chown -R puppetdb:puppetdb /var/lib/puppetdb/ssl
+
+# Enable services and start them
+sudo systemctl enable puppetdb
+sudo service puppetdb restart
+sudo service puppetserver restart
+
+echo "ALL DONE!"

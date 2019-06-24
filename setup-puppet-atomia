@@ -1,122 +1,18 @@
-wget https://apt.puppetlabs.com/puppetlabs-release-trusty.deb
-sudo dpkg -i puppetlabs-release-trusty.deb
-sudo apt-get update
+#!/bin/bash
 
-sudo apt-get install -y puppetmaster puppet git apache2-utils curl rubygems-integration build-essential libmysqlclient-dev ruby-dev postgresql
-sudo apt-get install -y puppetdb puppetdb-terminus
+# This script will download puppetmaster install script
+# depending on the OS version that you are using.
+# Each script should handle in itself various versions
+# of the distro that is used. Example Ubuntu script should
+# handle Ubuntu 14.04, 16.04, 18.04 and so on.
 
-echo "127.0.0.1 puppet" >> /etc/hosts
-echo "127.0.0.1 puppetdb" >> /etc/hosts
+source /etc/os-release
 
-gem install --no-rdoc --no-ri hiera-mysql hiera-mysql-backend mysql mysql2
-cd /etc/puppet
-
-## Setup MYSQL and add hiera user and database
-if [ -z ${HIERA_USER_PASSWORD+x} ]; then
-HIERA_USER_PASSWORD=`date +%s | sha256sum | base64 | head -c 16`
+if [ $ID = 'ubuntu' ]; then
+        echo "Downloading Ubuntu install script..."
+        puppet="$(wget -q -O - https://raw.githubusercontent.com/atomia/puppet-atomia/master/setup-puppet-ubuntu)"; echo "$puppet" |  sudo bash
+else
+        echo "Downloading RHEL install script..."
+        puppet="$(wget -q -O - https://raw.githubusercontent.com/atomia/puppet-atomia/master/setup-puppet-rhel)"; echo "$puppet" |  sudo bash
 fi
 
-SERVER_FQDN=`facter fqdn`
-mysql --defaults-file=/etc/mysql/debian.cnf -e "GRANT USAGE ON *.* TO 'hierauser'@'localhost'; DROP USER 'hierauser'@'localhost';"
-mysql --defaults-file=/etc/mysql/debian.cnf -e "CREATE USER 'hierauser'@'localhost' IDENTIFIED BY '${HIERA_USER_PASSWORD}'; GRANT ALL PRIVILEGES ON hiera.* TO 'hierauser'@'localhost';FLUSH PRIVILEGES;"
-
-## Setup PostgreSQL and add puppetdb user and database
-if [ -z ${PUPPETDB_USER_PASSWORD+x} ]; then
-PUPPETDB_USER_PASSWORD=`date +%s | sha256sum | base64 | head -c 16`
-fi
-
-sudo -u postgres psql -c "CREATE USER puppetdb WITH PASSWORD '${PUPPETDB_USER_PASSWORD}';"
-sudo -u postgres createdb -O puppetdb puppetdb
-
-## Setup PuppetDB
-echo "[main]
-server = ${SERVER_FQDN}
-port = 8081
-soft_write_failure = false" > /etc/puppet/puppetdb.conf
-
-echo "[database]
-classname = org.postgresql.Driver
-subprotocol = postgresql
-subname = //localhost:5432/puppetdb
-username = puppetdb
-password = ${PUPPETDB_USER_PASSWORD}
-log-slow-statements = 10" > /etc/puppetdb/conf.d/database.ini
-
-mkdir -p /etc/puppet/atomia/service_files
-
-echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref => \"master\" " > /etc/puppet/Puppetfile
-
-cd /etc/puppet
-
-gem install --no-rdoc --no-ri librarian-puppet -v 2.2.3
-HOME=/root librarian-puppet install
-cp /etc/puppet/modules/atomia/files/default_files/* /etc/puppet/atomia/service_files/
-
-mkdir -p /etc/puppet/manifests/
-echo "
-node default {
-        hiera_include('classes')
-}
-" > /etc/puppet/manifests/site.pp
-
-echo "---
-:backends:
-  - yaml
-  - mysql
-
-:yaml:
-  :datadir: /etc/puppet/hieradata
-
-:mysql:
-  :host: localhost
-  :user: hierauser
-  :pass: ${HIERA_USER_PASSWORD}
-  :database: hiera
-
-  :query: SELECT val FROM configuration WHERE var='%{key}'
-
-
-:hierarchy:
-  - \"%{::atomia_role_1}\"
-  - \"%{::atomia_role_2}\"
-  - \"%{::atomia_role_3}\"
-  - \"%{::atomia_role_4}\"
-  - \"%{::atomia_role_5}\"
-  - bootstrap
-
-:logger: console
-" > /etc/puppet/hiera.yaml
-
-echo "[atomiacerts]
-        path /etc/puppet/atomiacerts
-        allow *
-[atomia]
-        path /etc/puppet/atomia
-        allow *" > /etc/puppet/fileserver.conf
-
-echo "[main]
-logdir=/var/log/puppet
-vardir=/var/lib/puppet
-ssldir=/var/lib/puppet/ssl
-rundir=/var/run/puppet
-factpath=$vardir/lib/facter
-parser = future
-
-[master]
-# These are needfed when the puppetmaster is run by passenger
-# and can safely be removed if webrick is used.
-ssl_client_header = SSL_CLIENT_S_DN
-ssl_client_verify_header = SSL_CLIENT_VERIFY
-autosign = true
-storeconfigs = true
-storeconfigs_backend = puppetdb
-reports = store,puppetdb" > /etc/puppet/puppet.conf
-
-mv modules/atomia/examples/hieradata/ /etc/puppet/hieradata/
-
-sudo update-rc.d puppetdb defaults
-sudo service puppetdb start
-
-/etc/init.d/puppetmaster restart
-
-echo "ALL DONE!"
