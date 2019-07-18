@@ -77,7 +77,8 @@ echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref
 cd /etc/puppet
 
 sudo gem install --no-rdoc --no-ri librarian-puppet -v 2.2.3
-HOME=/root librarian-puppet install
+HOME=/root 
+sudo /usr/local/bin/librarian-puppet install
 sudo cp /etc/puppet/modules/atomia/files/default_files/* /etc/puppet/atomia/service_files/
 
 mkdir -p /etc/puppet/manifests/
