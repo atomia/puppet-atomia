@@ -7,7 +7,7 @@ if (isset($_GET) && !empty($_GET)) {
     $data['title'] = isset($_GET['title']) ? $_GET['title'] : "" ;
     $data['kwords'] = isset($_GET['kwords']) ? $_GET['kwords'] : "" ;
     $data['desc'] = isset($_GET['desc']) ? $_GET['desc'] : "" ;
-    $data['url'] = isset($_GET['url']) ? $_GET['url'] : "" ;
+    $data['url'] = isset($_GET['url']) && filter_var($_GET['url'], FILTER_VALIDATE_URL) ? $_GET['url'] : "" ;
 }
 
 ?>
