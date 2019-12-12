@@ -2,4 +2,4 @@ hosts = <%= @db_hosts %>
 dbname = <%= @db_name %>
 user = <%= @db_user %>
 password = <%= @db_pass %>
-query = SELECT maildir FROM user WHERE email = '%s'
+query = SELECT maildir FROM user WHERE email = '%s' AND status = 'active'
