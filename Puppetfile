@@ -91,3 +91,5 @@ mod "stdlib",
 mod 'derdanne-nfs', '1.0.1'
 
 mod 'saz-ssh', '3.0.1'
+
+mod 'puppetlabs-inifile', '1.6.0'
