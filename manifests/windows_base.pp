@@ -323,6 +323,19 @@ class atomia::windows_base (
     file { 'c:/install': ensure => 'directory' }
   }
 
+  if($::vagrant) {
+	# Fix DNS settings for Vagrant master since there is only one Windows server in vagrant
+	exec { 'fix-dns-1':
+		command  => "netsh interface ip set dns 'Ethernet' static 8.8.8.8",
+		provider => powershell,
+		onlyif   => 'Test-Path C:\install'
+	} ->
+	exec { 'fix-dns-2':
+		command  => "netsh interface ip add dns 'Ethernet' 127.0.0.1 index=1",
+		provider => powershell,
+		onlyif   => 'Test-Path C:\install'
+	}
+  }
   file { 'c:/install/base.ps1':
     ensure => 'file',
     source => 'puppet:///modules/atomia/windows_base/baseinstall.ps'
@@ -340,10 +353,20 @@ class atomia::windows_base (
 
 
   # Install Packages with Chocolatey
-  exec { 'install-chocolatey':
-    command  => "iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))",
-    provider => powershell,
-    onlyif   => 'Test-Path C:\ProgramData\Chocolatey'
+  if($::vagrant) {
+	  # Since install fails without porper DNS setup, set the DNS settings first then install chocolatey and app installer
+	  exec { 'install-chocolatey':
+		command  => "iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))",
+		provider => powershell,
+		require => [ Exec['fix-dns-1'], Exec['fix-dns-2'] ]
+	  }
+  } else {
+	# Regular install of Chocolatey
+	exec { 'install-chocolatey':
+		command  => "iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))",
+		provider => powershell,
+		onlyif   => 'Test-Path C:\ProgramData\Chocolatey'
+	  }
   }
 
   exec { 'set-chocolatey-path':
@@ -406,6 +429,8 @@ class atomia::windows_base (
   exec { 'install-atomia-installer':
     command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file C:\install\install_atomia_installer.ps1',
     creates => 'C:\install\install_atomia_installer.txt',
+	require => Exec['install-chocolatey']
+
   }
 
   file { 'C:\ProgramData\Atomia Installer':
