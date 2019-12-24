@@ -202,6 +202,7 @@ class atomia::glusterfs (
     device  => "${gluster_hostname}:/web_volume",
     options => 'defaults,_netdev',
     fstype  => 'glusterfs',
+    remounts => false,
     require => [Exec['start web volume'], File['/storage']],
   }
 
@@ -257,6 +258,7 @@ class atomia::glusterfs (
     device  => "${gluster_hostname}:/config_volume",
     options => 'defaults,_netdev',
     fstype  => 'glusterfs',
+    remounts => false,
     require => [Exec['start config volume'], File['/storage']],
   }
 
