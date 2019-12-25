@@ -49,22 +49,26 @@ class atomia::fsagent (
   package { 'g++': ensure => present }
   package { 'make': ensure => present }
   package { 'procmail': ensure => present }
-  package { 'unscd': ensure => present }
+  package { 'nscd': ensure => present }
   if !defined(Package['atomia-manager']) {
     package { 'atomia-manager': ensure => present }
   }
   package { 'python-pkg-resources': ensure => present }
 
   service { 'nscd':
-    enable => false,
-    ensure => 'stopped',
-  }
-  service { 'unscd':
     enable => true,
     ensure => 'running',
-    require  => Package['unscd'],
+    require  => Package['nscd'],
   }
-  
+  file { '/etc/nscd.conf':
+        ensure  => file,
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0600',
+        content => template('atomia/adjoin/nscd.conf.erb'),
+        notify  => Service['nscd'],
+        require => Package['nscd'],
+  }
   if $::lsbdistrelease == '16.04' {
     package { [
       'ruby2.3',
