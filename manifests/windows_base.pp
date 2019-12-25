@@ -437,10 +437,19 @@ class atomia::windows_base (
     ensure  => directory,
   }
 
-  file { 'C:\ProgramData\Atomia Installer\appupdater.ini':
-    ensure  => 'file',
-    source  => 'puppet:///modules/atomia/windows_base/appupdater.ini',
-    require => [Exec['install-atomia-installer'], File['C:\ProgramData\Atomia Installer']],
+  if($::vagrant){
+    # For Vagrant use TestRepository appupdater ini file
+    file { 'C:\ProgramData\Atomia Installer\appupdater.ini':
+      ensure  => 'file',
+      source  => 'puppet:///modules/atomia/windows_base/appupdater-vagrant.ini',
+      require => [Exec['install-atomia-installer'], File['C:\ProgramData\Atomia Installer']],
+    }
+  } else {
+    file { 'C:\ProgramData\Atomia Installer\appupdater.ini':
+      ensure  => 'file',
+      source  => 'puppet:///modules/atomia/windows_base/appupdater.ini',
+      require => [Exec['install-atomia-installer'], File['C:\ProgramData\Atomia Installer']],
+    }
   }
 
   # Install other requirements
