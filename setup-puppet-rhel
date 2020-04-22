@@ -31,7 +31,7 @@ sudo -u postgres createdb -O puppetdb puppetdb
 
 # Install needed gems (don't worry if some errors show it's normal)
 sudo gem install --no-rdoc --no-ri hiera-mysql hiera-mysql-backend mysql mysql2
-sudo puppetserver gem install --no-rdoc --no-ri jdbc-mysql -s http://rubygems.org/
+sudo puppetserver gem install --no-rdoc --no-ri jdbc-mysql -v 5.1.47 -s http://rubygems.org/
 sudo puppetserver gem install --no-rdoc --no-ri mysql mysql2 hiera-mysql hiera-mysql-backend -s http://rubygems.org/
 
 cd /etc/puppet
