@@ -24,10 +24,6 @@ mod "openssl",
   :git => "git://github.com/camptocamp/puppet-openssl.git",
   :ref => "929b874037e03d517b61d8933345f35664d96983"
 
-mod "nsclient",
-  :git => "git://github.com/stefanmortensen/puppet-nsclient",
-  :ref => "1e3cd1ffe23168ce16b40c2a1ecb3afd0be3c51d"
-
 mod "httpauth",
   :git => "git://github.com/jamtur01/puppet-httpauth.git",
   :ref => "22bcdf43e36838e16579c10a7db875bd066ae263"
