@@ -52,10 +52,6 @@ mod "resolv_conf",
   :git => "git://github.com/saz/puppet-resolv_conf.git",
   :ref => "d3c16527b1efb3a820c3b0250748da1d3ca04da7"
 
-mod "glusterfs",
-  :git => "git://github.com/stefanmortensen/puppet-glusterfs.git",
-  :ref => "8c2e765b599e0bfbb2d7dcc89c90c4cbd56a95e2"
-
 mod "concat",
    :git => "git://github.com/puppetlabs/puppetlabs-concat.git",
    :ref => "803f95830ebe58485c03abdae46801c12ca89be3"
