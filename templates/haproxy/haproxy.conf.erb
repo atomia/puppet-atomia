@@ -35,8 +35,9 @@ frontend apachecluster
 
 	acl enforce_ssl hdr(host) -i -f /etc/haproxy/ssl-redirects.lst
 	acl is_http_req ssl_fc,not
+	acl is_acme path_beg /.well-known/acme-challenge/
 
-	http-request redirect scheme https if enforce_ssl is_http_req
+	http-request redirect scheme https if enforce_ssl is_http_req !is_acme
 
 	acl acme_challenge path_beg /.well-known/acme-challenge/
 		http-request use-service lua.stateless_acme_challenge if acme_challenge
@@ -50,8 +51,9 @@ frontend iiscluster
 
 	acl enforce_ssl hdr(host) -i -f /etc/haproxy/ssl-redirects.lst
 	acl is_http_req ssl_fc,not
+	acl is_acme path_beg /.well-known/acme-challenge/
 
-	http-request redirect scheme https if enforce_ssl is_http_req
+	http-request redirect scheme https if enforce_ssl is_http_req !is_acme
 
 	acl acme_challenge path_beg /.well-known/acme-challenge/
 		http-request use-service lua.stateless_acme_challenge if acme_challenge
