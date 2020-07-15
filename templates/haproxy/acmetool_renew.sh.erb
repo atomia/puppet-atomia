@@ -1,0 +1,103 @@
+#!/bin/bash
+
+PATH=$PATH:/usr/sbin
+export PATH
+
+ATO_NETS="<%= @apache_cluster_ip %>/32"
+
+CERTS_DIR="/etc/haproxy/le_certs"
+
+# If the ATO_NETS ip is not binded then we need to exit the script as this nodes does not have binded IP
+ip a | grep $ATO_NETS > /dev/null
+BINDED=$?
+if [ $BINDED -eq 1 ]
+then
+    logger "Skipping renew of LE certs, as this nodes does not have apache cluster ip!"
+    exit 1
+fi
+
+curdate=$(date +%s)
+renewed_cert=0
+revoked_cert=0
+
+in_net() {
+        perl -e '
+use strict;
+my $net = shift @ARGV or die "no net";
+my $ip = shift @ARGV or die "no ip";
+my @pair = split("/", $net);
+my $pf = $pair[0];
+my $pl = $pair[1];
+$pf =~ s/(\d+)([.]|$)/sprintf("%02X", $1)/ge;
+$pf = unpack("N", pack("H8", $pf));
+$pl = unpack("N", pack("b32", "1" x $pl . "0" x (32 - $pl)));
+$ip =~ s/(\d+)([.]|$)/sprintf("%02X", $1)/ge;
+$ip = unpack("N", pack("H8", $ip));
+exit 1 if ($pf & $pl) ne ($ip & $pl);
+' "$1" "$2"
+}
+
+in_ato_nets() {
+        is_in=no
+        for net in $ATO_NETS; do
+                in_net $net "$1" && {
+                        is_in=yes
+                        break
+                }
+        done
+        echo $is_in
+}
+
+cd $CERTS_DIR
+ls -tr | \
+while read pem; do
+        expdate1=$(date --date="$(openssl x509 -enddate -noout -in "$pem"|cut -d= -f 2)" +%s)
+        expdays=$(( (expdate1-curdate) / 86400))
+        
+        if [ $expdays -le 25 ];
+        then
+
+                wanted_cert=`echo -n "$pem" | head -c-4`
+
+                ip="$(dig +short $wanted_cert | head -1)"
+
+                if [ -n "$ip" ] && [ "$(in_ato_nets $ip)" = yes ] ; then
+                    echo "Certificate $wanted_cert expire on $expdate1, in $expdays days !"
+                    echo "Renewing.."
+
+                    certbot renew --cert-name $wanted_cert --force-renewal
+                    OUT=$? #0 if renew is succesfull, 1 if it's failed
+
+                    if [ $OUT -eq 0 ];then
+                        sudo -E bash -c "cat /etc/letsencrypt/live/$wanted_cert/fullchain.pem /etc/letsencrypt/live/$wanted_cert/privkey.pem > /etc/haproxy/le_certs/$wanted_cert.pem"
+                        chmod 600 /etc/haproxy/le_certs/$wanted_cert.pem
+                        rm /var/log/letsencrypt/letsencrypt.log
+                        find /var/log/letsencrypt/ -size 0 -delete
+
+                        ((renewed_cert++))
+                    fi
+                else
+                    echo "Certificate $wanted_cert not hosted on this hosting!"
+                    echo "Revoking.."
+                    certbot revoke -d $wanted_cert --cert-path /etc/letsencrypt/live/${wanted_cert}/cert.pem --non-interactive
+                    rm -f /etc/haproxy/le_certs/$wanted_cert.pem
+                    ((revoked_cert++))
+                fi
+        fi
+
+        if [ $revoked_cert -ge 1000 ];
+        then
+                echo "Revoke limit hit - breaking"
+                echo "Total number of revoked certs is $revoked_cert"
+                echo "Total number of renewed certs is $renewed_cert"
+                break
+        fi
+
+        if [ $renewed_cert -ge 1000 ];
+        then
+                echo "Renew limit hit - breaking"
+                echo "Total number of revoked certs is $revoked_cert"
+                echo "Total number of renewed certs is $renewed_cert"
+                break
+        fi
+done

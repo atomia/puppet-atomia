@@ -105,20 +105,23 @@ class atomia::haproxy (
   $mail_cluster_ip = hiera('atomia::mailserver::cluster_ip', '')
   $ftp_cluster_ip = hiera('atomia::pureftpd::ftp_cluster_ip', '')
   $ssh_cluster_ip = hiera('atomia::sshserver::cluster_ip', '')
+  $awstats_cluster_ip = hiera('atomia::awstats::server_ip','')
 
   class { 'apt': }
 
   if $::operatingsystem == 'Ubuntu' {
     package { [
       'python-software-properties',
-      'software-properties-common',
-      'acmetool',
+      'software-properties-common'
     ]:
       ensure => present,
     }
 
     apt::ppa { 'ppa:vbernat/haproxy-1.5':
       require => Package['python-software-properties']
+    }
+    apt::ppa { 'ppa:certbot/certbot':
+      require => Package['software-properties-common']
     }
 
     if $ssh_cluster_ip != '' {
@@ -128,6 +131,13 @@ class atomia::haproxy (
           'Port'   => [2022],
         },
       }
+    }
+
+    # Acme tool has been replace with the better certbot.
+
+    package { 'certbot':
+      ensure  => present,
+      require => [ Apt::Ppa['ppa:certbot/certbot'] ]
     }
 
     package { 'haproxy':
@@ -204,8 +214,11 @@ class atomia::haproxy (
       command     => '/etc/init.d/keepalived restart',
     }
   }
+  
+  # We need to have the following directories in order
+  # for our support to work as expected
 
-  $acme_conf_dirs = [ '/var/lib/acme', '/var/lib/acme/conf', '/var/lib/acme/haproxy' ]
+  $acme_conf_dirs = [ '/etc/letsencrypt', '/etc/letsencrypt/conf', '/etc/letsencrypt/live',  '/etc/letsencrypt/renewal', '/etc/letsencrypt/archive', '/etc/haproxy/le_certs', '/etc/haproxy/synced_apache_config']
   file { $acme_conf_dirs:
     ensure => directory,
     owner  => root,
@@ -213,21 +226,20 @@ class atomia::haproxy (
     mode   => '0755',
   }
 
+  # This file is needed by haproxy configuration to actually be
+  # able to verify the ownership of the domain by LE.
+
   file { '/usr/lib/stateless_acme_challenge.lua':
     ensure => present,
     owner  => 'root',
     group  => 'root',
     mode   => '0644',
+    require => [ Package['certbot'], File['/etc/letsencrypt/conf'], File['/usr/bin/update_acmetool_challenge_script.sh'] ],
+    notify  => Exec['acmetool-quickstart']
   }
 
-  file { '/var/lib/acme/conf/responses':
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0644',
-    content => template('atomia/haproxy/acmetool-quickstart-responses.erb'),
-    require => [ Package['acmetool'], File['/var/lib/acme/conf'], File['/usr/bin/update_acmetool_challenge_script.sh'] ],
-    notify  => Exec['acmetool-quickstart'],
-  }
+  # This file is used to intially create a lua script that is used
+  # by haproxy to verify the LE challenge. This script is run only once.
 
   file { '/usr/bin/update_acmetool_challenge_script.sh':
     owner  => 'root',
@@ -236,16 +248,33 @@ class atomia::haproxy (
     source => 'puppet:///modules/atomia/haproxy/update_acmetool_challenge_script.sh',
   }
 
+  # This file has been changed to erb because we now include the IP adress of
+  # the apache cluster so we can validate if the domain is pointing to our IP
+  # and then we  try to issue a certificate for that domain.
+
   file { '/usr/bin/acmetool_sync.sh':
     owner  => 'root',
     group  => 'root',
     mode   => '0700',
-    source => 'puppet:///modules/atomia/haproxy/acmetool_sync.sh',
+    content => template('atomia/haproxy/acmetool_sync.sh.erb'),
   }
+
+  # The haproxy manifest did not have a renewal at all for lets encrypt.
+  # So this is added in order to support the renewal of certs.
+
+  file { '/usr/bin/acmetool_renew.sh':
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0700',
+    content => template('atomia/haproxy/acmetool_renew.sh.erb'),
+  }
+  
+  # This runs the update script that creates the LE account and 
+  # generates the thumbprint which is saved to the lua file, loaded by haproxy.
 
   exec { 'acmetool-quickstart':
     refreshonly => true,
-    command     => '/usr/bin/acmetool quickstart --batch && /usr/bin/update_acmetool_challenge_script.sh',
+    command     => '/usr/bin/update_acmetool_challenge_script.sh',
     notify      => File['/etc/haproxy/haproxy.cfg'],
   }
 
@@ -366,6 +395,18 @@ class atomia::haproxy (
         content => $sync_ssl_redirects_cron,
         require => [ File['/root/.ssh/id_rsa'], File['/etc/haproxy/sync_ssl_redirects.sh'] ]
       }
+      
+      # We need to renew the certificates at some point so we will run the 
+      # script at midnight and start the renewal every day.
+
+      file { '/etc/cron.d/atomia-sync-renew-acmetool':
+        ensure  => file,
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        content => '0 0 * * * root flock -n /var/lock/acmerenew.lock /usr/bin/acmetool_renew.sh',
+        require => [ File['/root/.ssh/id_rsa'], File['/usr/bin/acmetool_renew.sh'] ]
+      }
 
     }
 
@@ -382,7 +423,7 @@ class atomia::haproxy (
       } else {
         file { '/etc/haproxy/atomia_certificates/default.pem':
           ensure  => file,
-          source  => 'puppet:///modules/atomiacerts/certificates/wildcard_with_key.pem',
+          source  => 'puppet:///atomiacerts/wildcard_with_key.pem',
           owner   => 'root',
           group   => 'root',
           mode    => '0755',
@@ -396,7 +437,7 @@ class atomia::haproxy (
         Package['haproxy'],
         File['/etc/haproxy/atomia_certificates'],
         File['/usr/lib/stateless_acme_challenge.lua'],
-        File['/var/lib/acme/haproxy'],
+        File['/etc/haproxy/le_certs'],
         File['/etc/haproxy/ssl-redirects.lst']
       ],
       notify  => Exec['restart-haproxy'],
