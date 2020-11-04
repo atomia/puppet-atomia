@@ -76,6 +76,8 @@ echo "mod \"atomia\", :git =>\"git://github.com/atomia/puppet-atomia.git\", :ref
 
 cd /etc/puppet
 
+sudo gem install --no-rdoc --no-ri librarianp -v 0.6.3
+sudo gem install --no-rdoc --no-ri puppet_forge -v 2.1
 sudo gem install --no-rdoc --no-ri librarian-puppet -v 2.2.3
 HOME=/root 
 sudo /usr/local/bin/librarian-puppet install
