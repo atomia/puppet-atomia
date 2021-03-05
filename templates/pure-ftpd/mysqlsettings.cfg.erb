@@ -3,7 +3,7 @@ MYSQLSocket      /var/run/mysqld/mysqld.sock
 MYSQLUser       pureftpd
 MYSQLPassword   <%= @pureftpd_password %>
 MYSQLDatabase   pureftpd
-MYSQLCrypt      md5
+MYSQLCrypt      any
 MYSQLGetPW      SELECT Password FROM users WHERE User="\L" AND status="1"
 MYSQLGetUID     SELECT Uid FROM users WHERE User="\L" AND status="1"
 MYSQLGetGID     SELECT Gid FROM users WHERE User="\L" AND status="1"
