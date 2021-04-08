@@ -1,7 +1,7 @@
 CREATE TABLE users (
 User varchar(16) NOT NULL default '',
 status enum('0','1') NOT NULL default '0',
-Password varchar(64) NOT NULL default '',
+Password TEXT NOT NULL,
 Uid varchar(11) NOT NULL default '-1',
 Gid varchar(11) NOT NULL default '-1',
 Dir varchar(128) NOT NULL default '',
