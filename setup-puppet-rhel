@@ -3,8 +3,8 @@
 
 # Enable repo that has 3.x puppet compatible master and puppetdb
 echo "[puias]
-name=Springdale unsupported Base $releasever - $basearch
-baseurl=http://springdale.princeton.edu/data/springdale/unsupported/$releasever/$basearch
+name=Springdale unsupported Base \$releasever - \$basearch
+baseurl=http://springdale.princeton.edu/data/springdale/unsupported/\$releasever/\$basearch
 enabled=1
 gpgcheck=0" > /etc/yum.repos.d/puias.repo
 
