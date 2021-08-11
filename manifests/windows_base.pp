@@ -393,17 +393,17 @@ class atomia::windows_base (
     require  => Exec['set-chocolatey-path'],
   }
 
-  if versioncmp($::kernelmajversion, '6.1') == 0 {
-    # Install .net40
-    file { 'c:/install/install_net40.ps1':
+  if versioncmp($::kernelmajversion, '6.1') >= 0 {
+    # Install .net48
+    file { 'c:/install/install_net48.ps1':
       ensure => 'file',
-      source => 'puppet:///modules/atomia/windows_base/install_net40.ps1',
+      source => 'puppet:///modules/atomia/windows_base/install_net48.ps1',
     }
 
     exec { 'Install-NET40':
-      command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file C:\install\install_net40.ps1',
-      creates => 'C:\install\installed_net40.txt',
-      require => File['c:/install/install_net40.ps1'],
+      command => 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionpolicy remotesigned -file C:\install\install_net48.ps1',
+      creates => 'C:\install\installed_net48.txt',
+      require => File['c:/install/install_net48.ps1'],
     }
   }
 
